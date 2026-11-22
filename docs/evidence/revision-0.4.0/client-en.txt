@@ -1,0 +1,26 @@
+[18:24:04] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-operation
+[18:24:05] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-data
+[18:24:07] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-filter
+[18:24:09] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-collapsed
+[18:24:11] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT composter
+[18:24:12] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-data
+[18:24:14] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-alerts
+[18:24:16] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-native
+[18:24:18] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT reservoir
+[18:24:19] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT collector
+[18:24:21] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT probe
+[18:24:23] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT world
+[18:24:24] [Client thread/INFO] [cropmanager]: CLIENT_QA_MANAGER_NETWORK_PASS
+[18:24:25] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-manager
+[18:24:26] [Client thread/INFO] [cropmanager]: CLIENT_QA_MONITOR_NETWORK_PASS
+[18:24:26] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-monitor
+[18:24:28] [Client thread/INFO] [cropmanager]: CLIENT_QA_COLLECTOR_NETWORK_PASS
+[18:24:28] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-collector
+[18:24:30] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-manager
+[18:24:32] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-composter
+[18:24:33] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-monitor
+[18:24:35] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-reservoir
+[18:24:37] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-collector
+[18:24:39] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT legacy-classifier
+[18:24:40] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT legacy-bench
+[18:24:40] [Client thread/INFO] [cropmanager]: CROP_MANAGER_CLIENT_QA_PASSED

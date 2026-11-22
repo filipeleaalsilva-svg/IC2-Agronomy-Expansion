@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "particle": "cropmanager:blocks/biogas_weeder_side",
+    "down": "cropmanager:blocks/biogas_weeder_side",
+    "up": "cropmanager:blocks/biogas_weeder_top",
+    "north": "cropmanager:blocks/biogas_weeder_front_active",
+    "south": "cropmanager:blocks/biogas_weeder_side",
+    "east": "cropmanager:blocks/biogas_weeder_side",
+    "west": "cropmanager:blocks/biogas_weeder_side"
+  }
+}

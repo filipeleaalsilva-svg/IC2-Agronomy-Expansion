@@ -1,0 +1,44 @@
+{
+  "variants": {
+    "active=false,facing=north": {
+      "model": "cropmanager:seed_analyzer",
+      "y": 0,
+      "uvlock": true
+    },
+    "active=false,facing=east": {
+      "model": "cropmanager:seed_analyzer",
+      "y": 90,
+      "uvlock": true
+    },
+    "active=false,facing=south": {
+      "model": "cropmanager:seed_analyzer",
+      "y": 180,
+      "uvlock": true
+    },
+    "active=false,facing=west": {
+      "model": "cropmanager:seed_analyzer",
+      "y": 270,
+      "uvlock": true
+    },
+    "active=true,facing=north": {
+      "model": "cropmanager:seed_analyzer_active",
+      "y": 0,
+      "uvlock": true
+    },
+    "active=true,facing=east": {
+      "model": "cropmanager:seed_analyzer_active",
+      "y": 90,
+      "uvlock": true
+    },
+    "active=true,facing=south": {
+      "model": "cropmanager:seed_analyzer_active",
+      "y": 180,
+      "uvlock": true
+    },
+    "active=true,facing=west": {
+      "model": "cropmanager:seed_analyzer_active",
+      "y": 270,
+      "uvlock": true
+    }
+  }
+}

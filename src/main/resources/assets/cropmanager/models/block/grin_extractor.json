@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "cropmanager:blocks/grin_extractor_bottom",
+    "up": "cropmanager:blocks/grin_extractor_top",
+    "north": "cropmanager:blocks/grin_extractor_front",
+    "south": "cropmanager:blocks/grin_extractor_back",
+    "east": "cropmanager:blocks/grin_extractor_side",
+    "west": "cropmanager:blocks/grin_extractor_side",
+    "particle": "cropmanager:blocks/grin_extractor_side"
+  }
+}

@@ -1,0 +1,215 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "base": "cropmanager:blocks/sprinkler_base",
+    "accent": "cropmanager:blocks/sprinkler_accent_mk1",
+    "particle": "cropmanager:blocks/sprinkler_base"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        2,
+        13
+      ],
+      "faces": {
+        "up": {
+          "texture": "#base"
+        },
+        "down": {
+          "texture": "#base"
+        },
+        "north": {
+          "texture": "#base"
+        },
+        "south": {
+          "texture": "#base"
+        },
+        "east": {
+          "texture": "#base"
+        },
+        "west": {
+          "texture": "#base"
+        }
+      }
+    },
+    {
+      "from": [
+        4.5,
+        2,
+        4.5
+      ],
+      "to": [
+        11.5,
+        4,
+        11.5
+      ],
+      "faces": {
+        "up": {
+          "texture": "#accent"
+        },
+        "down": {
+          "texture": "#accent"
+        },
+        "north": {
+          "texture": "#accent"
+        },
+        "south": {
+          "texture": "#accent"
+        },
+        "east": {
+          "texture": "#accent"
+        },
+        "west": {
+          "texture": "#accent"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        4,
+        6.5
+      ],
+      "to": [
+        9.5,
+        9,
+        9.5
+      ],
+      "faces": {
+        "up": {
+          "texture": "#base"
+        },
+        "down": {
+          "texture": "#base"
+        },
+        "north": {
+          "texture": "#base"
+        },
+        "south": {
+          "texture": "#base"
+        },
+        "east": {
+          "texture": "#base"
+        },
+        "west": {
+          "texture": "#base"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        9,
+        6
+      ],
+      "to": [
+        10,
+        11,
+        10
+      ],
+      "faces": {
+        "up": {
+          "texture": "#accent"
+        },
+        "down": {
+          "texture": "#accent"
+        },
+        "north": {
+          "texture": "#accent"
+        },
+        "south": {
+          "texture": "#accent"
+        },
+        "east": {
+          "texture": "#accent"
+        },
+        "west": {
+          "texture": "#accent"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        9.2,
+        7.2
+      ],
+      "to": [
+        14,
+        10.4,
+        8.8
+      ],
+      "faces": {
+        "up": {
+          "texture": "#accent"
+        },
+        "down": {
+          "texture": "#accent"
+        },
+        "north": {
+          "texture": "#accent"
+        },
+        "south": {
+          "texture": "#accent"
+        },
+        "east": {
+          "texture": "#accent"
+        },
+        "west": {
+          "texture": "#accent"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          9.5,
+          8
+        ],
+        "axis": "y",
+        "angle": 45
+      }
+    }
+  ],
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        1,
+        0
+      ],
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ]
+    },
+    "ground": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        3,
+        0
+      ],
+      "scale": [
+        0.35,
+        0.35,
+        0.35
+      ]
+    }
+  }
+}

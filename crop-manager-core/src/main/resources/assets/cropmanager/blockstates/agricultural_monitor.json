@@ -1,0 +1,44 @@
+{
+  "variants": {
+    "active=false,facing=north": {
+      "model": "cropmanager:agricultural_monitor",
+      "y": 0,
+      "uvlock": true
+    },
+    "active=false,facing=east": {
+      "model": "cropmanager:agricultural_monitor",
+      "y": 90,
+      "uvlock": true
+    },
+    "active=false,facing=south": {
+      "model": "cropmanager:agricultural_monitor",
+      "y": 180,
+      "uvlock": true
+    },
+    "active=false,facing=west": {
+      "model": "cropmanager:agricultural_monitor",
+      "y": 270,
+      "uvlock": true
+    },
+    "active=true,facing=north": {
+      "model": "cropmanager:agricultural_monitor_active",
+      "y": 0,
+      "uvlock": true
+    },
+    "active=true,facing=east": {
+      "model": "cropmanager:agricultural_monitor_active",
+      "y": 90,
+      "uvlock": true
+    },
+    "active=true,facing=south": {
+      "model": "cropmanager:agricultural_monitor_active",
+      "y": 180,
+      "uvlock": true
+    },
+    "active=true,facing=west": {
+      "model": "cropmanager:agricultural_monitor_active",
+      "y": 270,
+      "uvlock": true
+    }
+  }
+}

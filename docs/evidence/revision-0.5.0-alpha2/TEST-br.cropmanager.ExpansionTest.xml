@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="br.cropmanager.ExpansionTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-16T00:13:31.863Z" hostname="DESKTOP-QOJVOOH" time="0.098">
+  <properties/>
+  <testcase name="advancedProfileChangesCapacityNotInventoryOrArea" classname="br.cropmanager.ExpansionTest" time="0.097"/>
+  <testcase name="filtersUseInclusiveBoundsAndSpeciesWithoutMutatingStats" classname="br.cropmanager.ExpansionTest" time="0.0"/>
+  <testcase name="redstoneModesHaveExplicitTruthTable" classname="br.cropmanager.ExpansionTest" time="0.0"/>
+  <testcase name="filterControlsRejectInvalidRangesAndPersistDefaults" classname="br.cropmanager.ExpansionTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

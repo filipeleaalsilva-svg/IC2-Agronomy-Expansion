@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="br.cropmanager.AutomationRulesTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-16T00:13:31.846Z" hostname="DESKTOP-QOJVOOH" time="0.001">
+  <properties/>
+  <testcase name="weedStopLatchesUntilCompletelyFull" classname="br.cropmanager.AutomationRulesTest" time="0.001"/>
+  <testcase name="originalConditionMustAlsoClear" classname="br.cropmanager.AutomationRulesTest" time="0.0"/>
+  <testcase name="exactThresholdDoesNotStop" classname="br.cropmanager.AutomationRulesTest" time="0.0"/>
+  <testcase name="settingsAndLatchPersistAndDisabledDoesNotTrigger" classname="br.cropmanager.AutomationRulesTest" time="0.0"/>
+  <testcase name="allEmptyRequiresBothAndKeepsStopUntilWeedFull" classname="br.cropmanager.AutomationRulesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,4 @@
+{
+  "parent": "item/generated",
+  "textures": { "layer0": "cropmanager:items/harvest_transfer_upgrade" }
+}

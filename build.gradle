@@ -1,0 +1,100 @@
+plugins {
+    id 'java'
+    id 'com.gtnewhorizons.retrofuturagradle' version '2.0.3'
+}
+group = 'br.cropmanager'
+version = '0.5.0-alpha9'
+base { archivesName = 'CropManager' }
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+        vendor = JvmVendorSpec.AZUL
+    }
+    withSourcesJar()
+}
+minecraft {
+    mcVersion.set('1.12.2')
+    mcpMappingChannel.set('stable')
+    mcpMappingVersion.set('39')
+}
+repositories {
+    mavenCentral()
+}
+dependencies {
+    implementation rfg.deobf(files('libs/industrialcraft-2-2.8.222-ex112.jar'))
+    compileOnly rfg.deobf(files('libs/HadEnoughItems_1.12.2-4.34.3.jar'))
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:2.28.2'
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+def verifyIc2 = tasks.register('verifyIc2') {
+    def ic2 = layout.projectDirectory.file('libs/industrialcraft-2-2.8.222-ex112.jar')
+    inputs.file(ic2)
+    doLast {
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        ic2.asFile.withInputStream { stream ->
+            byte[] buffer = new byte[65536]
+            int size
+            while ((size = stream.read(buffer)) > 0) digest.update(buffer, 0, size)
+        }
+        def actual = digest.digest().encodeHex().toString()
+        if (actual != 'f96b1886b6d060b308fb811029d5c5cc76deb17b835aa368dcb6071f2de290d4')
+            throw new GradleException('The IC2 JAR differs from the audited 2.8.222-ex112 artifact: ' + actual)
+    }
+}
+tasks.named('compileJava') { dependsOn verifyIc2 }
+processResources {
+    inputs.property('version', project.version)
+    filesMatching('mcmod.info') { expand(version: project.version) }
+}
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+// An optional, separate addon for tests against the real Cleanroom runtime.
+// It is never included in the distributable Crop Manager jar.
+sourceSets {
+    runtimeTest {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += output + compileClasspath
+    }
+}
+def runtimeTestJar = tasks.register('runtimeTestJar', Jar) {
+    from sourceSets.runtimeTest.output
+    archiveClassifier = 'runtime-tests-dev'
+}
+tasks.register('reobfRuntimeTests', com.gtnewhorizons.retrofuturagradle.mcp.ReobfuscatedJar) {
+    dependsOn runtimeTestJar, tasks.named('reobfJar')
+    inputJar.set(runtimeTestJar.flatMap { it.archiveFile })
+    archiveClassifier = 'runtime-tests'
+    def mainReobf = tasks.named('reobfJar', com.gtnewhorizons.retrofuturagradle.mcp.ReobfuscatedJar)
+    mcVersion.set(mainReobf.flatMap { it.mcVersion })
+    srg.set(mainReobf.flatMap { it.srg })
+    fieldCsv.set(mainReobf.flatMap { it.fieldCsv })
+    methodCsv.set(mainReobf.flatMap { it.methodCsv })
+    exceptorCfg.set(mainReobf.flatMap { it.exceptorCfg })
+    recompMcJar.set(mainReobf.flatMap { it.recompMcJar })
+    referenceClasspath.from(sourceSets.runtimeTest.compileClasspath)
+}
+
+// Opt-in local visual QA; ordinary builds and gameplay never launch this fixture.
+tasks.named('runClient').configure {
+    if (providers.gradleProperty('clientQa').isPresent()) {
+        dependsOn runtimeTestJar
+        jvmArgs '-XX:ActiveProcessorCount=4'
+        def qaLanguage = providers.gradleProperty('clientQaLang').getOrElse('en_us')
+        jvmArgs '-Dcropmanager.clientQa=true', "-Dcropmanager.qaLanguage=${qaLanguage}", "-Dcropmanager.qaDir=${layout.buildDirectory.dir('client-qa-' + qaLanguage).get().asFile.absolutePath}"
+        if (providers.gradleProperty('clientQaContrast').isPresent()) jvmArgs '-Dcropmanager.qaContrast=true', "-Dcropmanager.qaContrastPack=${layout.buildDirectory.file('contrast-pack.zip').get().asFile.absolutePath}"
+        if (providers.gradleProperty('clientQaStart').isPresent()) jvmArgs "-Dcropmanager.qaStart=${providers.gradleProperty('clientQaStart').get()}"
+        args '--width', '1100', '--height', '760'
+        doFirst {
+            def qaMods = layout.projectDirectory.dir('run/mods').asFile
+            def currentQa = runtimeTestJar.get().archiveFile.get().asFile
+            qaMods.listFiles()?.findAll { it.isFile() && it.name ==~ /^CropManager-[0-9].*-runtime-tests-dev\.jar$/ && it.name != currentQa.name }?.each {
+                if (!it.delete()) throw new GradleException('Cannot replace old QA addon: ' + it.name)
+            }
+            copy { from runtimeTestJar.get().archiveFile; into layout.projectDirectory.dir('run/mods') }
+        }
+    }
+}

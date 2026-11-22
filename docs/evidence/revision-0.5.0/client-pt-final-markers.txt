@@ -1,0 +1,12 @@
+[23:47:28] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT weeder
+[23:47:30] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT weeder-world
+[23:47:32] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-automation
+[23:47:33] [Client thread/INFO] [cropmanager]: CLIENT_QA_AREA_PASS
+[23:47:34] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-area
+[23:47:35] [Client thread/INFO] [cropmanager]: CLIENT_QA_WEEDER_PASS
+[23:47:35] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT weeder-area
+[23:47:37] [Client thread/INFO] [cropmanager]: CLIENT_QA_REMOTE_PASS
+[23:47:37] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-remote
+[23:47:39] [Client thread/INFO] [cropmanager]: CLIENT_QA_RULE_PASS
+[23:47:39] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-rule
+[23:47:39] [Client thread/INFO] [cropmanager]: CROP_MANAGER_CLIENT_QA_PASSED

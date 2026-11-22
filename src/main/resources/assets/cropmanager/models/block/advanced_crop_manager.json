@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "cropmanager:blocks/advanced_crop_manager_bottom",
+    "up": "cropmanager:blocks/advanced_crop_manager_top",
+    "north": "cropmanager:blocks/advanced_crop_manager_front",
+    "south": "cropmanager:blocks/advanced_crop_manager_back",
+    "east": "cropmanager:blocks/advanced_crop_manager_side",
+    "west": "cropmanager:blocks/advanced_crop_manager_side",
+    "particle": "cropmanager:blocks/advanced_crop_manager_side"
+  }
+}

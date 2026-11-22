@@ -1,0 +1,44 @@
+{
+  "variants": {
+    "active=false,facing=north": {
+      "model": "cropmanager:biogas_weeder",
+      "y": 0,
+      "uvlock": true
+    },
+    "active=false,facing=east": {
+      "model": "cropmanager:biogas_weeder",
+      "y": 90,
+      "uvlock": true
+    },
+    "active=false,facing=south": {
+      "model": "cropmanager:biogas_weeder",
+      "y": 180,
+      "uvlock": true
+    },
+    "active=false,facing=west": {
+      "model": "cropmanager:biogas_weeder",
+      "y": 270,
+      "uvlock": true
+    },
+    "active=true,facing=north": {
+      "model": "cropmanager:biogas_weeder_active",
+      "y": 0,
+      "uvlock": true
+    },
+    "active=true,facing=east": {
+      "model": "cropmanager:biogas_weeder_active",
+      "y": 90,
+      "uvlock": true
+    },
+    "active=true,facing=south": {
+      "model": "cropmanager:biogas_weeder_active",
+      "y": 180,
+      "uvlock": true
+    },
+    "active=true,facing=west": {
+      "model": "cropmanager:biogas_weeder_active",
+      "y": 270,
+      "uvlock": true
+    }
+  }
+}

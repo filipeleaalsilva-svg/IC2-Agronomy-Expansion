@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "cropmanager:blocks/agricultural_monitor_bottom",
+    "up": "cropmanager:blocks/agricultural_monitor_top",
+    "north": "cropmanager:blocks/agricultural_monitor_front",
+    "south": "cropmanager:blocks/agricultural_monitor_back",
+    "east": "cropmanager:blocks/agricultural_monitor_side",
+    "west": "cropmanager:blocks/agricultural_monitor_side",
+    "particle": "cropmanager:blocks/agricultural_monitor_side"
+  }
+}

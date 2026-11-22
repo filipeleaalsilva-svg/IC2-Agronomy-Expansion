@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "active=false,facing=north": { "model": "cropmanager:weed_ex_fabricator", "y": 0, "uvlock": true },
+    "active=false,facing=east": { "model": "cropmanager:weed_ex_fabricator", "y": 90, "uvlock": true },
+    "active=false,facing=south": { "model": "cropmanager:weed_ex_fabricator", "y": 180, "uvlock": true },
+    "active=false,facing=west": { "model": "cropmanager:weed_ex_fabricator", "y": 270, "uvlock": true },
+    "active=true,facing=north": { "model": "cropmanager:weed_ex_fabricator_active", "y": 0, "uvlock": true },
+    "active=true,facing=east": { "model": "cropmanager:weed_ex_fabricator_active", "y": 90, "uvlock": true },
+    "active=true,facing=south": { "model": "cropmanager:weed_ex_fabricator_active", "y": 180, "uvlock": true },
+    "active=true,facing=west": { "model": "cropmanager:weed_ex_fabricator_active", "y": 270, "uvlock": true }
+  }
+}

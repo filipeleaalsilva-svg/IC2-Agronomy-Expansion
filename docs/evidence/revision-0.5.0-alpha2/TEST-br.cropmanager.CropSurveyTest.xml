@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="br.cropmanager.CropSurveyTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-16T00:13:31.849Z" hostname="DESKTOP-QOJVOOH" time="0.008">
+  <properties/>
+  <testcase name="unidentifiedPlantsShareOneAnonymousGroupWithoutLeakingSpecies" classname="br.cropmanager.CropSurveyTest" time="0.006"/>
+  <testcase name="deterministicOrderUsesQuantityThenSpeciesIdentity" classname="br.cropmanager.CropSurveyTest" time="0.0"/>
+  <testcase name="publishedArraysRemainImmutableAsNextSamplesArrive" classname="br.cropmanager.CropSurveyTest" time="0.001"/>
+  <testcase name="averagesAndRangesUseOnlyRealNonWeedSamples" classname="br.cropmanager.CropSurveyTest" time="0.0"/>
+  <testcase name="emptySurveyHasNoImaginaryEnvironmentOrSpecies" classname="br.cropmanager.CropSurveyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

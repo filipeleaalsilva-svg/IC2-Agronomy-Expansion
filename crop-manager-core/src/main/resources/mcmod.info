@@ -1,0 +1,12 @@
+[
+  {
+    "modid": "cropmanager",
+    "name": "Crop Manager Core",
+    "description": "IC2 Experimental crop automation suite: Advanced Crop Manager, Agricultural Monitor, 500-slot Crop Database Chest & Portable Database, Electric Weed Harvester, Fertilizer Composter, and 3-Tank Weed-Ex Mixer.",
+    "version": "${version}",
+    "mcversion": "1.12.2",
+    "logoFile": "assets/cropmanager/logo.png",
+    "authorList": ["Leal"],
+    "dependencies": ["ic2"]
+  }
+]

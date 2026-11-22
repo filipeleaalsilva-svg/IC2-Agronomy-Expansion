@@ -1,0 +1,75 @@
+{
+  "texture_count": 9,
+  "texture_size": [
+    16,
+    16
+  ],
+  "model_elements": 32,
+  "registered": false,
+  "source": "built-in image_gen atlas + native IC2 casing/palette",
+  "textures": {
+    "chassis_side.png": {
+      "size": [
+        16,
+        16
+      ],
+      "sha256": "fd302236f391ce0d74ab1d59985d27af56458fd0356a18cfd1777eda8b60bbc3"
+    },
+    "chassis_top.png": {
+      "size": [
+        16,
+        16
+      ],
+      "sha256": "e5a33ef6de23d66f1579040ebf8e00d742b025b287314848f8bbd75b174bffbf"
+    },
+    "cutter.png": {
+      "size": [
+        16,
+        16
+      ],
+      "sha256": "c218836c7d68ebad8f09106d9ada0dfd07752a8122a88751af1f67f740f1385e"
+    },
+    "mechanics.png": {
+      "size": [
+        16,
+        16
+      ],
+      "sha256": "8c5a5ff2e60c59b5e595c7e02fba83768bd7128039ad8953d71a77c916c3b443"
+    },
+    "motor.png": {
+      "size": [
+        16,
+        16
+      ],
+      "sha256": "9e319aa7450939ed5a352196b013f8246c95a588719c75d4a3ea61534da49f0b"
+    },
+    "plain.png": {
+      "size": [
+        16,
+        16
+      ],
+      "sha256": "058031c01d67935dcf72da4d88d2d969e84a7555f677d747fa8e846cb1c26bdd"
+    },
+    "tank_end.png": {
+      "size": [
+        16,
+        16
+      ],
+      "sha256": "a7fdb8cb74c05a4c3ef24cff2a94e38ccc18876669c5dd3b34067ccd1b8693de"
+    },
+    "tank_side.png": {
+      "size": [
+        16,
+        16
+      ],
+      "sha256": "d3adb9d9463d21b0aaa90b5c4d7b3ecee0c97782ad19e4602b87eab5a21cf40f"
+    },
+    "underside.png": {
+      "size": [
+        16,
+        16
+      ],
+      "sha256": "3f9cfe31b56e0fb603ef3fa88688b191b3b7fd9fdce7e3de40880f0a66294318"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+[23:45:24] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-operation
+[23:45:26] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-data
+[23:45:28] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-filter
+[23:45:29] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-collapsed
+[23:45:31] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT composter
+[23:45:33] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-data
+[23:45:35] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-controls
+[23:45:36] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-native
+[23:45:38] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT reservoir
+[23:45:40] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT collector
+[23:45:42] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT probe
+[23:45:43] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT world
+[23:45:45] [Client thread/INFO] [cropmanager]: CLIENT_QA_MANAGER_NETWORK_PASS
+[23:45:45] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-manager
+[23:45:47] [Client thread/INFO] [cropmanager]: CLIENT_QA_MONITOR_NETWORK_PASS
+[23:45:47] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-monitor
+[23:45:48] [Client thread/INFO] [cropmanager]: CLIENT_QA_COLLECTOR_NETWORK_PASS
+[23:45:49] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-collector
+[23:45:50] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-manager
+[23:45:52] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-composter
+[23:45:54] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-monitor
+[23:45:56] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-reservoir
+[23:45:57] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-collector
+[23:45:59] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT weeder
+[23:46:01] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT weeder-world
+[23:46:03] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-automation
+[23:46:04] [Client thread/INFO] [cropmanager]: CLIENT_QA_AREA_PASS
+[23:46:04] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-area
+[23:46:05] [Client thread/INFO] [cropmanager]: CLIENT_QA_WEEDER_PASS
+[23:46:06] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT weeder-area
+[23:46:08] [Client thread/INFO] [cropmanager]: CLIENT_QA_REMOTE_PASS
+[23:46:08] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-remote
+[23:46:09] [Client thread/INFO] [cropmanager]: CLIENT_QA_RULE_PASS
+[23:46:10] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-rule
+[23:46:10] [Client thread/INFO] [cropmanager]: CROP_MANAGER_CLIENT_QA_PASSED

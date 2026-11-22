@@ -1,0 +1,9 @@
+Crop Manager 0.2.0-alpha1 — 2026-11-14
+17 JUnit tests passed; zero failures/errors.
+67 checks passed in disposable Cleanroom 0.6.11-alpha server with audited IC2.
+Client visual QA passed with Forge 1.12.2 + IC2.
+Real GUI network checks passed: redstone, filter, non-consuming sample, wrong-window rejection.
+Original Crop-Matron included alongside addon machines for casing comparison.
+All machine faces/animation frames use 16x16 pixels and the supplied IC2 reference palette.
+Screenshots include the native IC2 GUI skin and original blue upgrade-info icon.
+The full E2EE client and two-player multiplayer session were not validated in this revision.

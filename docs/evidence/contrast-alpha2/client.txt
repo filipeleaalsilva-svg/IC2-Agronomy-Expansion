@@ -1,0 +1,5 @@
+[22:46:19] [Client thread/INFO] [cropmanager]: CLIENT_QA_CONTRAST_PASS 0 f0f0f0
+[22:46:20] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-dark-contrast
+[22:46:23] [Client thread/INFO] [cropmanager]: CLIENT_QA_CONTRAST_PASS 1 202020
+[22:46:24] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-light-contrast
+[22:46:24] [Client thread/INFO] [cropmanager]: CROP_MANAGER_CLIENT_QA_PASSED

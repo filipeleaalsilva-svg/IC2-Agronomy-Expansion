@@ -1,0 +1,4 @@
+{
+  "parent": "cropmanager:block/weed_ex_fabricator",
+  "textures": { "north": "cropmanager:blocks/weed_ex_fabricator/front_active" }
+}

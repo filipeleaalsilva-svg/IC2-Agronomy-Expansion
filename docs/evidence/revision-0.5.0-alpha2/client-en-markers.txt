@@ -1,0 +1,77 @@
+[21:08:20] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 0
+[21:08:20] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-operation
+[21:08:22] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 1
+[21:08:22] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-data
+[21:08:24] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 2
+[21:08:24] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-filter
+[21:08:25] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 3
+[21:08:26] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-collapsed
+[21:08:27] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 4
+[21:08:27] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT composter
+[21:08:29] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 5
+[21:08:29] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-data
+[21:08:31] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 6
+[21:08:31] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-controls
+[21:08:32] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 7
+[21:08:33] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-native
+[21:08:34] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 8
+[21:08:34] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT reservoir
+[21:08:36] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 9
+[21:08:36] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT collector
+[21:08:38] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 10
+[21:08:38] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT probe
+[21:08:40] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT world
+[21:08:41] [Client thread/INFO] [cropmanager]: CLIENT_QA_MANAGER_NETWORK_PASS
+[21:08:41] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 12
+[21:08:41] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-manager
+[21:08:43] [Client thread/INFO] [cropmanager]: CLIENT_QA_MONITOR_NETWORK_PASS
+[21:08:43] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 13
+[21:08:43] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-monitor
+[21:08:45] [Client thread/INFO] [cropmanager]: CLIENT_QA_COLLECTOR_NETWORK_PASS
+[21:08:45] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 14
+[21:08:45] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-collector
+[21:08:46] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 15
+[21:08:47] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-manager
+[21:08:48] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 16
+[21:08:48] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-composter
+[21:08:50] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 17
+[21:08:50] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-monitor
+[21:08:52] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 18
+[21:08:52] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-reservoir
+[21:08:53] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 19
+[21:08:54] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-collector
+[21:08:55] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 20
+[21:08:55] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT weeder
+[21:08:57] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT weeder-world
+[21:08:59] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 22
+[21:08:59] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-automation
+[21:09:00] [Client thread/INFO] [cropmanager]: CLIENT_QA_AREA_PASS
+[21:09:00] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 23
+[21:09:01] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-area
+[21:09:02] [Client thread/INFO] [cropmanager]: CLIENT_QA_WEEDER_PASS
+[21:09:02] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 24
+[21:09:02] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT weeder-area
+[21:09:04] [Client thread/INFO] [cropmanager]: CLIENT_QA_REMOTE_PASS
+[21:09:04] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 25
+[21:09:04] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-remote
+[21:09:06] [Client thread/INFO] [cropmanager]: CLIENT_QA_RULE_PASS
+[21:09:06] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 26
+[21:09:06] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-rule
+[21:09:07] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 27
+[21:09:07] [Client thread/INFO] [cropmanager]: CLIENT_QA_COMPACT_LOCALE_PASS
+[21:09:08] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-environment
+[21:09:09] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 28
+[21:09:09] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT manager-environment
+[21:09:11] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 29
+[21:09:11] [Client thread/INFO] [cropmanager]: CLIENT_QA_SURVEY_LOCAL_PASS 29
+[21:09:11] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT crop-selected-environment
+[21:09:13] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 30
+[21:09:13] [Client thread/INFO] [cropmanager]: CLIENT_QA_SURVEY_LOCAL_PASS 30
+[21:09:13] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT survey-pagination
+[21:09:14] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 31
+[21:09:15] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-weeder
+[21:09:16] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 32
+[21:09:16] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-monitor-controls
+[21:09:18] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 33
+[21:09:18] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-monitor-automation
+[21:09:18] [Client thread/INFO] [cropmanager]: CROP_MANAGER_CLIENT_QA_PASSED

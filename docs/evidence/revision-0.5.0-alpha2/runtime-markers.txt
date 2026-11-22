@@ -1,0 +1,146 @@
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: IC2 crop block resolves
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Real IC2 wheat card resolves
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Low EU remains visible on processing and idle ticks
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: No crop action without EU
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: No input consumption without EU
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Low EU clears after recharging
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Native harvest preserves and resets real crop
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Native fertilizer consumes exactly one item
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Native hydration drains exactly 200 mB once
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Native Weed-Ex drains exactly 150 mB once
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Combined pass costs 9 + 30 + 20 EU
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Satisfied crop consumes no further fluids
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Full output blocks harvesting before plant mutation
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Output capability rejects insertion
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Input capability rejects extraction
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Input capability rejects invalid fertilizer
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: EU and both fluid tanks survive NBT reload
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Pending count above signed byte survives NBT reload
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Partial insertion conserves all pending products
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Disabled machine consumes no scan EU
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Pending queue flush conserves products across several slots
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Overclockers apply native timing and demand multipliers
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Storage and transformer upgrades have real effects
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Neighbor chunk starts unloaded
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Full radius-eight scan does not load neighbor chunk
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Full container output prevents input consumption and fluid transfer
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Water bucket transfers once and preserves empty container
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Breaking machine drops harvested items exactly once
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Marking saves beside solid block at chunk edge does not load neighbor
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Saving a treated crop at chunk edge does not load neighbor
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Basic Manager migrates to advanced and preserves orientation
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Migration preserves EU inventory tanks area controls and filters
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Migration never drops or duplicates the old inventory
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Obsolete item registry removed: crop_manager
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Obsolete item registry removed: seed_classifier
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Obsolete item registry removed: seed_workbench
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Obsolete item registry removed: configuration_card
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Obsolete item registry removed: agricultural_notebook
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Obsolete item registry removed: compost
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Removed recipe absent: crop_manager
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Removed recipe absent: seed_classifier
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Removed recipe absent: seed_workbench
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Removed recipe absent: configuration_card
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Removed recipe absent: agricultural_notebook
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Removed recipe absent: compost_fertilizer
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Active recipe present: advanced_crop_manager
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Active recipe present: agricultural_monitor
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Active recipe present: electric_composter
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Active recipe present: agricultural_probe
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Active recipe present: agricultural_reservoir
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Active recipe present: agricultural_collector
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Unpowered composter preserves its inputs
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Composter retains tile while active and uses exactly 5 EU per tick
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Eight plants and 1000 EU make one genuine IC2 fertilizer across save/load
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Overclocker applies actual IC2 timing demand and preserves completed work ratio
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Composter storage and transformer upgrades have actual effects
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: All composter upgrade state survives reload
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Old two-slot composter saves expand safely to six slots
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Full fertilizer output consumes no energy and preserves progress
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Composter automation validates organics and exposes only output extraction
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor alarms on Manager low EU and retains tile identity
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Normal output mode stays off during a selected fault
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Disabled output leaves visual diagnosis active
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Test button forces real redstone power even with disabled output
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Test pulse is configured for exactly 100 ticks
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Unlink cancels a running signal test
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Crop-Matron uses the original IC2 placement and network initialization
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Probe links native Crop-Matron with real resources and normal-mode signal
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Native Crop-Matron water fault obeys selected category and normal mode
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Native Crop-Matron fault drives alarm-mode redstone
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor output lights an actual adjacent redstone lamp
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor link mask and output mode survive reload
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Unlink clears both target data and signal
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor rejects unknown controls
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Dimension fault is visible and alarms without loading another world
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Alarm handling does not load an unavailable target chunk
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Unpowered reservoir preserves fluids
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Reservoir supplies both native Crop-Matron fluids via capability and spends exactly 40 EU
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Reservoir transfers conserve both fluids
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Full reservoir destination consumes no EU or fluid
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Reservoir fluid and power buffers persist
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Reservoir tanks reject the wrong fluid
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Reservoir empties containers once and preserves the bucket
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Reservoir automation separates container input and output
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Collector without EU leaves drops untouched
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Collector respects pickup delay
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Collector respects item ownership
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Partial collection preserves remainder NBT and charges once
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Full collector neither deletes drops nor spends EU
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Collector moves final remainder without changing item data
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Collector automation permits extraction only
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Collector on/off control pauses operation
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Collector inventory and controls persist
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Advanced recipe no longer depends on removed basic Manager
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Composter activity animation does not load a neighboring chunk
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Collector edge fixture collected its fresh test item
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Collector lookup insertion and activity never load the neighboring chunk
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Reservoir pumps into a loaded neighbor without loading its other side
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor alarm and redstone notifications respect unloaded neighbor chunks
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Automation stops scanning below 20% Weed-Ex without consuming scan EU
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Manager remains stopped at 19999 mB even after original threshold clears
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Automatic stop latch persists across save/load without monitor
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Manager resumes only when Weed-Ex is completely full
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Manual off overrides automatic return and halts EU-consuming scans
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor can switch a linked Manager on
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor changes the source harvest function rather than a local copy
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor edits rules stored on the Manager
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Old selectable fault controls are removed
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Remote monitor does not change local-only area settings
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Remote control rejects a different-dimension target
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Advanced area radius can be increased
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Advanced area layers can be selected
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Area controls cannot disable every layer
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Area controls respect the server radius limit
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Area reset restores configured defaults
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Unfuelled weeder never removes crops
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Biogas weeder removes true weeds for 1+20 mB and preserves crop sticks
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: High-growth valuable crops are never mistaken for removable weeds
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Weeder rejects water as fuel
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Weeder uses fuel container slots
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Weeder fuel counter and area persist
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Weeder manual off stops fuel consumption
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Weeder is a non-cubic 3D block
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Removed sorter becomes a functional collector and conserves all 36 stacks including overflow
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Legacy overflow recovery survives another save/load
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor reads the biogas weeder fuel and removal counter
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor switches the linked biogas weeder on
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Weeder does not accept Manager-only harvest controls
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Survey stays unpublished until the existing scan completes a full cycle
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Completed real crop scan groups two identified plants and one unknown while excluding true weeds
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Level-one analysis reveals species identity but survey publishes no unknown identity or seed genetics
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Survey environment aggregates match actual IC2 terrain nutrients humidity air and light readings
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor receives the same completed species and environment survey as the linked Manager
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Reloading old or current Manager NBT waits for a fresh survey instead of fabricating saved environment data
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Changing the configured area immediately invalidates the previous crop survey
+[21:05:49] [Server thread/INFO] [cropmanager]: RUNTIME PASS: An empty planting area publishes an empty survey with no imaginary crop or environment sample
+[21:05:51] [Server thread/INFO] [cropmanager]: RUNTIME PASS: EU arrives from real BatBox during server ticks, stage 0
+[21:05:51] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor test pulse remains active after 30 real server ticks
+[21:05:52] [Server thread/INFO] [cropmanager]: RUNTIME PASS: EU arrives from real BatBox during server ticks, stage 1
+[21:05:52] [Server thread/INFO] [cropmanager]: RUNTIME PASS: EU reception continues after live tier and storage upgrade
+[21:05:55] [Server thread/INFO] [cropmanager]: RUNTIME PASS: EU arrives from real BatBox during server ticks, stage 2
+[21:05:55] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Monitor test pulse expires after 100 real server ticks
+[21:05:56] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Real server ticks unload the test chunk
+[21:05:58] [Server thread/INFO] [cropmanager]: RUNTIME PASS: EU arrives from real BatBox during server ticks, stage 4
+[21:05:58] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Saved upgrades survive real chunk unload and reload
+[21:05:58] [Server thread/INFO] [cropmanager]: CROP_MANAGER_RUNTIME_TESTS_PASSED checks=145

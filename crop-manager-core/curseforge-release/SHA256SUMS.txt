@@ -1,0 +1,4 @@
+350baf24f1a1e96f123087d6f537d25bdb9b2a50861d5d81e8ab0ed35e212c5e  CropManagerCore-0.5.0-alpha9.jar
+0b44a90a7159673ef9153e1758aa1171894bba06eb72b2bd538dddb6f67ef738  CropManagerCore-0.5.0-alpha9-sources.jar
+228994ea2380753607f2af9aeda5f3cdbfbfdb12be56c286bb9f671a5547c62a  CropManagerCore-GUI-Dark-0.5.0-alpha9.zip
+8d9b954e822da27895625417b5c47d8146fd0fd3bb92780cfb702e9a8c2571ee  curseforge-logo-512.png

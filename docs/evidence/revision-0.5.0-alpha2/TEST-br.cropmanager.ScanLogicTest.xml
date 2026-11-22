@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="br.cropmanager.ScanLogicTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-16T00:13:32.845Z" hostname="DESKTOP-QOJVOOH" time="0.007">
+  <properties/>
+  <testcase name="visitsEveryPositionExactlyOnceForEverySupportedArea" classname="br.cropmanager.ScanLogicTest" time="0.006"/>
+  <testcase name="baseSpeedAndOverclockedSpeedAreBounded" classname="br.cropmanager.ScanLogicTest" time="0.001"/>
+  <testcase name="rejectsInvalidOrEmptySettings" classname="br.cropmanager.ScanLogicTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+    id 'com.gtnewhorizons.retrofuturagradle' version '2.0.3'
+}
+group = 'br.cropmanager'
+version = '0.5.0-alpha9'
+base { archivesName = 'CropManagerCore' }
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+        vendor = JvmVendorSpec.AZUL
+    }
+    withSourcesJar()
+}
+minecraft {
+    mcVersion.set('1.12.2')
+    mcpMappingChannel.set('stable')
+    mcpMappingVersion.set('39')
+}
+repositories {
+    mavenCentral()
+}
+dependencies {
+    implementation rfg.deobf(files('../libs/industrialcraft-2-2.8.222-ex112.jar'))
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:2.28.2'
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+def verifyIc2 = tasks.register('verifyIc2') {
+    def ic2 = layout.projectDirectory.file('../libs/industrialcraft-2-2.8.222-ex112.jar')
+    inputs.file(ic2)
+    doLast {
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        ic2.asFile.withInputStream { stream ->
+            byte[] buffer = new byte[65536]
+            int size
+            while ((size = stream.read(buffer)) > 0) digest.update(buffer, 0, size)
+        }
+        def actual = digest.digest().encodeHex().toString()
+        if (actual != 'f96b1886b6d060b308fb811029d5c5cc76deb17b835aa368dcb6071f2de290d4')
+            throw new GradleException('The IC2 JAR differs from the audited 2.8.222-ex112 artifact: ' + actual)
+    }
+}
+tasks.named('compileJava') { dependsOn verifyIc2 }
+processResources {
+    inputs.property('version', project.version)
+    filesMatching('mcmod.info') { expand(version: project.version) }
+}
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}

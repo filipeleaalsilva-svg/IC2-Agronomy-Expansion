@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "cropmanager:blocks/weed_ex_fabricator/bottom",
+    "up": "cropmanager:blocks/weed_ex_fabricator/top",
+    "north": "cropmanager:blocks/weed_ex_fabricator/front",
+    "south": "cropmanager:blocks/weed_ex_fabricator/back",
+    "east": "cropmanager:blocks/weed_ex_fabricator/side",
+    "west": "cropmanager:blocks/weed_ex_fabricator/side",
+    "particle": "cropmanager:blocks/weed_ex_fabricator/side"
+  }
+}

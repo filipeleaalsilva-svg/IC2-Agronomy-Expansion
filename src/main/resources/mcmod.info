@@ -1,0 +1,1 @@
+[{"modid":"cropmanager","name":"Crop Manager","description":"IC2 crop care and harvesting in one machine.","version":"${version}","mcversion":"1.12.2","logoFile":"assets/cropmanager/logo.png","authorList":[],"dependencies":["ic2"]}]

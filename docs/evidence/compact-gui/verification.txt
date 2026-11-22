@@ -1,0 +1,1 @@
+Compact GUI revision: 17 JUnit tests passed; client visual QA passed for all block GUIs and both themes. Real GUI networking passed for redstone, filter adjustment, non-consuming sample and wrong-window rejection. Images are direct crops of in-game screenshots, with no content changes.

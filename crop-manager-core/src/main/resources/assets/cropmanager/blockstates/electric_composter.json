@@ -1,0 +1,44 @@
+{
+  "variants": {
+    "active=false,facing=north": {
+      "model": "cropmanager:electric_composter",
+      "y": 0,
+      "uvlock": true
+    },
+    "active=false,facing=east": {
+      "model": "cropmanager:electric_composter",
+      "y": 90,
+      "uvlock": true
+    },
+    "active=false,facing=south": {
+      "model": "cropmanager:electric_composter",
+      "y": 180,
+      "uvlock": true
+    },
+    "active=false,facing=west": {
+      "model": "cropmanager:electric_composter",
+      "y": 270,
+      "uvlock": true
+    },
+    "active=true,facing=north": {
+      "model": "cropmanager:electric_composter_active",
+      "y": 0,
+      "uvlock": true
+    },
+    "active=true,facing=east": {
+      "model": "cropmanager:electric_composter_active",
+      "y": 90,
+      "uvlock": true
+    },
+    "active=true,facing=south": {
+      "model": "cropmanager:electric_composter_active",
+      "y": 180,
+      "uvlock": true
+    },
+    "active=true,facing=west": {
+      "model": "cropmanager:electric_composter_active",
+      "y": 270,
+      "uvlock": true
+    }
+  }
+}

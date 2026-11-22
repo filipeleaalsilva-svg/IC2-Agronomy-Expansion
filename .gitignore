@@ -1,0 +1,16 @@
+.gradle/
+.gradle-home/
+build/
+dist/
+run/
+logs/
+libs/*.jar
+.local-archive/
+__pycache__/
+*.py[cod]
+/CropManager*.jar
+/CropManager*-GUI-*.zip
+/crop-manager-core/curseforge-release/*.jar
+/crop-manager-core/curseforge-release/*.zip
+.idea/
+*.iml

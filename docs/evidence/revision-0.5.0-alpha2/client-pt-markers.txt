@@ -1,0 +1,43 @@
+[21:09:58] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 0
+[21:10:00] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 1
+[21:10:01] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 2
+[21:10:03] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 3
+[21:10:05] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 4
+[21:10:07] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 5
+[21:10:08] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 6
+[21:10:10] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 7
+[21:10:12] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 8
+[21:10:14] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 9
+[21:10:15] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 10
+[21:10:19] [Client thread/INFO] [cropmanager]: CLIENT_QA_MANAGER_NETWORK_PASS
+[21:10:19] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 12
+[21:10:21] [Client thread/INFO] [cropmanager]: CLIENT_QA_MONITOR_NETWORK_PASS
+[21:10:21] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 13
+[21:10:22] [Client thread/INFO] [cropmanager]: CLIENT_QA_COLLECTOR_NETWORK_PASS
+[21:10:22] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 14
+[21:10:24] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 15
+[21:10:26] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 16
+[21:10:28] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 17
+[21:10:29] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 18
+[21:10:31] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 19
+[21:10:33] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 20
+[21:10:36] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 22
+[21:10:38] [Client thread/INFO] [cropmanager]: CLIENT_QA_AREA_PASS
+[21:10:38] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 23
+[21:10:39] [Client thread/INFO] [cropmanager]: CLIENT_QA_WEEDER_PASS
+[21:10:40] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 24
+[21:10:42] [Client thread/INFO] [cropmanager]: CLIENT_QA_REMOTE_PASS
+[21:10:42] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 25
+[21:10:43] [Client thread/INFO] [cropmanager]: CLIENT_QA_RULE_PASS
+[21:10:43] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 26
+[21:10:45] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 27
+[21:10:45] [Client thread/INFO] [cropmanager]: CLIENT_QA_COMPACT_LOCALE_PASS
+[21:10:47] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 28
+[21:10:49] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 29
+[21:10:49] [Client thread/INFO] [cropmanager]: CLIENT_QA_SURVEY_LOCAL_PASS 29
+[21:10:50] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 30
+[21:10:50] [Client thread/INFO] [cropmanager]: CLIENT_QA_SURVEY_LOCAL_PASS 30
+[21:10:52] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 31
+[21:10:54] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 32
+[21:10:56] [Client thread/INFO] [cropmanager]: CLIENT_QA_LAYOUT_PASS 33
+[21:10:56] [Client thread/INFO] [cropmanager]: CROP_MANAGER_CLIENT_QA_PASSED

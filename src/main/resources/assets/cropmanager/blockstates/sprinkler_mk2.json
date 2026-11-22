@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "cropmanager:sprinkler_mk2"
+    },
+    "active=true": {
+      "model": "cropmanager:sprinkler_mk2_active"
+    }
+  }
+}

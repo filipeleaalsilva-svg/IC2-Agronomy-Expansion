@@ -1,0 +1,1 @@
+17 automated tests passed. Client visual and real GUI-network tests passed in en-US and pt-BR. Collapse/expand was checked for advanced Manager, classifier and monitor without changing the container ID. English is the default resource language; the addon respects Minecraft language preferences. 123 nonempty matching locale entries validated in the distribution.

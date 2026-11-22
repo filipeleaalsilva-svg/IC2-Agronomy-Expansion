@@ -1,0 +1,4 @@
+{
+  "parent": "item/generated",
+  "textures": { "layer0": "cropmanager:items/wireless_range_upgrade" }
+}

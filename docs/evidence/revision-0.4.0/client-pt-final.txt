@@ -1,0 +1,17 @@
+[18:25:59] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT collector
+[18:26:01] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT probe
+[18:26:02] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT world
+[18:26:04] [Client thread/INFO] [cropmanager]: CLIENT_QA_MANAGER_NETWORK_PASS
+[18:26:04] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-manager
+[18:26:06] [Client thread/INFO] [cropmanager]: CLIENT_QA_MONITOR_NETWORK_PASS
+[18:26:06] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-monitor
+[18:26:07] [Client thread/INFO] [cropmanager]: CLIENT_QA_COLLECTOR_NETWORK_PASS
+[18:26:08] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT network-collector
+[18:26:09] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-manager
+[18:26:11] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-composter
+[18:26:13] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-monitor
+[18:26:15] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-reservoir
+[18:26:16] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT scale1-collector
+[18:26:18] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT legacy-classifier
+[18:26:20] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT legacy-bench
+[18:26:20] [Client thread/INFO] [cropmanager]: CROP_MANAGER_CLIENT_QA_PASSED

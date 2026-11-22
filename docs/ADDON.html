@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Guia visual do addon Crop Manager para Minecraft 1.12.2 e IndustrialCraft 2.">
+<title>Crop Manager — guia do addon</title>
+<style>
+:root{color-scheme:dark;--bg:#111820;--panel:#1b252e;--panel2:#222f39;--line:#35434e;--text:#edf2f4;--muted:#aab8c0;--green:#9bd27d;--blue:#74bfe8;--amber:#ecc779;--shadow:0 14px 40px #0005}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% -10%,#2e4957 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--blue)}.wrap{width:min(1120px,calc(100% - 32px));margin:auto}.hero{padding:62px 0 34px}.eyebrow,.tag{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--green);font-weight:750}.hero h1{font-size:clamp(2.5rem,6vw,4.6rem);line-height:1.02;margin:.45rem 0 1rem;letter-spacing:-.04em}.hero p{max-width:740px;color:var(--muted);font-size:1.12rem}.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.pill{padding:6px 11px;border:1px solid var(--line);border-radius:999px;background:#10171dbb;color:#d7e1e5;font-size:.86rem}.shot{margin:18px 0 52px;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.shot img{display:block;width:100%;height:auto;border-radius:9px}.shot figcaption{padding:9px 5px 0;color:var(--muted);font-size:.87rem}section{margin:54px 0}h2{font-size:clamp(1.7rem,3vw,2.4rem);line-height:1.15;margin:0 0 12px;letter-spacing:-.025em}h3{margin:.2rem 0 .35rem;font-size:1.25rem}.lead{max-width:800px;color:var(--muted);margin:0 0 22px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.card{background:linear-gradient(145deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}.card-head{display:flex;gap:16px;align-items:center;margin-bottom:12px}.pixel{width:88px;height:88px;object-fit:contain;image-rendering:pixelated;background:#d0d5d6;border:1px solid #66747a;border-radius:10px;padding:4px;flex:none}.desc{color:#d4dde1;margin:.35rem 0 .8rem}.meta{font-size:.91rem;color:var(--muted);margin:.4rem 0}.meta b{color:#eaf0f2}.recipe{padding:9px 11px;margin-top:11px;border-left:3px solid var(--green);background:#121b21;border-radius:0 8px 8px 0;font-size:.9rem;color:#dbe5e8}.badge{display:inline-block;color:var(--green);font-size:.72rem;font-weight:750;text-transform:uppercase;letter-spacing:.06em}.item{max-width:720px}.item .pixel{background:#202930}.server{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.server .card{padding:22px}.server ul{padding-left:1.2rem;color:#d4dde1}.server li{padding:.2rem 0}.note{border:1px solid #725f32;background:#362f20;color:#f0dfb4;padding:14px 16px;border-radius:10px;margin-top:16px}.steps{counter-reset:step;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.step{padding:15px;background:var(--panel);border:1px solid var(--line);border-radius:12px}.step b{display:block;color:var(--green);margin-bottom:5px}footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--muted);font-size:.9rem}code{color:#c4e6bd;background:#10171d;padding:2px 5px;border-radius:4px}@media(max-width:760px){.grid,.server,.steps{grid-template-columns:1fr}.hero{padding-top:42px}.card{padding:15px}.pixel{width:76px;height:76px}}
+</style>
+</head>
+<body>
+<header class="wrap hero">
+  <div class="eyebrow">Guia visual · addon agrícola</div>
+  <h1>Crop Manager</h1>
+  <p>Automação e ferramentas para cuidar de plantações do IndustrialCraft 2. O addon combina manejo de crops, monitoramento de recursos e utilidades para fazendas. Ele não adiciona novas espécies de plantas.</p>
+  <div class="pills"><span class="pill">Versão 0.5.0-alpha2</span><span class="pill">Minecraft 1.12.2</span><span class="pill">IndustrialCraft 2 Experimental 2.8.222-ex112</span></div>
+</header>
+<main class="wrap">
+  <figure class="shot">
+    <img src="evidence/revision-0.5.0/pt_br-weeder-world.png" alt="Captura real do cliente Minecraft mostrando os blocos Crop Manager instalados no mundo de teste">
+    <figcaption>Captura do cliente Minecraft de desenvolvimento: blocos do addon colocados no mundo. As imagens dos cartões abaixo usam as texturas reais incluídas no mod.</figcaption>
+  </figure>
+
+  <section>
+    <h2>Blocos do addon</h2>
+    <p class="lead">O addon atual contém cinco blocos e três itens próprios. As máquinas trabalham com crops e recursos existentes no IC2; não adicionam novas espécies.</p>
+    <div class="grid">
+      <article class="card">
+        <div class="card-head"><img class="pixel" src="../src/main/resources/assets/cropmanager/textures/blocks/advanced_crop_manager_front.png" alt="Textura frontal real do Crop Manager avançado"><div><span class="badge">Máquina principal</span><h3>Crop Manager avançado</h3></div></div>
+        <p class="desc">Percorre a área agrícola configurada e executa as funções habilitadas: colher crops maduros, aplicar fertilizante, hidratar e usar Weed-Ex.</p>
+        <p class="meta"><b>Como funciona:</b> usa uma única varredura para cuidar da plantação. Varre uma área configurável de até 17×17 em três camadas, aplica apenas as funções habilitadas e respeita energia, inventário e controles de redstone. Não planta nem cruza crops.</p>
+        <div class="recipe"><b>Receita:</b> linha horizontal — Crop Harvester + circuito eletrônico avançado + Crop-Matron, do IC2.</div>
+      </article>
+      <article class="card">
+        <div class="card-head"><img class="pixel" src="../src/main/resources/assets/cropmanager/textures/blocks/agricultural_monitor_front.png" alt="Textura frontal real do Monitor agrícola"><div><span class="badge">Leitura e controle remoto</span><h3>Monitor agrícola</h3></div></div>
+        <p class="desc">Exibe estado e recursos do alvo vinculado, e permite controlar remotamente o Manager. Com o Manager avançado, também mostra culturas e dados ambientais da última varredura completa.</p>
+        <p class="meta"><b>Como funciona:</b> a sonda cria o vínculo. O monitor pode controlar funções e regras do Manager e emitir sinal de redstone conforme o estado configurado. Não precisa de EU.</p>
+        <div class="recipe"><b>Receita:</b> <code>GGG / CRC / III</code> — vidro, circuito eletrônico IC2, redstone e ferro.</div>
+      </article>
+      <article class="card">
+        <div class="card-head"><img class="pixel" src="../src/main/resources/assets/cropmanager/textures/blocks/electric_composter_front.png" alt="Textura frontal real da Composteira elétrica"><div><span class="badge">Produção de fertilizante</span><h3>Composteira elétrica</h3></div></div>
+        <p class="desc">Converte vegetais aceitos em fertilizante do IC2: oito vegetais iguais produzem um fertilizante do IC2.</p>
+        <p class="meta"><b>Como funciona:</b> consome energia ao longo do processo e pausa sem consumir os itens quando falta energia, material ou espaço de saída. Aceita upgrades de overclock, armazenamento e transformador do IC2.</p>
+        <div class="recipe"><b>Receita:</b> <code>III / FCF / III</code> — ferro, fornalhas e circuito eletrônico IC2.</div>
+      </article>
+      <article class="card">
+        <div class="card-head"><img class="pixel" src="../src/main/resources/assets/cropmanager/textures/blocks/weed_ex_fabricator/front.png" alt="Textura frontal real do Fabricador de Weed-Ex"><div><span class="badge">Produção de Weed-Ex</span><h3>Fabricador de Weed-Ex</h3></div></div>
+        <p class="desc">Produz Weed-Ex usando água, Grin Powder e redstone do IC2.</p>
+        <p class="meta"><b>Como funciona:</b> recebe líquidos por recipientes ou capacidades de fluido Forge e abastece Manager/Crop-Matron adjacentes em transferências periódicas. Usa EU por transferência efetiva.</p>
+        <div class="recipe"><b>Receita:</b> <code>IGI / GCG / IRI</code> — ferro, vidro, circuito avançado IC2 e redstone.</div>
+      </article>
+
+      <article class="card">
+        <div class="card-head"><img class="pixel" src="../src/main/resources/assets/cropmanager/textures/blocks/biogas_weeder/motor.png" alt="Textura real do motor do Capinador a biogás"><div><span class="badge">Remoção de ervas daninhas</span><h3>Capinador a biogás</h3></div></div>
+        <p class="desc">Remove ervas daninhas reais do IC2 sem danificar crops valiosos ou estacas.</p>
+        <p class="meta"><b>Como funciona:</b> consome biogás enquanto examina posições e um custo adicional quando remove ervas. Tem área configurável e pode ser ligado por redstone. Não usa EU, não colhe e não aplica Weed-Ex.</p>
+        <div class="recipe"><b>Receita:</b> ferro + balde vazio + fornalhas + circuito eletrônico IC2.</div>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Itens do addon</h2>
+    <p class="lead">Além dos blocos, o addon registra a Sonda Agrícola e dois upgrades próprios para as máquinas.</p>
+    <article class="card item">
+      <div class="card-head"><img class="pixel" src="../src/main/resources/assets/cropmanager/textures/items/agricultural_probe.png" alt="Ícone real da Sonda agrícola"><div><span class="badge">Ferramenta</span><h3>Sonda agrícola</h3></div></div>
+      <p class="desc">Vincula um Manager, Capinador ou Crop-Matron do IC2 a um monitor. Segure a sonda, agache e use no bloco-alvo; depois use-a no monitor.</p>
+      <p class="meta"><b>Também inspeciona crops:</b> respeita o nível de análise do IC2 e não revela espécie ou genética que ainda não foi descoberta.</p>
+      <div class="recipe"><b>Receita:</b> <code> G / ICI / R </code> — vidro, ferro, circuito eletrônico IC2 e redstone.</div>
+    </article>
+    <div class="grid" style="margin-top:16px">
+      <article class="card"><div class="card-head"><img class="pixel" src="../src/main/resources/assets/cropmanager/textures/items/weed_killer_upgrade.png" alt="Ícone real do Upgrade Weed Killer"><div><span class="badge">Upgrade do Manager</span><h3>Upgrade Weed Killer</h3></div></div><p class="desc">Faz o Manager remover ervas daninhas reais do IC2 encontradas na varredura.</p><p class="meta">Cada erva removida consome 20 mB de Weed-Ex.</p></article>
+      <article class="card"><div class="card-head"><img class="pixel" src="../src/main/resources/assets/cropmanager/textures/items/wireless_range_upgrade.png" alt="Ícone real do Upgrade de Alcance Wireless"><div><span class="badge">Upgrade do monitor</span><h3>Upgrade de Alcance Wireless</h3></div></div><p class="desc">Dobra o alcance da ligação entre monitor e alvo.</p><p class="meta">O monitor aceita até quatro upgrades: alcance máximo de 512 blocos na mesma dimensão, desde que o alvo esteja carregado.</p></article>
+    </div>
+  </section>
+
+  <section>
+    <h2>O que o addon faz no servidor?</h2>
+    <div class="server">
+      <article class="card"><h3>Execução</h3><ul><li>O servidor processa varreduras, cuidados com crops, inventários, energia, tanques e regras automáticas.</li><li>O monitor apresenta os dados recebidos do bloco vinculado; ele não inicia buscas extras nem carrega chunks para procurar plantações.</li><li>Funciona em mundo solo ou servidor dedicado compatível. Em multiplayer, instale a mesma versão do addon no servidor e em todos os clientes.</li></ul></article>
+      <article class="card"><h3>Ambiente necessário</h3><ul><li><b>Minecraft Java 1.12.2</b>.</li><li><b>IndustrialCraft 2 Experimental 2.8.222-ex112</b> obrigatório.</li><li>Servidor Forge/Cleanroom para 1.12.2 com suporte aos mods Forge. Cleanroom 0.6.11-alpha foi usado nos testes locais de servidor.</li><li>O addon não adiciona crops e não substitui o IC2.</li></ul></article>
+    </div>
+    <div class="note">A lógica das máquinas roda no servidor. O monitor não força carregamento de chunks. O alvo de compatibilidade é Minecraft 1.12.2 com IC2 Experimental 2.8.222-ex112. Esta revisão alpha foi validada em Cleanroom isolado e no cliente de desenvolvimento. Isso não equivale a testar o modpack E2EE completo ou todas as combinações de mods e scripts.</div>
+  </section>
+
+  <section>
+    <h2>Instalação resumida</h2>
+    <div class="steps"><div class="step"><b>1 · Prepare</b>Faça backup do mundo. Confirme Minecraft 1.12.2 e IC2 Experimental 2.8.222-ex112.</div><div class="step"><b>2 · Instale</b>Copie <code>CropManager-0.5.0-alpha2.jar</code> para a pasta <code>mods</code> do servidor e de cada cliente.</div><div class="step"><b>3 · Inicie</b>Reinicie o jogo/servidor e confirme que todos usam exatamente a mesma versão.</div></div>
+  </section>
+</main>
+<footer><div class="wrap">Crop Manager 0.5.0-alpha2 · Minecraft 1.12.2 · IndustrialCraft 2 Experimental 2.8.222-ex112<br>Os cartões usam texturas reais do addon; a imagem do capinador no mundo é uma captura do QA local. O Crop Manager básico antigo migra para o avançado quando seu chunk é carregado.</div></footer>
+</body>
+</html>

@@ -1,0 +1,46 @@
+[02:52:24] [main/INFO] [FML]: Cleanroom version 0.6.11-alpha
+[02:52:24] [main/INFO] [FML]: Java is OpenJDK 64-Bit Server VM, version 25.0.3, running on Windows 11:amd64:10.0, installed at C:\Users\Kashmir\AppData\Roaming\PrismLauncher\java\azul_zulu_jre25.0.3
+[02:52:28] [Server thread/INFO] [FML]: Starts to replace vanilla recipe ingredients with ore ingredients.
+[02:52:31] [Cleanroom Version Check/INFO] [forge.VersionCheck]: [cleanroom] Starting version check at https://download.cleanroommc.com/api/forge
+[02:52:31] [Cleanroom Version Check/INFO] [forge.VersionCheck]: [cleanroom] Found status: BETA_OUTDATED Target: 0.7.14-alpha
+[02:52:31] [Cleanroom Version Check/INFO] [forge.VersionCheck]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[02:52:32] [Cleanroom Version Check/INFO] [forge.VersionCheck]: [forge] Found status: BETA Target: null
+[02:52:35] [Server thread/INFO] [cropmanager]: Recipe ingredient te/crop_harvester = ic2:te:58
+[02:52:35] [Server thread/INFO] [cropmanager]: Recipe ingredient te/cropmatron = ic2:te:59
+[02:52:35] [Server thread/INFO] [cropmanager]: Recipe ingredient crafting/advanced_circuit = ic2:crafting:2
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: IC2 crop block resolves
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Real IC2 wheat card resolves
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: No crop action without EU
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: No input consumption without EU
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Native harvest preserves and resets real crop
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Native fertilizer consumes exactly one item
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Native hydration drains exactly 200 mB once
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Native Weed-Ex drains exactly 150 mB once
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Combined pass costs 9 + 30 + 20 EU
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Satisfied crop consumes no further fluids
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Full output blocks harvesting before plant mutation
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Output capability rejects insertion
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Input capability rejects extraction
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Input capability rejects invalid fertilizer
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: EU and both fluid tanks survive NBT reload
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Pending count above signed byte survives NBT reload
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Partial insertion conserves all pending products
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Disabled machine consumes no scan EU
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Pending queue flush conserves products across several slots
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Overclockers apply native timing and demand multipliers
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Storage and transformer upgrades have real effects
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Neighbor chunk starts unloaded
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Full radius-eight scan does not load neighbor chunk
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Full container output prevents input consumption and fluid transfer
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Water bucket transfers once and preserves empty container
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Breaking machine drops harvested items exactly once
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Marking saves beside solid block at chunk edge does not load neighbor
+[02:52:36] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Saving a treated crop at chunk edge does not load neighbor
+[02:52:38] [Server thread/INFO] [cropmanager]: RUNTIME PASS: EU arrives from real BatBox during server ticks, stage 0
+[02:52:39] [Server thread/INFO] [cropmanager]: RUNTIME PASS: EU arrives from real BatBox during server ticks, stage 1
+[02:52:39] [Server thread/INFO] [cropmanager]: RUNTIME PASS: EU reception continues after live tier and storage upgrade
+[02:52:41] [Server thread/INFO] [cropmanager]: RUNTIME PASS: EU arrives from real BatBox during server ticks, stage 2
+[02:52:42] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Real server ticks unload the test chunk
+[02:52:44] [Server thread/INFO] [cropmanager]: RUNTIME PASS: EU arrives from real BatBox during server ticks, stage 4
+[02:52:44] [Server thread/INFO] [cropmanager]: RUNTIME PASS: Saved upgrades survive real chunk unload and reload
+[02:52:44] [Server thread/INFO] [cropmanager]: CROP_MANAGER_RUNTIME_TESTS_PASSED checks=35

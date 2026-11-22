@@ -1,0 +1,12 @@
+[12:40:47] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT composter-light
+[12:40:48] [Client thread/INFO] [cropmanager]: CLIENT_QA_WORKBENCH_NETWORK_PASS
+[12:40:48] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT workbench-light
+[12:40:49] [Client thread/INFO] [cropmanager]: CLIENT_QA_NOTEBOOK_NETWORK_PASS
+[12:40:50] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT notebook-light
+[12:40:51] [Client thread/INFO] [cropmanager]: CLIENT_QA_ALARM_NETWORK_PASS
+[12:40:52] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT monitor-alerts
+[12:40:54] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT composter-dark
+[12:40:55] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT workbench-dark
+[12:40:56] [Client thread/INFO] [cropmanager]: CLIENT_QA_NOTEBOOK_NETWORK_PASS
+[12:40:57] [Client thread/INFO] [cropmanager]: CLIENT_QA_SCREENSHOT notebook-dark
+[12:40:57] [Client thread/INFO] [cropmanager]: CROP_MANAGER_CLIENT_QA_PASSED
