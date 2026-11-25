@@ -9,6 +9,7 @@ import ic2.api.item.IC2Items;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 
@@ -91,9 +92,53 @@ public final class CropRegistry {
             false
     );
 
+    public static final BaseCropCard RESINCANE = new BaseCropCard(
+            "resincane",
+            new CropProperties(4, 2, 0, 2, 1, 1),
+            new String[] {"Resin", "Reed", "Sticky"},
+            () -> safeIc2("misc_resource", "resin", new ItemStack(Items.SLIME_BALL)),
+            false
+    );
+
+    public static final BaseCropCard CRYOLOTUS = new BaseCropCard(
+            "cryolotus",
+            new CropProperties(3, 1, 1, 0, 2, 1),
+            new String[] {"Ice", "White", "Flower"},
+            () -> new ItemStack(Items.SNOWBALL, 1),
+            false
+    );
+
+    public static final BaseCropCard CUPRIC_MOSS = new BaseCropCard(
+            "cupric_moss",
+            new CropProperties(5, 2, 0, 2, 2, 0),
+            new String[] {"Metal", "Copper", "Catalyzed"},
+            () -> safeIc2("dust", "small_copper", new ItemStack(Items.GOLD_NUGGET)),
+            true,
+            crop -> crop.isBlockBelow("blockCopper")
+    );
+
+    public static final BaseCropCard STANNUM_HERB = new BaseCropCard(
+            "stannum_herb",
+            new CropProperties(5, 2, 0, 2, 2, 0),
+            new String[] {"Metal", "Tin", "Catalyzed"},
+            () -> safeIc2("dust", "small_tin", new ItemStack(Items.IRON_NUGGET)),
+            true,
+            crop -> crop.isBlockBelow("blockTin")
+    );
+
+    public static final BaseCropCard VOLTREED = new BaseCropCard(
+            "voltreed",
+            new CropProperties(6, 3, 0, 2, 3, 0),
+            new String[] {"Redstone", "Signal", "Catalyzed"},
+            () -> new ItemStack(Items.REDSTONE, 1),
+            true,
+            crop -> crop.isBlockBelow(Blocks.REDSTONE_BLOCK) || crop.isBlockBelow("blockRedstone")
+    );
+
     public static final List<BaseCropCard> ALL = Collections.unmodifiableList(
             Arrays.asList(GRINBLOOM, BIOREED, NITROBULB, LAZULI_BLOOM, IRID_MOSS, RADBLOOM,
-                    GLOWBLOOM, QUARTZREED, LITHIVINE, SULFURBUD)
+                    GLOWBLOOM, QUARTZREED, LITHIVINE, SULFURBUD,
+                    RESINCANE, CRYOLOTUS, CUPRIC_MOSS, STANNUM_HERB, VOLTREED)
     );
 
     private CropRegistry() {}

@@ -3,8 +3,8 @@ plugins {
     id 'com.gtnewhorizons.retrofuturagradle' version '2.0.3'
 }
 group = 'br.cropmanager'
-version = '0.5.0-alpha9'
-base { archivesName = 'CropManager' }
+version = '0.5.0-alpha11'
+base { archivesName = 'IC2-Agronomy-Expansion' }
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(8)
@@ -53,7 +53,7 @@ tasks.withType(AbstractArchiveTask).configureEach {
 }
 
 // An optional, separate addon for tests against the real Cleanroom runtime.
-// It is never included in the distributable Crop Manager jar.
+// It is never included in the distributable IC2: Agronomy Expansion jar.
 sourceSets {
     runtimeTest {
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
@@ -86,12 +86,15 @@ tasks.named('runClient').configure {
         def qaLanguage = providers.gradleProperty('clientQaLang').getOrElse('en_us')
         jvmArgs '-Dcropmanager.clientQa=true', "-Dcropmanager.qaLanguage=${qaLanguage}", "-Dcropmanager.qaDir=${layout.buildDirectory.dir('client-qa-' + qaLanguage).get().asFile.absolutePath}"
         if (providers.gradleProperty('clientQaContrast').isPresent()) jvmArgs '-Dcropmanager.qaContrast=true', "-Dcropmanager.qaContrastPack=${layout.buildDirectory.file('contrast-pack.zip').get().asFile.absolutePath}"
+        if (providers.gradleProperty('clientQaReservoir').isPresent()) jvmArgs '-Dcropmanager.qaReservoir=true'
+        if (providers.gradleProperty('clientQaLights').isPresent()) jvmArgs '-Dcropmanager.qaLights=true'
+        if (providers.gradleProperty('clientQaManual').isPresent()) jvmArgs '-Dcropmanager.qaManual=true'
         if (providers.gradleProperty('clientQaStart').isPresent()) jvmArgs "-Dcropmanager.qaStart=${providers.gradleProperty('clientQaStart').get()}"
         args '--width', '1100', '--height', '760'
         doFirst {
             def qaMods = layout.projectDirectory.dir('run/mods').asFile
             def currentQa = runtimeTestJar.get().archiveFile.get().asFile
-            qaMods.listFiles()?.findAll { it.isFile() && it.name ==~ /^CropManager-[0-9].*-runtime-tests-dev\.jar$/ && it.name != currentQa.name }?.each {
+            qaMods.listFiles()?.findAll { it.isFile() && it.name ==~ /^(?:CropManager|IC2-Agronomy-Expansion)-[0-9].*-runtime-tests-dev\.jar$/ && it.name != currentQa.name }?.each {
                 if (!it.delete()) throw new GradleException('Cannot replace old QA addon: ' + it.name)
             }
             copy { from runtimeTestJar.get().archiveFile; into layout.projectDirectory.dir('run/mods') }

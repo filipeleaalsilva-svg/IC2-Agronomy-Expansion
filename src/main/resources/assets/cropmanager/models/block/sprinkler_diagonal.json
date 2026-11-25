@@ -1,0 +1,8 @@
+{
+  "parent": "block/orientable",
+  "textures": {
+    "front": "cropmanager:blocks/sprinkler_diagonal",
+    "top": "cropmanager:blocks/storage_steel",
+    "side": "cropmanager:blocks/storage_steel"
+  }
+}

@@ -2,6 +2,7 @@ package br.cropmanager.chest.client;
 
 import br.cropmanager.chest.block.BlockCropDatabaseChest;
 import br.cropmanager.chest.inventory.TileCropDatabaseChest;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -16,17 +17,22 @@ public final class CropChestRenderer extends TileEntitySpecialRenderer<TileCropD
     private static final ResourceLocation[] TEXTURES = new ResourceLocation[6];
     static {
         TEXTURES[0] = new ResourceLocation("cropmanager", "textures/blocks/crop_database_chest_front.png");
-        for (int face = 1; face < FACES.length; face++) {
-            TEXTURES[face] = new ResourceLocation("ic2", "textures/blocks/resource/advanced_machine.png");
-        }
+        TEXTURES[1] = new ResourceLocation("cropmanager", "textures/blocks/crop_database_chest_back.png");
+        TEXTURES[2] = new ResourceLocation("cropmanager", "textures/blocks/crop_database_chest_left.png");
+        TEXTURES[3] = new ResourceLocation("cropmanager", "textures/blocks/crop_database_chest_right.png");
+        TEXTURES[4] = new ResourceLocation("cropmanager", "textures/blocks/crop_database_chest_top.png");
+        TEXTURES[5] = new ResourceLocation("cropmanager", "textures/blocks/crop_database_chest_bottom.png");
     }
     @Override public void render(TileCropDatabaseChest tile, double x, double y, double z,
                                  float partialTicks, int destroyStage, float alpha) {
         GlStateManager.pushMatrix();
         GlStateManager.translate(x + 0.5, y, z + 0.5);
-        if (tile.hasWorld() && tile.getBlockType() instanceof BlockCropDatabaseChest) {
-            float facing = tile.getWorld().getBlockState(tile.getPos()).getValue(BlockCropDatabaseChest.FACING).getHorizontalAngle();
-            GlStateManager.rotate(180 - facing, 0, 1, 0);
+        if (tile.hasWorld()) {
+            IBlockState state = tile.getWorld().getBlockState(tile.getPos());
+            if (state.getBlock() instanceof BlockCropDatabaseChest) {
+                float facing = state.getValue(BlockCropDatabaseChest.FACING).getHorizontalAngle();
+                GlStateManager.rotate(180 - facing, 0, 1, 0);
+            }
         }
         GlStateManager.translate(-0.5, 0, -0.5);
         GlStateManager.color(1, 1, 1, alpha);

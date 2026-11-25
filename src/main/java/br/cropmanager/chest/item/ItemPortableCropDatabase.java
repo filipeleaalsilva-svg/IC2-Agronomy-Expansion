@@ -6,7 +6,6 @@ import br.cropmanager.chest.inventory.TileCropDatabaseChest;
 import java.util.List;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -28,7 +27,7 @@ public final class ItemPortableCropDatabase extends Item {
         setRegistryName(CropManager.ID, "portable_crop_database");
         setTranslationKey(CropManager.ID + ".portable_crop_database");
         setMaxStackSize(1);
-        setCreativeTab(CreativeTabs.REDSTONE);
+        setCreativeTab(CropManager.TAB);
     }
 
     /**
@@ -66,7 +65,11 @@ public final class ItemPortableCropDatabase extends Item {
         if (!(tile instanceof TileCropDatabaseChest)) return EnumActionResult.PASS;
         if (world.isRemote) return EnumActionResult.SUCCESS;
         ItemStack held = player.getHeldItem(hand);
+        int slot = hand == EnumHand.MAIN_HAND ? player.inventory.currentItem : 40;
+        PortableCropInventory portable = PortableCropInventory.open(player, slot);
+        if (portable == null) return EnumActionResult.FAIL;
         ItemUpgradeLinker.setLink(held, world.provider.getDimension(), pos);
+        portable.transferSeedsTo((TileCropDatabaseChest) tile);
         player.sendStatusMessage(new TextComponentTranslation("cropmanager.linker.linked",
                 pos.getX(), pos.getY(), pos.getZ()), true);
         return EnumActionResult.SUCCESS;
@@ -77,7 +80,7 @@ public final class ItemPortableCropDatabase extends Item {
         if (!player.inventory.getItemStack().isEmpty()) return new ActionResult<>(EnumActionResult.FAIL, held);
         if (!world.isRemote) {
             int slot = hand == EnumHand.MAIN_HAND ? player.inventory.currentItem : 40;
-            if (ItemUpgradeLinker.hasLink(held)) {
+            if (ItemUpgradeLinker.hasLink(held) && !player.isSneaking()) {
                 if (resolveLinkedChest(player, held) != null) {
                     player.openGui(CropManager.instance, 13, world, slot, 0, 0);
                 } else {
@@ -97,11 +100,11 @@ public final class ItemPortableCropDatabase extends Item {
         if (link != null) {
             tooltip.add(I18n.format("cropmanager.linker.linked_to",
                     link.getInteger("X"), link.getInteger("Y"), link.getInteger("Z"), link.getInteger("Dim")));
-        } else {
-            int occupied = stack.hasTagCompound() ? stack.getTagCompound().getCompoundTag(PortableCropInventory.DATA)
-                    .getCompoundTag("Seeds").getTagList("Items", 10).tagCount() : 0;
-            tooltip.add(I18n.format("cropdatabasechest.portable.capacity", occupied));
+            tooltip.add(I18n.format("cropdatabasechest.portable.local_hint"));
         }
+        int occupied = stack.hasTagCompound() ? stack.getTagCompound().getCompoundTag(PortableCropInventory.DATA)
+                .getCompoundTag("Seeds").getTagList("Items", 10).tagCount() : 0;
+        tooltip.add(I18n.format("cropdatabasechest.portable.capacity", occupied));
         tooltip.add(I18n.format(PortableCropInventory.isPickupEnabled(stack) ? "cropdatabasechest.pickup.tooltip_on" : "cropdatabasechest.pickup.tooltip_off"));
     }
 }

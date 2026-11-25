@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "cropmanager:eu_dish_antenna" },
+    "facing=south": { "model": "cropmanager:eu_dish_antenna", "y": 180 },
+    "facing=west":  { "model": "cropmanager:eu_dish_antenna", "y": 270 },
+    "facing=east":  { "model": "cropmanager:eu_dish_antenna", "y": 90 }
+  }
+}

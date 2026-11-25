@@ -1,7 +1,6 @@
 package br.cropmanager;
 
 import ic2.core.crop.TileEntityCrop;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -18,7 +17,7 @@ import net.minecraft.world.World;
 public final class FarmTool extends Item {
     public FarmTool(String name) {
         setRegistryName(CropManager.ID, name); setTranslationKey("cropmanager." + name);
-        setCreativeTab(CreativeTabs.TOOLS); setMaxStackSize(1);
+        setCreativeTab(CropManager.TAB); setMaxStackSize(1);
     }
     @net.minecraftforge.fml.relauncher.SideOnly(net.minecraftforge.fml.relauncher.Side.CLIENT)
     @Override public void addInformation(ItemStack stack, World world, java.util.List<String> tooltip, net.minecraft.client.util.ITooltipFlag flag) {

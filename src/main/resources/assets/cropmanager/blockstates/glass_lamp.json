@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "cropmanager:glass_lamp"
+    },
+    "facing=up": {
+      "model": "cropmanager:glass_lamp_hanging"
+    },
+    "facing=north": {
+      "model": "cropmanager:glass_lamp_wall"
+    },
+    "facing=east": {
+      "model": "cropmanager:glass_lamp_wall",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "cropmanager:glass_lamp_wall",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "cropmanager:glass_lamp_wall",
+      "y": 270
+    }
+  }
+}

@@ -25,23 +25,27 @@ import net.minecraftforge.items.ItemStackHandler;
  * telemetria exibida na GUI; a automação externa só consegue inserir sementes que ainda precisem
  * de análise para evitar loops com baús de armazenamento.
  */
-public final class SeedAnalyzerTile extends FarmTile implements ITickable, IUpgradableBlock {
-    public int progress;
-    public int workTicks = ManagerConfig.analyzerDuration;
+public final class SeedAnalyzerTile extends PoweredMachineTile {
     public int clientDuration = ManagerConfig.analyzerDuration;
-    public double euPerTick = ManagerConfig.analyzerEuPerTick;
-    private boolean upgradesDirty = true;
-    public String condition = "analyzer_input";
+    public SeedAnalyzerTile() {
+        super(ManagerConfig.analyzerEnergyCapacity, ManagerConfig.analyzerSinkTier,
+                ManagerConfig.analyzerDuration, ManagerConfig.analyzerEuPerTick, "analyzer_input");
+    }
+    @Override protected ItemStackHandler machineInventory() { return inventory; }
+    @Override protected int upgradeStartSlot() { return 2; }
+    @Override protected int upgradeEndSlot() { return 6; }
+    @Override protected int batterySlot() { return 6; }
+    @Override protected int baseDuration() { return ManagerConfig.analyzerDuration; }
+    @Override protected double baseEuPerTick() { return ManagerConfig.analyzerEuPerTick; }
+    @Override protected int baseEnergyCapacity() { return ManagerConfig.analyzerEnergyCapacity; }
+    @Override protected int baseSinkTier() { return ManagerConfig.analyzerSinkTier; }
+    @Override protected boolean processMachineTick() { return processTick(); }
 
     // Last analyzed seed telemetry (synced to GUI and persisted)
     public String lastSpecies = "";
     public int lastTier, lastGr, lastGa, lastRe;
     public boolean lastCatalyzed;
     public String lastAttributes = "";
-
-    public final BasicSink energy = createSink(ManagerConfig.analyzerEnergyCapacity, ManagerConfig.analyzerSinkTier);
-    @Override public BasicSink energySink() { return energy; }
-    @Override public boolean isSupportMachine() { return true; }
 
     public static boolean isSeedBag(ItemStack stack) {
         return !stack.isEmpty() && stack.getItem() instanceof ICropSeed;
@@ -71,21 +75,6 @@ public final class SeedAnalyzerTile extends FarmTile implements ITickable, IUpgr
             markDirty();
         }
     };
-
-    @Override public void onLoad() { if (!world.isRemote) { recalculateUpgrades(); energy.onLoad(); } }
-    @Override public void invalidate() { energy.invalidate(); super.invalidate(); }
-    @Override public void onChunkUnload() { energy.onChunkUnload(); super.onChunkUnload(); }
-
-    @Override
-    public void update() {
-        if (world.isRemote) return;
-        if (upgradesDirty) recalculateUpgrades();
-        tickUpgrades(this, inventory, 2, 6);
-        dischargeBattery(inventory, 6, energy);
-        energy.update();
-        boolean working = processTick();
-        setActive(working);
-    }
 
     boolean processTick() {
         if (upgradesDirty) recalculateUpgrades();
@@ -158,22 +147,6 @@ public final class SeedAnalyzerTile extends FarmTile implements ITickable, IUpgr
         lastAttributes = attrs == null ? "" : String.join(", ", attrs);
     }
 
-    private void recalculateUpgrades() {
-        double[] multipliers = applyIc2Upgrades(this, inventory, 2, 6, energy, 1,
-                ManagerConfig.analyzerEnergyCapacity, ManagerConfig.analyzerSinkTier);
-        int next = Math.max(1, (int) Math.ceil(ManagerConfig.analyzerDuration * multipliers[0]));
-        progress = Math.min(next - 1, (int) ((long) progress * next / Math.max(1, workTicks)));
-        workTicks = next;
-        euPerTick = Math.ceil(ManagerConfig.analyzerEuPerTick * multipliers[1]);
-        upgradesDirty = false;
-    }
-
-    @Override public double getEnergy() { return energy.getEnergyStored(); }
-    @Override public boolean useEnergy(double amount) { boolean used = energy.useEnergy(amount); if (used) markDirty(); return used; }
-    @Override public Set<UpgradableProperty> getUpgradableProperties() {
-        return EnumSet.of(UpgradableProperty.Processing, UpgradableProperty.EnergyStorage, UpgradableProperty.Transformer);
-    }
-
     public IItemHandler itemsForFace(@Nullable EnumFacing face) {
         return new IItemHandler() {
             @Override public int getSlots() { return inventory.getSlots(); }
@@ -242,10 +215,7 @@ public final class SeedAnalyzerTile extends FarmTile implements ITickable, IUpgr
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         super.writeToNBT(tag);
-        energy.writeToNBT(tag);
-        tag.setTag("Inventory", inventory.serializeNBT());
-        tag.setInteger("Work", progress);
-        tag.setInteger("Duration", workTicks);
+        writePoweredNBT(tag);
         tag.setString("LastSpecies", lastSpecies);
         tag.setInteger("LastTier", lastTier);
         tag.setInteger("LastGr", lastGr);
@@ -259,13 +229,6 @@ public final class SeedAnalyzerTile extends FarmTile implements ITickable, IUpgr
     @Override
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
-        energy.readFromNBT(tag);
-        double eu = energy.getEnergyStored();
-        NBTTagCompound items = tag.getCompoundTag("Inventory").copy();
-        items.setInteger("Size", 7);
-        inventory.deserializeNBT(items);
-        workTicks = Math.max(1, tag.hasKey("Duration") ? tag.getInteger("Duration") : ManagerConfig.analyzerDuration);
-        progress = Math.max(0, Math.min(workTicks - 1, tag.getInteger("Work")));
         lastSpecies = tag.getString("LastSpecies");
         lastTier = tag.getInteger("LastTier");
         lastGr = tag.getInteger("LastGr");
@@ -273,10 +236,14 @@ public final class SeedAnalyzerTile extends FarmTile implements ITickable, IUpgr
         lastRe = tag.getInteger("LastRe");
         lastCatalyzed = tag.getBoolean("LastCatalyzed");
         lastAttributes = tag.getString("LastAttributes");
-        upgradesDirty = true;
-        recalculateUpgrades();
-        energy.setEnergyStored(Double.isFinite(eu) ? Math.max(0, Math.min(energy.getCapacity(), eu)) : 0);
+        readPoweredNBT(tag);
     }
 
-    @Override public void dropContents() { dropHandler(inventory); }
+    @Override EquipmentLayout equipmentLayout() {
+        return new EquipmentLayout(inventory, 126,
+                new int[]{34, 110, 148, 148, 148, 148, 8},
+                new int[]{24, 24, 22, 40, 58, 76, 62},
+                1, false,
+                s -> isBattery(s) ? new int[]{6, 7} : ManagerTile.isIc2Upgrade(s) ? new int[]{2, 6} : new int[]{0, 1});
+    }
 }

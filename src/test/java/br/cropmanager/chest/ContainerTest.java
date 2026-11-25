@@ -281,4 +281,76 @@ public class ContainerTest {
         ItemStack cloneClick = container.slotClick(0, 2, ClickType.CLONE, player);
         assertTrue(cloneClick.isEmpty());
     }
+
+    @Test public void remoteLinkedChestBlocksHotbarSwapOfLockedCarrierSlot() {
+        ItemStack linkedPortable = new ItemStack(br.cropmanager.CropManager.PORTABLE_DATABASE);
+        br.cropmanager.chest.item.ItemUpgradeLinker.setLink(linkedPortable, 0, BlockPos.ORIGIN);
+        ItemStack otherItem = new ItemStack(net.minecraft.init.Items.STICK);
+        player.inventory.setInventorySlotContents(0, linkedPortable);
+        player.inventory.setInventorySlotContents(9, otherItem);
+
+        ContainerCropDatabaseChest remote = new ContainerCropDatabaseChest(player.inventory, tile, 0);
+        // Slot 500 corresponde ao índice 9 do inventário do jogador; 527 corresponde ao índice 0 (hotbar).
+        assertTrue(remote.slotClick(500, 0, ClickType.SWAP, player).isEmpty());
+        assertTrue(remote.slotClick(527, 1, ClickType.SWAP, player).isEmpty());
+        assertSame(linkedPortable, player.inventory.getStackInSlot(0));
+        assertSame(otherItem, player.inventory.getStackInSlot(9));
+    }
+
+    @Test public void chestViewMessageRoundTripAndApplyView() {
+        int[] mapped = new int[500];
+        java.util.Arrays.fill(mapped, -1);
+        mapped[7] = 0;
+        mapped[499] = 1;
+        br.cropmanager.chest.network.ChestViewMessage outgoing = new br.cropmanager.chest.network.ChestViewMessage(
+                42, 2, 10, 2, true, true, 77, mapped);
+        io.netty.buffer.ByteBuf buf = io.netty.buffer.Unpooled.buffer();
+        outgoing.toBytes(buf);
+
+        br.cropmanager.chest.network.ChestViewMessage decoded = new br.cropmanager.chest.network.ChestViewMessage();
+        decoded.fromBytes(buf);
+
+        assertEquals(42, decoded.getWindow());
+        assertEquals(2, decoded.getPage());
+        assertEquals(10, decoded.getPageCount());
+        assertEquals(2, decoded.getOccupied());
+        assertTrue(decoded.isPickup());
+        assertTrue(decoded.isFavoritesOnly());
+        assertEquals(77, decoded.getRevision());
+        assertEquals(0, decoded.getPositions()[7]);
+        assertEquals(1, decoded.getPositions()[499]);
+
+        container.applyView(decoded.getPage(), decoded.getPageCount(), decoded.getOccupied(),
+                decoded.isPickup(), decoded.isFavoritesOnly(), decoded.getRevision(), decoded.getPositions());
+        assertEquals(2, container.getPage());
+        assertEquals(10, container.getPageCount());
+        assertEquals(2, container.getOccupied());
+        assertTrue(container.favoritesOnly());
+        assertEquals(77, container.getRevision());
+        assertTrue(container.inventorySlots.get(7).isEnabled());
+        assertTrue(container.inventorySlots.get(499).isEnabled());
+        assertFalse(container.inventorySlots.get(0).isEnabled());
+    }
+
+    @Test public void mpPlayerCanPickUpAndPlaceWithoutReAcknowledging() {
+        net.minecraft.entity.player.EntityPlayerMP mpPlayer = mock(net.minecraft.entity.player.EntityPlayerMP.class);
+        mpPlayer.world = world;
+        mpPlayer.inventory = new InventoryPlayer(mpPlayer);
+        ContainerCropDatabaseChest mpContainer = new ContainerCropDatabaseChest(mpPlayer.inventory, tile);
+
+        ItemStack seed = SeedFixtures.bag(1, 4);
+        tile.setInventorySlotContents(0, seed);
+        mpContainer.detectAndSendChanges();
+        mpContainer.acknowledgeView(mpContainer.getRevision());
+
+        // 1º clique: pega a seed do slot 0 do baú para o cursor
+        mpContainer.slotClick(0, 0, ClickType.PICKUP, mpPlayer);
+        assertFalse(mpPlayer.inventory.getItemStack().isEmpty());
+        assertTrue(tile.getStackInSlot(0).isEmpty());
+
+        // 2º clique imediato (sem novo acknowledgeView): coloca no slot 500 (inventário do jogador)
+        mpContainer.slotClick(500, 0, ClickType.PICKUP, mpPlayer);
+        assertTrue(mpPlayer.inventory.getItemStack().isEmpty());
+        assertFalse(mpPlayer.inventory.getStackInSlot(9).isEmpty());
+    }
 }

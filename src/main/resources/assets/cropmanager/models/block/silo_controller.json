@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "cropmanager:blocks/silo_casing",
+    "up": "cropmanager:blocks/silo_casing",
+    "north": "cropmanager:blocks/silo_controller",
+    "south": "cropmanager:blocks/silo_casing",
+    "east": "cropmanager:blocks/silo_casing",
+    "west": "cropmanager:blocks/silo_casing",
+    "particle": "cropmanager:blocks/silo_controller"
+  }
+}

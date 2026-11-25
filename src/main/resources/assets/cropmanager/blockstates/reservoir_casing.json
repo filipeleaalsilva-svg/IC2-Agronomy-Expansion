@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "part=casing": {
+      "model": "cropmanager:reservoir_casing"
+    },
+    "part=glass": {
+      "model": "cropmanager:reservoir_tank_glass"
+    },
+    "part=ladder": {
+      "model": "cropmanager:reservoir_ladder"
+    },
+    "part=railing": {
+      "model": "cropmanager:reservoir_railing"
+    },
+    "part=tower": {
+      "model": "cropmanager:reservoir_empty"
+    }
+  }
+}

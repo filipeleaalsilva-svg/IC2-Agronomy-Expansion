@@ -15,15 +15,24 @@ import net.minecraftforge.fml.relauncher.Side;
 @Mod.EventBusSubscriber(modid = CropManager.ID, value = Side.CLIENT)
 public final class AreaPreview {
     private static FarmTile target;
-    private static int radius, layers;
+    private static int radius, layers, offsetX, offsetY, offsetZ;
     private AreaPreview() {}
     static boolean selected(FarmTile tile) { return target == tile; }
     static void toggle(FarmTile tile) {
         if (selected(tile)) target = null;
-        else { target = tile; if (tile instanceof ManagerTile || tile instanceof WeederTile) refresh(tile); else { radius = 4; layers = 7; } }
+        else { target = tile; if (tile instanceof ManagerTile || tile instanceof WeederTile) refresh(tile); else { radius = 4; layers = 7; offsetX = offsetY = offsetZ = 0; } }
     }
     static void refresh(FarmTile tile) {
-        if (selected(tile)) { radius = tile instanceof ManagerTile ? ((ManagerTile)tile).radius : ((WeederTile)tile).radius; layers = tile instanceof ManagerTile ? ((ManagerTile)tile).layers : ((WeederTile)tile).layers; }
+        if (selected(tile)) {
+            if (tile instanceof ManagerTile) {
+                ManagerTile m = (ManagerTile) tile;
+                radius = m.radius; layers = m.layers;
+                offsetX = m.offsetX; offsetY = m.offsetY; offsetZ = m.offsetZ;
+            } else {
+                radius = ((WeederTile) tile).radius; layers = ((WeederTile) tile).layers;
+                offsetX = offsetY = offsetZ = 0;
+            }
+        }
     }
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END || target == null) return;
@@ -31,16 +40,6 @@ public final class AreaPreview {
         if (mc.world == null || target.getWorld() != mc.world || target.isInvalid()
                 || !mc.world.isBlockLoaded(target.getPos(), false)
                 || mc.world.getTileEntity(target.getPos()) != target) target = null;
-    }
-    private static void markers(int[] data, double x, double y, double z, boolean unknown) {
-        for (int i = 0; i + 2 < data.length; i += 3) marker(new net.minecraft.util.math.BlockPos(data[i], data[i+1], data[i+2]).toLong(), x, y, z, unknown);
-    }
-    private static void marker(long point, double x, double y, double z, boolean unknown) {
-        net.minecraft.util.math.BlockPos p = net.minecraft.util.math.BlockPos.fromLong(point);
-        double inset = unknown ? 0.30 : 0.05;
-        AxisAlignedBB box = new AxisAlignedBB(p.getX() + inset, p.getY() + inset, p.getZ() + inset,
-                p.getX() + 1 - inset, p.getY() + 1 - inset, p.getZ() + 1 - inset).offset(-x, -y, -z);
-        RenderGlobal.drawSelectionBoundingBox(box, 1, unknown ? 0.8f : 0.25f, unknown ? 0.2f : 0.25f, 0.9f);
     }
     @SubscribeEvent public static void render(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
@@ -58,16 +57,12 @@ public final class AreaPreview {
         GlStateManager.disableDepth();
         GlStateManager.depthMask(false);
         try {
-            if (target instanceof ManagerTile && ((ManagerTile)target).advanced) {
-                markers(((ManagerTile)target).report.getIntArray("Rejected"), x, y, z, false);
-                markers(((ManagerTile)target).report.getIntArray("Unknown"), x, y, z, true);
-            }
             for (int bit = 0; bit < 3; bit++) if ((layers & (1 << bit)) != 0) {
-                int level = target.getPos().getY() + bit - 1;
+                int level = target.getPos().getY() + offsetY + bit - 1;
                 if (level < 0 || level >= mc.world.getHeight()) continue;
-                AxisAlignedBB box = new AxisAlignedBB(target.getPos().getX() - radius, level,
-                        target.getPos().getZ() - radius, target.getPos().getX() + radius + 1,
-                        level + 1, target.getPos().getZ() + radius + 1).grow(0.002).offset(-x, -y, -z);
+                AxisAlignedBB box = new AxisAlignedBB(target.getPos().getX() + offsetX - radius, level,
+                        target.getPos().getZ() + offsetZ - radius, target.getPos().getX() + offsetX + radius + 1,
+                        level + 1, target.getPos().getZ() + offsetZ + radius + 1).grow(0.002).offset(-x, -y, -z);
                 RenderGlobal.drawSelectionBoundingBox(box, 0.55f, 0.95f, 0.35f, 0.8f);
             }
         } finally {

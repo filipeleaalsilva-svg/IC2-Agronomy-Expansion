@@ -14,7 +14,7 @@ IC2_JAR = PROJECT_ROOT / "libs" / "industrialcraft-2-2.8.222-ex112.jar"
 DESIGN_KIT_WIDGETS = PROJECT_ROOT / "design_kit" / "widgets"
 GUI_LIGHT_DIR = PROJECT_ROOT / "src" / "main" / "resources" / "assets" / "cropmanager" / "textures" / "gui"
 ITEMS_DIR = PROJECT_ROOT / "src" / "main" / "resources" / "assets" / "cropmanager" / "textures" / "items"
-DEFAULT_DARK_PACK = PROJECT_ROOT / "dist" / "CropManager-GUI-Dark-0.5.0-alpha9"
+DEFAULT_DARK_PACK = PROJECT_ROOT / "dist" / "CropManager-GUI-Dark-0.5.0-alpha10"
 
 LIGHT_PALETTE = {
     "body": (0xC6, 0xC6, 0xC6, 255),
@@ -42,27 +42,27 @@ LIGHT_PALETTE = {
 }
 
 DARK_PALETTE = {
-    "body": (0x25, 0x2A, 0x30, 255),
-    "panel_dark": (0x1B, 0x20, 0x26, 255),
-    "panel_mid": (0x20, 0x25, 0x2B, 255),
-    "subpanel": (0x1C, 0x21, 0x27, 255),
-    "rivet": (0x08, 0x0B, 0x0F, 255),
-    "ghost": (0x3A, 0x44, 0x4E, 255),
+    "body": (0x1C, 0x1C, 0x1D, 255),
+    "panel_dark": (0x15, 0x15, 0x16, 255),
+    "panel_mid": (0x18, 0x18, 0x19, 255),
+    "subpanel": (0x18, 0x18, 0x19, 255),
+    "rivet": (0x08, 0x08, 0x09, 255),
+    "ghost": (0x3A, 0x3A, 0x3D, 255),
     "accent_water": (0x2E, 0x86, 0xC1, 255),
     "accent_weed": (0x58, 0xD6, 0x8D, 255),
-    "edge": (0x62, 0x6B, 0x74, 255),
-    "shadow": (0x08, 0x0B, 0x0F, 255),
-    "shadow_deep": (0x05, 0x08, 0x0C, 255),
-    "seam": (0x38, 0x42, 0x4B, 255),
-    "engrave_dark": (0x08, 0x0B, 0x0F, 255),
-    "engrave_fill": (0x15, 0x1B, 0x22, 255),
-    "engrave_light": (0x4A, 0x54, 0x5E, 255),
-    "slot_bg": (0x11, 0x17, 0x1D, 255),
-    "slot_icon": (0x32, 0x3B, 0x44, 255),
-    "slot_icon_hi": (0x0B, 0x0F, 0x14, 255),
-    "gauge_well": (0x05, 0x08, 0x0C, 255),
-    "gauge_border": (0x08, 0x0B, 0x0F, 255),
-    "gauge_tick": (0x28, 0x32, 0x3B, 255),
+    "edge": (0x4E, 0x4E, 0x52, 255),
+    "shadow": (0x0D, 0x0D, 0x0E, 255),
+    "shadow_deep": (0x05, 0x05, 0x06, 255),
+    "seam": (0x2E, 0x2E, 0x31, 255),
+    "engrave_dark": (0x0D, 0x0D, 0x0E, 255),
+    "engrave_fill": (0x14, 0x14, 0x15, 255),
+    "engrave_light": (0x4E, 0x4E, 0x52, 255),
+    "slot_bg": (0x12, 0x12, 0x13, 255),
+    "slot_icon": (0x32, 0x32, 0x35, 255),
+    "slot_icon_hi": (0x0B, 0x0B, 0x0C, 255),
+    "gauge_well": (0x05, 0x05, 0x06, 255),
+    "gauge_border": (0x08, 0x08, 0x09, 255),
+    "gauge_tick": (0x28, 0x28, 0x2B, 255),
     "gauge_tick_red": (0x7A, 0x26, 0x20, 255),
 }
 
@@ -126,8 +126,6 @@ def load_ic2_sprites(dark: bool = False) -> dict[str, Image.Image]:
         "bolt_on": load_clean_widget("symbols_and_icons/common_symbols_and_icon_024_u116_v65_7x13.png", common.crop((116, 65, 123, 78))),
         "energy_box": load_clean_widget("bars_and_tanks/common_bars_and_tank_027_u128_v7_32x17.png", common.crop((128, 7, 160, 24))),
         "energy_fill": load_clean_widget("symbols_and_icons/common_symbols_and_icon_028_u132_v43_24x9.png", common.crop((132, 43, 156, 52))),
-        "heat_off": common.crop((97, 81, 110, 94)),          # 13x13 empty heat flames
-        "heat_on": common.crop((112, 80, 125, 93)),          # 13x13 lit heat flames
         "recycle_off": common.crop((133, 64, 151, 79)),      # 18x15 recycling/composting icon
         "arrow_right": load_clean_widget("symbols_and_icons/common_symbols_and_icon_033_u165_v0_22x15.png", common.crop((165, 0, 187, 15))),
         "crush_off": common.crop((165, 35, 186, 46)),        # 21x11 grinder/crusher icon
@@ -645,38 +643,22 @@ def build_screen(
     draw = ImageDraw.Draw(im)
 
     if machine == "monitor":
-        player_top, hotbar_y = 152, 210
-        # 1. Remote Telemetry OLED Header (flat #000000, 1px #373737 outer bezel)
-        draw_oled_bezel(draw, 8, 18, 212, 28, p)
-
-        # 2. Remote Supply Zone (Left recessed sub-panel #B0B5B8 with rivets)
-        draw_recessed_subpanel(draw, 8, 49, 66, 93, p)
-        draw_industrial_tank(im, draw, sprites, 13, 55, 22, 50, p, p["accent_water"])
-        draw_industrial_tank(im, draw, sprites, 45, 55, 22, 50, p, p["accent_weed"])
-        draw_wireless_arrows(draw, 29, 109, p)
-        for i in range(3):
-            draw_ghost_slot(im, draw, sprites, 14 + 18 * i, 119, p, icon="fert")
-
-        # 3. Remote Collection Zone (Center recessed sub-panel #B0B5B8 with 5x3 harvest grid)
-        draw_recessed_subpanel(draw, 78, 49, 100, 75, p)
+        draw_oled_bezel(draw, 7, 17, 162, 16, p)
+        draw_gauge(im, draw, sprites, 8, 42, 16, 36, p, kind="fluid")
+        draw_gauge(im, draw, sprites, 30, 42, 16, 36, p, kind="fluid")
+        draw_recessed_subpanel(draw, 73, 33, 96, 58, p)
         for i in range(15):
-            draw_ghost_slot(im, draw, sprites, 84 + 18 * (i % 5), 55 + 18 * (i // 5), p)
-
-        # 4. Link, Energy & Upgrades Zone (Right)
-        draw_gauge(im, draw, sprites, 183, 51, 13, 54, p, kind="energy_v")
-        im.alpha_composite(sprites["bolt_off"], (186, 108))
-        draw_ghost_slot(im, draw, sprites, 182, 125, p, icon="bolt")
+            draw_ghost_slot(im, draw, sprites, 76 + 18 * (i % 5), 36 + 18 * (i // 5), p)
         for i in range(4):
-            draw_ghost_slot(im, draw, sprites, 202, 51 + 18 * i, p, icon="antenna")
-        draw_ghost_slot(im, draw, sprites, 202, 125, p, icon="transfer")
-
+            draw_ghost_slot(im, draw, sprites, 98 + 18 * i, 92, p)
+            draw_slot(im, draw, sprites, 8 + 18 * i, 127, p, icon="antenna")
+        for i in range(3):
+            draw_slot(im, draw, sprites, 98 + 18 * i, 127, p, icon="fert")
+        draw_slot(im, draw, sprites, 8, 151, p, icon="bolt")
+        draw_slot(im, draw, sprites, 98, 151, p, icon="transfer")
         if sidebar:
-            # Top strip for 5 tab buttons
-            draw_bevel_box(draw, 233, 18, 125, 18, p["shadow"], p["edge"], p["seam"], fill=p["panel_mid"])
-            # Framed content sub-panel
-            draw_recessed_subpanel(draw, 233, 39, 125, 189, p)
-
-        draw_player_inventory(im, draw, sprites, player_top, hotbar_y, p, divider_line=True, left_x=34)
+            draw_recessed_subpanel(draw, 179, 41, 139, 189, p)
+        draw_player_inventory(im, draw, sprites, 173, 231, p)
 
     elif machine == "weeder":
         player_top, hotbar_y = 126, 184
@@ -687,6 +669,7 @@ def build_screen(
         # Slots
         draw_slot(im, draw, sprites, 44, 64, p, icon="cell")
         draw_slot(im, draw, sprites, 104, 64, p)
+        draw_slot(im, draw, sprites, 134, 64, p)
 
         if sidebar:
             # Framed content panel at x=180..316, y=26..198
@@ -698,29 +681,27 @@ def build_screen(
         player_top, hotbar_y = 126, 184
         # Frame grouping the 4 upgrade slots at x=145..167, y=19..95
         draw_bevel_box(draw, 145, 19, 23, 77, p["shadow"], p["edge"], p["seam"], fill=p["panel_dark"])
-        # Gauges
-        draw_gauge(im, draw, sprites, 8, 24, 10, 60, p, kind="energy_v")
-        draw_gauge(im, draw, sprites, 68, 58, 30, 5, p, kind="progress")
-        # Authentic IC2 lightning bolt below the vertical EU bar
-        im.alpha_composite(sprites["bolt_off"], (9, 87))
-        # Authentic IC2 arrow_right + recycle_off between (66, 44) and (98, 44)
-        im.alpha_composite(sprites["arrow_right"], (72, 40))
-        im.alpha_composite(sprites["recycle_off"], (74, 23))
+        # Energy bolt above battery slot (8, 62)
+        im.alpha_composite(sprites["bolt_off"], (13, 44))
+        # Water tank (26, 28, 20, 50) + progress bar (74, 62, 30, 5)
+        draw_gauge(im, draw, sprites, 26, 28, 20, 50, p, kind="fluid")
+        draw_gauge(im, draw, sprites, 74, 62, 30, 5, p, kind="progress")
+        # Authentic IC2 arrow_right centered between (54, 42) and (112, 42)
+        im.alpha_composite(sprites["arrow_right"], (80, 42))
         # Slots
-        draw_slot(im, draw, sprites, 44, 40, p, icon="fert")
-        draw_slot(im, draw, sprites, 104, 40, p, icon="fert")
-        for uy in (22, 40, 58, 76):
-            draw_slot(im, draw, sprites, 148, uy, p, icon="upgrade")
+        draw_slot(im, draw, sprites, 54, 42, p, icon="fert")
+        draw_slot(im, draw, sprites, 112, 42, p, icon="fert")
 
         draw_player_inventory(im, draw, sprites, player_top, hotbar_y, p, divider_line=True)
 
     elif machine == "grinder":
         player_top, hotbar_y = 126, 184
-        # Gauges
-        draw_gauge(im, draw, sprites, 8, 28, 10, 60, p, kind="energy_v")
+        # Frame grouping the 4 upgrade slots at x=145..167, y=19..95
+        draw_bevel_box(draw, 145, 19, 23, 77, p["shadow"], p["edge"], p["seam"], fill=p["panel_dark"])
+        # Energy bolt above battery slot (8, 62)
+        im.alpha_composite(sprites["bolt_off"], (13, 44))
+        # Progress bar
         draw_gauge(im, draw, sprites, 64, 80, 48, 5, p, kind="progress")
-        # Authentic IC2 lightning bolt below the vertical EU bar
-        im.alpha_composite(sprites["bolt_off"], (9, 90))
         # Authentic IC2 crusher/grinder icon above the middle blade slot
         im.alpha_composite(sprites["crush_off"], (78, 35))
         # Connectors between slots (38->80->122 at y=52)
@@ -737,95 +718,79 @@ def build_screen(
         player_top, hotbar_y = 126, 184
         # Frame grouping the 4 upgrade slots at x=145..167, y=19..95
         draw_bevel_box(draw, 145, 19, 23, 77, p["shadow"], p["edge"], p["seam"], fill=p["panel_dark"])
-        # Energy bolt + battery slot (aligned with EquipmentGui bolt(13,44) and battery(8,62))
+        # Energy bolt above battery slot (8, 62)
         im.alpha_composite(sprites["bolt_off"], (13, 44))
-        draw_slot(im, draw, sprites, 8, 62, p, icon="bolt")
-        # Seed Bag input (34, 24) -> arrow + progress bar (58, 36, 42, 5) -> Seed Bag output (110, 24)
+        # Seed Bag input (34, 24) -> arrow (68, 20) + progress bar (58, 36, 42, 5) -> Seed Bag output (110, 24)
         draw_slot(im, draw, sprites, 34, 24, p)
-        im.alpha_composite(sprites["arrow_right"], (68, 24))
+        im.alpha_composite(sprites["arrow_right"], (68, 20))
         draw_gauge(im, draw, sprites, 58, 36, 42, 5, p, kind="progress")
         draw_slot(im, draw, sprites, 110, 24, p)
         # OLED genetic telemetry readout panel (30, 50, 110, 48)
         draw_oled_bezel(draw, 30, 50, 110, 48, p)
         # Upgrade column
-        for uy in (22, 40, 58, 76):
-            draw_slot(im, draw, sprites, 148, uy, p, icon="upgrade")
 
         draw_player_inventory(im, draw, sprites, player_top, hotbar_y, p, divider_line=True)
 
     elif machine == "extractor":
         player_top, hotbar_y = 126, 184
-        # Gauges (wider 64px center gap between x=36..56 and x=120..140)
-        draw_gauge(im, draw, sprites, 8, 28, 10, 60, p, kind="energy_v")
-        draw_gauge(im, draw, sprites, 36, 28, 20, 50, p, kind="fluid")
-        draw_gauge(im, draw, sprites, 120, 28, 20, 50, p, kind="fluid")
-        draw_gauge(im, draw, sprites, 64, 59, 48, 5, p, kind="progress")
-        # Authentic IC2 lightning bolt below the vertical EU bar
-        im.alpha_composite(sprites["bolt_off"], (9, 90))
-        # Authentic IC2 heat_off flames aligned with EquipmentGui (82, 42)
-        im.alpha_composite(sprites["heat_off"], (82, 42))
+        # Frame grouping the 4 upgrade slots at x=145..167, y=19..95
+        draw_bevel_box(draw, 145, 19, 23, 77, p["shadow"], p["edge"], p["seam"], fill=p["panel_dark"])
+        # Energy bolt above battery slot (8, 62)
+        im.alpha_composite(sprites["bolt_off"], (13, 44))
+        # Gauges
+        draw_gauge(im, draw, sprites, 28, 28, 20, 50, p, kind="fluid")
+        draw_gauge(im, draw, sprites, 112, 28, 20, 50, p, kind="fluid")
+        draw_gauge(im, draw, sprites, 56, 59, 48, 5, p, kind="progress")
         # Slots
         draw_slot(im, draw, sprites, 24, 84, p, icon="powder")
-        draw_slot(im, draw, sprites, 60, 84, p, icon="cell")
-        draw_slot(im, draw, sprites, 96, 84, p, icon="cell")
-        draw_slot(im, draw, sprites, 132, 84, p)
+        draw_slot(im, draw, sprites, 54, 84, p, icon="cell")
+        draw_slot(im, draw, sprites, 84, 84, p, icon="cell")
+        draw_slot(im, draw, sprites, 114, 84, p)
 
         draw_player_inventory(im, draw, sprites, player_top, hotbar_y, p, divider_line=True)
 
     elif machine == "mixer":
         player_top, hotbar_y = 126, 184
+        # Frame grouping the 4 upgrade slots at x=145..167, y=19..95
+        draw_bevel_box(draw, 145, 19, 23, 77, p["shadow"], p["edge"], p["seam"], fill=p["panel_dark"])
+        # Energy bolt above battery slot (8, 62)
+        im.alpha_composite(sprites["bolt_off"], (13, 44))
         # Gauges
-        draw_gauge(im, draw, sprites, 8, 28, 10, 60, p, kind="energy_v")
-        draw_gauge(im, draw, sprites, 36, 28, 20, 50, p, kind="fluid")
-        draw_gauge(im, draw, sprites, 120, 28, 20, 50, p, kind="fluid")
-        draw_gauge(im, draw, sprites, 64, 59, 48, 5, p, kind="progress")
-        # Authentic IC2 lightning bolt below the vertical EU bar
-        im.alpha_composite(sprites["bolt_off"], (9, 90))
+        draw_gauge(im, draw, sprites, 28, 28, 20, 50, p, kind="fluid")
+        draw_gauge(im, draw, sprites, 112, 28, 20, 50, p, kind="fluid")
+        draw_gauge(im, draw, sprites, 56, 59, 48, 5, p, kind="progress")
         # Subtle vertical conduit from Redstone slot (80,32) to progress bar (64,59,48,5)
-        fill_rect(draw, 87, 50, 2, 8, p["engrave_dark"])
-        fill_rect(draw, 89, 50, 1, 8, p["engrave_light"])
+        fill_rect(draw, 79, 50, 2, 8, p["engrave_dark"])
+        fill_rect(draw, 81, 50, 1, 8, p["engrave_light"])
         # Clean symmetric 4-slot layout (no overlapping arrow behind progress text)
-        draw_slot(im, draw, sprites, 80, 32, p, icon="redstone")
-        draw_slot(im, draw, sprites, 38, 84, p, icon="cell")
-        draw_slot(im, draw, sprites, 96, 84, p, icon="cell")
-        draw_slot(im, draw, sprites, 128, 84, p)
+        draw_slot(im, draw, sprites, 72, 32, p, icon="redstone")
+        draw_slot(im, draw, sprites, 28, 84, p, icon="cell")
+        draw_slot(im, draw, sprites, 84, 84, p, icon="cell")
+        draw_slot(im, draw, sprites, 116, 84, p)
 
         draw_player_inventory(im, draw, sprites, player_top, hotbar_y, p, divider_line=True)
 
     elif machine == "manager":
-        player_top, hotbar_y = 144, 202
-        # 1. Hydraulic Zone (Left recessed sub-panel #B0B5B8 with rivets)
-        draw_recessed_subpanel(draw, 8, 18, 66, 95, p)
-        draw_industrial_tank(im, draw, sprites, 13, 23, 22, 46, p, p["accent_water"])
-        draw_industrial_tank(im, draw, sprites, 45, 23, 22, 46, p, p["accent_weed"])
-        # Fluid container I/O slots (Water: 22/24, Weed-Ex: 23/25)
-        draw_ghost_slot(im, draw, sprites, 15, 73, p, icon="cell")
-        draw_ghost_slot(im, draw, sprites, 47, 73, p, icon="cell")
-        draw_ghost_slot(im, draw, sprites, 15, 92, p)
-        draw_ghost_slot(im, draw, sprites, 47, 92, p)
-
-        # 2. Central Zone (Top OLED + Harvest/Fertilizer recessed sub-panel)
-        draw_oled_bezel(draw, 78, 18, 100, 34, p)
-        draw_recessed_subpanel(draw, 78, 54, 100, 81, p)
-        for i in range(15):
-            draw_ghost_slot(im, draw, sprites, 84 + 18 * (i % 5), 58 + 18 * (i // 5), p)
-        draw_engraved_divider(draw, 82, 112, 92, p)
+        draw_gauge(im, draw, sprites, 10, 22, 18, 52, p, kind="fluid")
+        draw_gauge(im, draw, sprites, 74, 22, 18, 52, p, kind="fluid")
+        for x in (33, 51):
+            draw_slot(im, draw, sprites, x, 24, p, icon="cell")
+            draw_slot(im, draw, sprites, x, 42, p)
         for i in range(3):
-            draw_ghost_slot(im, draw, sprites, 102 + 18 * i, 115, p, icon="fert")
-
-        # 3. Right Zone (Energy meter + IC2 bolt + 4 stacked Upgrades without extra frame)
-        draw_gauge(im, draw, sprites, 183, 20, 13, 76, p, kind="energy_v")
-        im.alpha_composite(sprites["bolt_off"], (186, 99))
+            draw_slot(im, draw, sprites, 10 + 18 * i, 85, p, icon="fert")
+        draw_recessed_subpanel(draw, 95, 19, 93, 59, p)
+        for i in range(15):
+            draw_slot(im, draw, sprites, 98 + 18 * (i % 5), 22 + 18 * (i // 5), p)
         for i in range(4):
-            draw_ghost_slot(im, draw, sprites, 202, 23 + 18 * i, p, icon="upgrade")
-
+            draw_slot(im, draw, sprites, 98 + 18 * i, 85, p, icon="upgrade")
         if sidebar:
-            # Top strip for 4 square icon tab buttons
-            draw_bevel_box(draw, 233, 12, 119, 22, p["shadow"], p["edge"], p["seam"], fill=p["panel_mid"])
-            # Recessed technical sub-panel for active tab content
-            draw_recessed_subpanel(draw, 233, 36, 119, 184, p)
+            draw_recessed_subpanel(draw, 198, 32, 108, 170, p)
+        draw_player_inventory(im, draw, sprites, 126, 184, p, left_x=16)
 
-        draw_player_inventory(im, draw, sprites, player_top, hotbar_y, p, divider_line=True, left_x=34)
+    if machine in ("composter", "grinder", "extractor", "mixer", "analyzer"):
+        draw_slot(im, draw, sprites, 8, 62, p, icon="bolt")
+        for y in (22, 40, 58, 76):
+            draw_slot(im, draw, sprites, 148, y, p, icon="upgrade")
 
     out_path = out_dir / f"{name}.png"
     im.save(out_path, format="PNG")
@@ -834,7 +799,7 @@ def build_screen(
 def build_chest_textures(p: dict, sprites: dict[str, Image.Image], out_dir: Path, dark: bool) -> None:
     """Generate IC2-styled Crop Database Chest GUI (256x256) and side drawer (128x128)."""
     im = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
-    draw_nine_slice_panel(im, sprites["panel_9slice"], 0, 0, 250, 228, p["body"])
+    draw_nine_slice_panel(im, sprites["panel_9slice"], 0, 0, 195, 216, p["body"])
     draw = ImageDraw.Draw(im)
 
     lcd_bg = (0x0A, 0x0E, 0x12, 255) if dark else (0x12, 0x18, 0x1C, 255)
@@ -842,42 +807,30 @@ def build_chest_textures(p: dict, sprites: dict[str, Image.Image], out_dir: Path
     lcd_box = (0x0E, 0x14, 0x1A, 255) if dark else (0x17, 0x20, 0x26, 255)
     lcd_line = (0x24, 0x30, 0x3A, 255) if dark else (0x2B, 0x39, 0x42, 255)
 
-    # Left Cropnalyzer-style display panel (8, 8, 104, 134)
-    draw_bevel_box(draw, 8, 8, 104, 134, p["shadow"], p["edge"], p["seam"], fill=lcd_bg)
-    fill_rect(draw, 9, 9, 102, 14, lcd_hdr)
-    fill_rect(draw, 10, 23, 100, 1, lcd_line)
-    fill_rect(draw, 10, 55, 100, 1, lcd_line)
-    fill_rect(draw, 10, 107, 100, 1, lcd_line)
-    # Recessed products tray at PRODUCT_Y=124 (11, 122, 98, 18)
-    draw_bevel_box(draw, 11, 122, 98, 18, (0x05, 0x08, 0x0A, 255), lcd_line, lcd_bg, fill=lcd_box)
-
-    # Search input box (117, 8, 104, 15) + Sort button area (224..242)
-    draw_bevel_box(draw, 117, 8, 104, 15, p["shadow"], p["edge"], p["seam"], fill=lcd_bg)
-
-    # 7x5 Chest Seed Bag grid at (117, 28)
-    draw_bevel_box(draw, 115, 26, 130, 94, p["shadow"], p["edge"], p["seam"], fill=p["panel_dark"])
+    # Match the readout, 5x5 seed grid, toolbar and inventory in CropGuiLayout.
+    draw_bevel_box(draw, 7, 11, 86, 91, p["shadow"], p["edge"], p["seam"], fill=lcd_bg)
+    fill_rect(draw, 8, 12, 84, 12, lcd_hdr)
+    fill_rect(draw, 8, 43, 84, 1, lcd_line)
+    fill_rect(draw, 8, 74, 84, 1, lcd_line)
+    draw_bevel_box(draw, 8, 82, 84, 19, p["shadow"], lcd_line, lcd_bg, fill=lcd_box)
+    draw_bevel_box(draw, 96, 12, 94, 94, p["shadow"], p["edge"], p["seam"], fill=p["panel_dark"])
     for row in range(5):
-        for col in range(7):
-            draw_slot(im, draw, sprites, 117 + col * 18, 28 + row * 18, p)
-
-    # Toolbar strip below the 7x5 grid (115, 122, 130, 19)
-    draw_bevel_box(draw, 115, 122, 130, 19, p["shadow"], p["edge"], p["seam"], fill=p["panel_mid"])
-
-    # Player inventory (17, 148) + divider + right status card (184, 148, 58, 74)
-    draw_player_inventory(im, draw, sprites, 148, 206, p, divider_line=True, left_x=17)
-    draw_bevel_box(draw, 184, 148, 58, 74, p["shadow"], p["edge"], p["seam"], fill=p["panel_dark"])
+        for col in range(5):
+            draw_slot(im, draw, sprites, 99 + col * 18, 15 + row * 18, p)
+    draw_bevel_box(draw, 7, 107, 181, 18, p["shadow"], p["edge"], p["seam"], fill=p["panel_mid"])
+    draw_player_inventory(im, draw, sprites, 133, 191, p, left_x=17)
 
     chest_path = out_dir / "crop_database_chest.png"
     im.save(chest_path, format="PNG")
     verify_png(chest_path, 256, 256)
 
-    # Side drawer (100x112) + tab (24x24) in 128x128
+    # Side drawer (100x112) + tab (22x24) in 128x128
     dr = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
     draw_nine_slice_panel(dr, sprites["panel_9slice"], 0, 0, 100, 112, p["body"])
     ddraw = ImageDraw.Draw(dr)
     draw_bevel_box(ddraw, 6, 6, 88, 16, p["shadow"], p["edge"], p["seam"], fill=p["panel_mid"])
     draw_bevel_box(ddraw, 6, 76, 88, 30, p["shadow"], p["edge"], p["seam"], fill=p["panel_dark"])
-    draw_nine_slice_panel(dr, sprites["panel_9slice"], 104, 0, 24, 24, p["body"])
+    draw_nine_slice_panel(dr, sprites["panel_9slice"], 104, 0, 22, 24, p["body"])
     drawer_path = out_dir / "crop_database_drawer.png"
     dr.save(drawer_path, format="PNG")
     verify_png(drawer_path, 128, 128)
@@ -925,8 +878,8 @@ def main() -> None:
     dark_sprites = load_ic2_sprites(dark=True)
 
     screens = [
-        ("equipment_monitor", 364, 236, True, 226, "monitor"),
-        ("equipment_monitor_compact", 228, 236, False, 226, "monitor"),
+        ("equipment_monitor", 322, 256, True, 174, "monitor"),
+        ("equipment_monitor_compact", 176, 256, False, 174, "monitor"),
         ("equipment_weeder_expanded", 322, 208, True, 174, "weeder"),
         ("equipment_weeder_compact", 176, 208, False, 174, "weeder"),
         ("equipment_composter", 176, 208, False, 174, "composter"),
@@ -935,9 +888,9 @@ def main() -> None:
         ("equipment_mixer", 176, 208, False, 174, "mixer"),
         ("equipment_analyzer", 176, 208, False, 174, "analyzer"),
         ("equipment_legacy", 176, 208, False, 174, "composter"),
-        ("manager_advanced", 358, 228, True, 226, "manager"),
-        ("manager_advanced_compact", 228, 228, False, 226, "manager"),
-        ("manager_basic", 228, 228, False, 226, "manager"),
+        ("manager_advanced", 310, 208, True, 192, "manager"),
+        ("manager_advanced_compact", 194, 208, False, 192, "manager"),
+        ("manager_basic", 194, 208, False, 192, "manager"),
     ]
 
     for name, w, h, side, sx, machine in screens:

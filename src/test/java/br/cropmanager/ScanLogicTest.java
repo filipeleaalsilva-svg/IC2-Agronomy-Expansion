@@ -48,4 +48,35 @@ public class ScanLogicTest {
         assertFalse(ScanLogic.validSettings(4, 7, 16, 8));
         assertTrue(ScanLogic.validSettings(4, 1, 0, 8));
     }
+
+    @Test public void offsetConstantsAndValidationEnforceBounds() {
+        assertEquals(16, ScanLogic.MAX_HORIZONTAL_OFFSET);
+        assertEquals(5, ScanLogic.MAX_VERTICAL_OFFSET);
+        assertTrue(ScanLogic.validOffsets(0, 0, 0));
+        assertTrue(ScanLogic.validOffsets(16, 5, -16));
+        assertTrue(ScanLogic.validOffsets(-16, -5, 16));
+        assertFalse(ScanLogic.validOffsets(17, 0, 0));
+        assertFalse(ScanLogic.validOffsets(-17, 0, 0));
+        assertFalse(ScanLogic.validOffsets(0, 6, 0));
+        assertFalse(ScanLogic.validOffsets(0, -6, 0));
+        assertFalse(ScanLogic.validOffsets(0, 0, 17));
+        assertFalse(ScanLogic.validOffsets(0, 0, -17));
+    }
+
+    @Test public void offsetWithShiftTranslatesEveryScannedPosition() {
+        int radius = 3;
+        int layers = 5;
+        int offsetX = -4;
+        int offsetY = 2;
+        int offsetZ = 6;
+        int count = ScanLogic.volume(radius, layers);
+        Set<String> seen = new HashSet<>();
+        for (int i = 0; i < count; i++) {
+            int[] base = ScanLogic.offset(i, radius, layers);
+            int[] shifted = ScanLogic.offset(i, radius, layers, offsetX, offsetY, offsetZ);
+            assertArrayEquals(new int[] {base[0] + offsetX, base[1] + offsetY, base[2] + offsetZ}, shifted);
+            assertTrue(seen.add(shifted[0] + "," + shifted[1] + "," + shifted[2]));
+        }
+        assertEquals(count, seen.size());
+    }
 }

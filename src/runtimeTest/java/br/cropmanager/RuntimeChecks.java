@@ -3,7 +3,6 @@ package br.cropmanager;
 import ic2.api.crops.CropCard;
 import ic2.api.crops.Crops;
 import ic2.api.item.IC2Items;
-import ic2.api.energy.tile.IHeatSource;
 import ic2.api.upgrade.IProcessingUpgrade;
 import ic2.core.crop.TileEntityCrop;
 import ic2.core.ref.FluidName;
@@ -29,11 +28,13 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import ic2.core.block.wiring.TileEntityElectricBatBox;
 
 /** Optional separate test addon. Runs only in its explicitly named disposable world. */
-@Mod(modid = "cropmanager_tests", name = "Crop Manager Runtime Tests", version = "1",
+@Mod(modid = "cropmanager_tests", name = "IC2: Agronomy Expansion Runtime Tests", version = "1",
         dependencies = "required-after:cropmanager")
 public final class RuntimeChecks {
     private int checks;
     private WorldServer tickWorld;
+    private AgriculturalReservoirTile wiredReservoir;
+    private BlockPos wiredSource;
     private BlockPos tickPos;
     private int tickStage, elapsed;
     private double previousEnergy;
@@ -64,7 +65,16 @@ public final class RuntimeChecks {
         if (!"cropmanager-test-world".equals(server.getFolderName()))
             throw new IllegalStateException("Runtime tests require the disposable cropmanager-test-world");
         try {
+            if (Boolean.getBoolean("cropmanager.testReservoirOnly")) {
+                agriculturalReservoirFormation(server.getWorld(0));
+                beginTickedEnergyTest(server.getWorld(0));
+                return;
+            }
+            wirelessEnergy(server.getWorld(0));
+            crossingToolAndLamps(server.getWorld(0));
+            checkAgriculturalManual(server.getWorld(0));
             run(server.getWorld(0));
+            agriculturalReservoirFormation(server.getWorld(0));
             revision04(server.getWorld(0));
             revision05(server.getWorld(0));
             revision052Survey(server.getWorld(0));
@@ -78,24 +88,402 @@ public final class RuntimeChecks {
         }
     }
 
+    private void wirelessEnergy(WorldServer world) {
+        BlockPos plugPos = new BlockPos(5, 90, 5);
+        BlockPos pointPos = plugPos.east(20);
+        world.setBlockState(plugPos, CropManager.EU_WIFI_PLUG.getDefaultState(), 2);
+        world.setBlockState(pointPos, CropManager.EU_WIFI_POINT.getDefaultState(), 2);
+        EuWifiPlugTile plug = (EuWifiPlugTile) world.getTileEntity(plugPos);
+        EuWifiPointTile point = (EuWifiPointTile) world.getTileEntity(pointPos);
+        int channel = WirelessEuGridData.MAX_CHANNEL - 1;
+        WirelessEuGridData grid = WirelessEuGridData.get(world);
+        grid.extractEu(channel, Double.MAX_VALUE, world.provider.getDimension(), null);
+        plug.channel = channel;
+        point.channel = channel;
+        point.storedEu = 0;
+        point.redstoneMode = 0;
+        point.outputTier = 2;
+        point.rateLimit = 128;
+        plug.energy.setEnergyStored(400);
+        plug.update();
+        point.update();
+        check(plug.lastInputRate == 400 && point.getOfferedEnergy() == 128 && grid.getStoredEu(channel) == 272,
+                "IC2 Wi-Fi Plug and Point share an EU buffer across separate chunks and respect Tier 2");
+
+        BlockPos dishPos = plugPos.up(4);
+        BlockPos mfePos = dishPos.north();
+        BlockPos receiverPos = dishPos.east(3);
+        world.setBlockState(mfePos, IC2Items.getItemAPI().getBlockState("te", "mfe"), 2);
+        ic2.core.block.wiring.TileEntityElectricMFE mfe = new ic2.core.block.wiring.TileEntityElectricMFE();
+        world.setTileEntity(mfePos, mfe);
+        mfe.energy.addEnergy(2000);
+        world.setBlockState(dishPos, CropManager.EU_DISH_ANTENNA.getDefaultState(), 2);
+        world.setBlockState(receiverPos, CropManager.COMPOSTER.getDefaultState(), 2);
+        EuDishAntennaTile dish = (EuDishAntennaTile) world.getTileEntity(dishPos);
+        ComposterTile receiver = (ComposterTile) world.getTileEntity(receiverPos);
+        dish.redstoneMode = 0;
+        receiver.energySink().setEnergyStored(0);
+        receiver.inventory.setStackInSlot(2, new ItemStack(CropManager.WIRELESS_EU));
+        dish.update();
+        check(mfe.getStored() < 2000 && receiver.getEnergy() > 0,
+                "Dish drains a real IC2 MFE and powers a loaded machine with an unbound upgrade");
+        for (BlockPos pos : new BlockPos[]{receiverPos, dishPos, mfePos, pointPos, plugPos}) world.setBlockToAir(pos);
+        grid.extractEu(channel, Double.MAX_VALUE, world.provider.getDimension(), null);
+    }
+
+    private void crossingToolAndLamps(WorldServer world) {
+        BlockPos target = new BlockPos(5, 80, 5);
+        world.setBlockState(target.down(), Blocks.FARMLAND.getDefaultState(), 3);
+        world.setBlockState(target, IC2Items.getItemAPI().getBlockState("te", "crop"), 3);
+        TileEntityCrop crop = new TileEntityCrop();
+        world.setTileEntity(target, crop);
+        crop.reset();
+        crop.setCrossingBase(true);
+        ItemStack tool = new ItemStack(CropManager.CROSSING_TOOL);
+        ItemStack sticks = new ItemStack(ic2.core.ref.ItemName.crop_stick.getInstance(), 2);
+        check(CrossingTool.supplies(tool).insertItem(0, sticks, false).isEmpty(),
+                "Crossing Tool accepts the registered IC2 crop stick");
+        check("linked".equals(CrossingTool.useOnCrop(tool, crop)), "Crossing Tool links the empty double crop");
+        NBTTagCompound save = crop.writeToNBT(new NBTTagCompound());
+        TileEntityCrop restored = new TileEntityCrop();
+        restored.readFromNBT(save);
+        world.removeTileEntity(target);
+        world.setTileEntity(target, restored);
+        CropCard wheat = Crops.instance.getCropCard("ic2", "wheat");
+        restored.setCrop(wheat);
+        restored.setCurrentSize(wheat.getMaxSize());
+        check("rearmed".equals(CrossingTool.useOnCrop(tool, restored))
+                        && restored.isCrossingBase() && restored.getCrop() == null
+                        && CrossingTool.supplies(tool).getStackInSlot(0).getCount() == 1,
+                "Real IC2 pick rearms a saved crossing point and uses exactly one crop stick");
+
+        BlockPos lampPos = target.east(3);
+        for (FarmLanternBlock lamp : CropManager.LANTERNS) {
+            for (EnumFacing face : EnumFacing.values()) {
+                BlockPos support = lampPos.offset(face.getOpposite());
+                world.setBlockState(support, CropManager.GREENHOUSE_GLASS.getDefaultState(), 3);
+                check(world.mayPlace(lamp, lampPos, true, face, null), lamp.getRegistryName() + " mounts on " + face);
+                world.setBlockState(lampPos, lamp.getStateForPlacement(world, lampPos, face, 0, 0, 0, 0, null), 3);
+                check(world.getBlockState(lampPos).getLightValue(world, lampPos) == 15,
+                        lamp.getRegistryName() + " emits full light on " + face);
+                world.setBlockToAir(support);
+                check(world.isAirBlock(lampPos), lamp.getRegistryName() + " drops when support is removed on " + face);
+            }
+        }
+    }
+
+    private void checkAgriculturalManual(WorldServer world) {
+        net.minecraft.inventory.Container container = new net.minecraft.inventory.Container() {
+            @Override public boolean canInteractWith(net.minecraft.entity.player.EntityPlayer player) { return true; }
+        };
+        net.minecraft.inventory.InventoryCrafting grid = new net.minecraft.inventory.InventoryCrafting(container, 3, 3);
+        grid.setInventorySlotContents(0, new ItemStack(Items.BOOK));
+        String[] recipes = {"agricultural_manual_starter", "reservoir_guide"};
+        ItemStack[] ingredients = {new ItemStack(CropManager.ORGANIC_COMPOST), new ItemStack(CropManager.RESERVOIR_CASING)};
+        for (int i = 0; i < recipes.length; i++) {
+            net.minecraft.item.crafting.IRecipe recipe = net.minecraftforge.fml.common.registry.ForgeRegistries.RECIPES
+                    .getValue(new net.minecraft.util.ResourceLocation(CropManager.ID, recipes[i]));
+            grid.setInventorySlotContents(8, ingredients[i]);
+            check(recipe != null && recipe.matches(grid, world)
+                            && recipe.getCraftingResult(grid).getItem() == CropManager.AGRICULTURAL_MANUAL,
+                    "Recipe crafts the Agricultural Manual: " + recipes[i]);
+        }
+        net.minecraft.item.crafting.IRecipe hive = net.minecraftforge.fml.common.registry.ForgeRegistries.RECIPES
+                .getValue(new net.minecraft.util.ResourceLocation(CropManager.ID, "pollinator_hive"));
+        for (int i = 0; i < grid.getSizeInventory(); i++) {
+            grid.setInventorySlotContents(i, new ItemStack(i / 3 == 1 ? Blocks.YELLOW_FLOWER : Blocks.PLANKS));
+        }
+        check(hive != null && hive.matches(grid, world), "Pollinator Hive recipe matches planks and dandelions");
+        ItemStack hiveResult = hive.getCraftingResult(grid);
+        check(hiveResult.getItem() == net.minecraft.item.Item.getItemFromBlock(CropManager.POLLINATOR_HIVE)
+                        && hiveResult.getCount() == 1,
+                "Survival recipe crafts one Pollinator Hive");
+        check(br.cropmanager.guide.ManualRegistry.getEntry("pollinator_hive").getRecipes().contains(hive),
+                "Catalog resolves the registered Pollinator Hive recipe");
+        net.minecraft.item.crafting.IRecipe glass = net.minecraftforge.fml.common.registry.ForgeRegistries.RECIPES
+                .getValue(new net.minecraft.util.ResourceLocation(CropManager.ID, "greenhouse_glass"));
+        for (int i = 0; i < grid.getSizeInventory(); i++) {
+            grid.setInventorySlotContents(i, new ItemStack(Blocks.GLASS));
+        }
+        grid.setInventorySlotContents(4, new ItemStack(Items.IRON_INGOT));
+        check(glass != null && glass.matches(grid, world), "Greenhouse Glass recipe matches glass around an iron ingot");
+        ItemStack glassResult = glass.getCraftingResult(grid);
+        check(glassResult.getItem() == net.minecraft.item.Item.getItemFromBlock(CropManager.GREENHOUSE_GLASS)
+                        && glassResult.getCount() == 8,
+                "Survival recipe crafts eight Greenhouse Glass blocks");
+        check(br.cropmanager.guide.ManualRegistry.getEntry("greenhouse_glass").getRecipes().contains(glass),
+                "Catalog resolves the registered Greenhouse Glass recipe");
+        ItemStack oldGuide = new ItemStack(Items.WRITTEN_BOOK);
+        NBTTagCompound bookTag = new NBTTagCompound();
+        bookTag.setString("title", "Guia do Crop Manager");
+        bookTag.setString("author", "Crop Manager");
+        NBTTagList pages = new NBTTagList();
+        pages.appendTag(new net.minecraft.nbt.NBTTagString("{\"text\":\"Guia do Crop Manager\"}"));
+        bookTag.setTag("pages", pages);
+        oldGuide.setTagCompound(bookTag);
+        ItemStack legacy = new ItemStack(oldGuide.writeToNBT(new NBTTagCompound()));
+        check(legacy.getItem() == Items.WRITTEN_BOOK
+                        && net.minecraft.item.ItemWrittenBook.validBookTagContents(legacy.getTagCompound()),
+                "Saved legacy signed book remains readable");
+        check(br.cropmanager.guide.ManualRegistry.getCategories().size() == 6, "Manual provides six categories");
+        for (net.minecraft.item.Item item : net.minecraftforge.fml.common.registry.ForgeRegistries.ITEMS.getValuesCollection()) {
+            net.minecraft.util.ResourceLocation id = item.getRegistryName();
+            if (id != null && CropManager.ID.equals(id.getNamespace())) {
+                check(br.cropmanager.guide.ManualRegistry.getEntry(id.getPath()) != null, "Manual documents " + id);
+            }
+        }
+        for (ic2.api.crops.CropCard crop : br.cropmanager.crop.CropRegistry.ALL) {
+            check(br.cropmanager.guide.ManualRegistry.getEntry("crop_" + crop.getId()) != null,
+                    "Manual documents custom crop " + crop.getId());
+        }
+        check(br.cropmanager.guide.ManualRegistry.getEntry("agricultural_manual").getRecipes().size() == 2,
+                "Catalog resolves both recipes for the Agricultural Manual");
+        net.minecraft.item.crafting.IRecipe blade = br.cropmanager.guide.ManualRegistry.getEntry("grinding_blade").getRecipes().get(0);
+        check(blade instanceof net.minecraftforge.common.crafting.IShapedRecipe
+                        && ((net.minecraftforge.common.crafting.IShapedRecipe) blade).getRecipeWidth() == 2
+                        && blade.getIngredients().get(4) == net.minecraft.item.crafting.Ingredient.EMPTY,
+                "Catalog retains the shaped blade recipe width and empty slot");
+        net.minecraft.item.crafting.IRecipe casing = br.cropmanager.guide.ManualRegistry.getEntry("reservoir_casing").getRecipes().get(0);
+        check(casing.getIngredients().get(3).getMatchingStacks().length > 1
+                        && casing.getRecipeOutput().getCount() == 8,
+                "Catalog retains OreDict ingredient alternatives and the result count");
+        check(br.cropmanager.guide.ManualRegistry.getEntry("portable_crop_database").getRecipes().stream()
+                        .anyMatch(net.minecraft.item.crafting.IRecipe::isDynamic),
+                "Catalog associates the special portable database link recipe");
+    }
+
+    private void agriculturalReservoirFormation(WorldServer world) {
+        for (String name : new String[]{"agricultural_reservoir", "reservoir_casing"}) {
+            check(net.minecraftforge.fml.common.registry.ForgeRegistries.RECIPES
+                            .getValue(new net.minecraft.util.ResourceLocation(CropManager.ID, name)) != null,
+                    "Active recipe present: " + name);
+        }
+        BlockPos center = new BlockPos(100040, 120, 100040);
+        for (int height : new int[] {4, 6, 5}) {
+            AgriculturalReservoirTile reservoir = buildReservoir(world, center, height, EnumFacing.NORTH);
+            check(reservoir.formed == (height == 5), "New structure height validation: " + height);
+            if (height == 6) {
+                NBTTagCompound legacy = reservoir.writeToNBT(new NBTTagCompound());
+                legacy.removeTag("ReservoirPorts");
+                net.minecraftforge.items.ItemStackHandler oldInventory = new net.minecraftforge.items.ItemStackHandler(4);
+                oldInventory.setStackInSlot(0, new ItemStack(Items.WATER_BUCKET));
+                legacy.setTag("Inventory", oldInventory.serializeNBT());
+                legacy.setBoolean("ReservoirFormed", true);
+                legacy.setInteger("StructureHeight", 6);
+                legacy.setInteger("StructureBaseY", center.getY());
+                legacy.setLong("StructureCenter", center.toLong());
+                reservoir.readFromNBT(legacy);
+                reservoir.tryForm();
+                check(reservoir.formed && reservoir.water.getCapacity() == 48000 && !reservoir.usesTowerModel(),
+                        "Formed legacy tower keeps its shape and capacity");
+                reservoir.processContainers();
+                check(reservoir.usesLegacyPorts() && reservoir.filterFluid(0).getFluid() == FluidRegistry.WATER
+                                && reservoir.inventory.getStackInSlot(2).getItem() == Items.WATER_BUCKET,
+                        "Legacy physical filter becomes a sample and is returned without losing fluid");
+            }
+            if (height != 5) clearReservoir(world, center, height);
+        }
+
+        BlockPos control = center.north().up();
+        AgriculturalReservoirTile reservoir = (AgriculturalReservoirTile) world.getTileEntity(control);
+        BlockPos rear = center.south().up();
+        ReservoirCasingTile rearCasing = (ReservoirCasingTile) world.getTileEntity(rear);
+        net.minecraftforge.fluids.capability.IFluidHandler input = reservoir.fluidAccess(EnumFacing.NORTH);
+        net.minecraftforge.fluids.capability.IFluidHandler output = rearCasing.getCapability(
+                net.minecraftforge.fluids.capability.CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, EnumFacing.SOUTH);
+        FluidStack water = new FluidStack(FluidRegistry.WATER, 1000);
+        check(reservoir.water.getCapacity() == 32000 && reservoir.weed.getCapacity() == 32000,
+                "Fixed five-layer reservoir starts with two 32000 mB tanks");
+        check(input.fill(water, false) == 1000 && output.fill(water, true) == 0
+                        && reservoir.fluidAccess(EnumFacing.EAST).fill(water, true) == 0,
+                "Ports enforce input, output and closed modes");
+        net.minecraftforge.common.util.FakePlayer player = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(world);
+        player.setPosition(control.getX() + .5, control.getY(), control.getZ() - 1);
+        ItemStack sample = net.minecraftforge.fluids.FluidUtil.getFilledBucket(water);
+        player.inventory.setItemStack(sample);
+        check(reservoir.control(31, player) && player.inventory.getItemStack() == sample && sample.getCount() == 1,
+                "Filter copies fluid without consuming held bucket");
+        check(input.fill(water, true) == 1000 && reservoir.weed.getFluidAmount() == 1000
+                        && reservoir.water.getFluidAmount() == 0 && input.drain(1000, true) == null,
+                "Input routes to the matching filter and cannot drain");
+        check(output.drain(500, true).amount == 500, "Rear port drains the selected shared tanks");
+        player.inventory.setItemStack(ItemStack.EMPTY);
+        reservoir.control(33, player);
+
+        reservoir.inventory.setStackInSlot(0, new ItemStack(Items.BUCKET));
+        reservoir.inventory.setStackInSlot(2, sample.copy());
+        reservoir.water.fill(water, true);
+        reservoir.processContainers();
+        check(reservoir.water.getFluidAmount() == 1000 && !reservoir.inventory.getStackInSlot(0).isEmpty(),
+                "Occupied output prevents processing and retains input fluid");
+        reservoir.inventory.setStackInSlot(2, ItemStack.EMPTY);
+        reservoir.processContainers();
+        check(reservoir.water.getFluidAmount() == 0 && reservoir.inventory.getStackInSlot(0).isEmpty()
+                        && reservoir.inventory.getStackInSlot(2).getItem() == Items.WATER_BUCKET,
+                "Empty bucket uses the input slot and produces a full bucket in the output");
+
+        reservoir.inventory.setStackInSlot(4, new ItemStack(CropManager.RESERVOIR_CAPACITY, 4));
+        check(reservoir.water.getCapacity() == 96000 && reservoir.weed.getCapacity() == 96000,
+                "Four expansion modules raise both tanks to 96000 mB");
+        reservoir.water.fill(new FluidStack(FluidRegistry.WATER, 40000), true);
+        ReservoirContainer container = new ReservoirContainer(player.inventory, reservoir);
+        int capacitySlot = AgriculturalReservoirTile.CAPACITY_SLOT;
+        check(container.transferStackInSlot(player, capacitySlot).isEmpty()
+                        && reservoir.inventory.getStackInSlot(capacitySlot).getCount() == 4,
+                "Dedicated server quick-move rejects hidden upgrades");
+        check(container.enchantItem(player, 1) && container.transferStackInSlot(player, capacitySlot).getCount() == 4,
+                "Dedicated server quick-move transfers upgrades on the active tab");
+        check(reservoir.water.getCapacity() == 32000 && reservoir.water.getFluidAmount() == 40000 && reservoir.water.fill(water, false) == 0,
+                "Removing expansion preserves over-capacity fluid and stops filling");
+        reservoir.water.drain(40000, true);
+
+        reservoir.inventory.setStackInSlot(5, new ItemStack(CropManager.RESERVOIR_PUMP));
+        reservoir.inventory.setStackInSlot(6, new ItemStack(CropManager.RESERVOIR_RESERVE));
+        check(reservoir.control(40, player), "Reserve valve enables per-tank reserve selection");
+        reservoir.water.fill(new FluidStack(FluidRegistry.WATER, 12000), true);
+        reservoir.energy.setEnergyStored(100);
+        net.minecraftforge.fluids.FluidTank destination = new net.minecraftforge.fluids.FluidTank(5000);
+        reservoir.transferToHandler(0, destination);
+        check(destination.getFluidAmount() == 2000 && reservoir.getEnergy() == 60,
+                "Pump sends 2000 mB and charges 40 EU");
+        check(output.drain(5000, true).amount == 2000 && reservoir.water.getFluidAmount() == 8000,
+                "Piped withdrawal leaves the 25 percent reserve");
+        check(reservoir.control(4, player) && world.getBlockState(control).getComparatorInputOverride(world, control) == 4,
+                "Comparator reports tank 1 level");
+        reservoir.inventory.setStackInSlot(6, IC2Items.getItem("upgrade", "transformer"));
+        check(reservoir.energy.getSinkTier() == 2 && rearCasing.getSinkTier() == 2,
+                "Transformer changes controller and casing tier together");
+
+        BlockPos machinePos = rear.south();
+        BlockPos signalPos = center.west(2).up();
+        world.setBlockToAir(signalPos);
+        world.setBlockToAir(machinePos);
+        world.setBlockState(machinePos, CropManager.ADVANCED.getDefaultState(), 18);
+        ManagerTile receiver = (ManagerTile) world.getTileEntity(machinePos);
+        long time = world.getTotalWorldTime();
+        world.getWorldInfo().setWorldTotalTime(time - time % AgriculturalReservoirTile.TRANSFER_INTERVAL);
+        check(reservoir.control(1, player) && reservoir.control(2, player),
+                "Isolate the first tank for the redstone-mode check");
+        reservoir.update();
+        check(receiver.water.getFluidAmount() == 0, "High-signal mode waits for redstone");
+        world.setBlockState(signalPos, Blocks.REDSTONE_BLOCK.getDefaultState(), 18);
+        reservoir.update();
+        check(receiver.water.getFluidAmount() == 2000, "Redstone powers automatic transfer through the configured rear output");
+        reservoir.control(2, player);
+        reservoir.update();
+        check(receiver.water.getFluidAmount() == 2000, "Low-signal mode stops automatic transfer while powered");
+        world.getWorldInfo().setWorldTotalTime(time);
+        world.setBlockToAir(signalPos);
+        world.setBlockToAir(machinePos);
+        reservoir.water.fill(new FluidStack(FluidRegistry.WATER, 2000), true);
+        reservoir.energy.setEnergyStored(60);
+        reservoir.weed.drain(Integer.MAX_VALUE, true);
+        FluidStack weedEx = new FluidStack(FluidName.weed_ex.getInstance(), 750);
+        check(reservoir.weed.fill(weedEx, true) == 750, "Harvest fixture fills the second tank with Weed-Ex");
+
+        BlockPos core = center.up();
+        world.setBlockState(core, Blocks.STONE.getDefaultState(), 18);
+        reservoir.tryForm();
+        check(!reservoir.formed && output.getTankProperties().length == 0, "Blocked core invalidates cached piping");
+        world.setBlockToAir(core);
+        reservoir.tryForm();
+        check(reservoir.formed, "Clearing the core permits reformation");
+
+        BlockPos corner = center.north().west();
+        int waterBefore = reservoir.water.getFluidAmount();
+        int weedBefore = reservoir.weed.getFluidAmount();
+        double energyBefore = reservoir.getEnergy();
+        world.setBlockToAir(corner);
+        check(!reservoir.formed && rearCasing.controller() == null && output.getTankProperties().length == 0,
+                "Breaking a casing unlinks the remaining ports immediately");
+        check(world.getBlockState(rear).getActualState(world, rear).getValue(ReservoirCasingBlock.PART)
+                        == ReservoirCasingBlock.Part.CASING,
+                "The surviving shell displays ordinary casings after a casing breaks");
+        world.setBlockState(corner, CropManager.RESERVOIR_CASING.getDefaultState(), 18);
+        reservoir.tryForm();
+        check(reservoir.formed && rearCasing.controller() == reservoir && output.getTankProperties().length > 0
+                        && reservoir.water.getFluidAmount() == waterBefore && reservoir.weed.getFluidAmount() == weedBefore
+                        && reservoir.getEnergy() == energyBefore,
+                "Replacing the casing restores ports without changing tank contents or energy");
+
+        net.minecraft.block.state.IBlockState state = world.getBlockState(control);
+        check(state.getBlock().removedByPlayer(state, world, control, player, true), "Controller defers removal until harvest");
+        state.getBlock().harvestBlock(world, player, control, state, reservoir, new ItemStack(Items.IRON_PICKAXE));
+        check(!reservoir.formed && rearCasing.controller() == null && output.getTankProperties().length == 0,
+                "Harvesting the controller unlinks the remaining ports immediately");
+        check(world.getBlockState(rear).getActualState(world, rear).getValue(ReservoirCasingBlock.PART)
+                        == ReservoirCasingBlock.Part.CASING,
+                "The surviving shell displays ordinary casings after controller harvest");
+        boolean preserved = false;
+        for (net.minecraft.entity.item.EntityItem entity : world.getEntitiesWithinAABB(
+                net.minecraft.entity.item.EntityItem.class, new net.minecraft.util.math.AxisAlignedBB(control))) {
+            ItemStack drop = entity.getItem();
+            if (drop.getItem() != net.minecraft.item.Item.getItemFromBlock(CropManager.AGRICULTURAL_RESERVOIR)
+                    || !drop.hasTagCompound()) continue;
+            AgriculturalReservoirTile restored = new AgriculturalReservoirTile();
+            restored.readFromNBT(drop.getTagCompound().getCompoundTag("BlockEntityTag"));
+            if (restored.water.getFluidAmount() == waterBefore && restored.getEnergy() == energyBefore
+                    && restored.weed.getFluidAmount() == weedBefore && weedEx.isFluidEqual(restored.weed.getFluid())
+                    && restored.hasModule(1) && restored.hasModule(3)) {
+                preserved = true;
+                entity.setDead();
+            }
+        }
+        check(preserved && world.isAirBlock(control), "Harvest drop preserves both fluids, energy and modules");
+        clearReservoir(world, center, 6);
+    }
+
+    private AgriculturalReservoirTile buildReservoir(WorldServer world, BlockPos center, int height, EnumFacing front) {
+        clearReservoir(world, center, 6);
+        for (int y = 0; y < height; y++) {
+            boolean cap = y == 0 || y == height - 1;
+            for (int x = -1; x <= 1; x++) for (int z = -1; z <= 1; z++) {
+                boolean shell = cap || x != 0 || z != 0;
+                if (shell) world.setBlockState(center.add(x, y, z), CropManager.RESERVOIR_CASING.getDefaultState(), 18);
+            }
+        }
+        BlockPos at = center.offset(front).up();
+        world.setBlockState(at, CropManager.AGRICULTURAL_RESERVOIR.getDefaultState()
+                .withProperty(AgriculturalReservoirBlock.FACING, front), 18);
+        AgriculturalReservoirTile reservoir = (AgriculturalReservoirTile) world.getTileEntity(at);
+        reservoir.tryForm();
+        return reservoir;
+    }
+
+    private static void clearReservoir(WorldServer world, BlockPos center, int height) {
+        for (int y = 0; y < height; y++) for (int x = -1; x <= 1; x++) for (int z = -1; z <= 1; z++)
+            world.setBlockToAir(center.add(x, y, z));
+    }
+
     private void weedExProductionLine(WorldServer world) {
         BlockPos base = new BlockPos(100008, 210, 100008);
         for (int i = 0; i <= 4; i++) world.setBlockToAir(base.east(i));
-        BlockPos sourcePos = base.east(3);
         world.setBlockState(base, CropManager.GRIN_GRINDER.getDefaultState(), 18);
         world.setBlockState(base.east(), CropManager.GRIN_EXTRACTOR.getDefaultState(), 18);
-        world.setBlockState(base.east(2), CropManager.THERMAL_PIPE.getDefaultState(), 18);
-        world.setBlockState(sourcePos, CropManager.ADVANCED.getDefaultState(), 18);
         world.setBlockState(base.east(4), CropManager.WEED_EX_FABRICATOR.getDefaultState(), 18);
         GrinGrinderTile grinder = (GrinGrinderTile)world.getTileEntity(base);
         GrinExtractorTile extractor = (GrinExtractorTile)world.getTileEntity(base.east());
         WeedExFabricatorTile mixer = (WeedExFabricatorTile)world.getTileEntity(base.east(4));
-        TestHeatSource heat = new TestHeatSource(4000);
-        world.setTileEntity(sourcePos, heat);
+        net.minecraftforge.common.util.FakePlayer player = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(world);
+        player.setPosition(base.getX() + 0.5, base.getY() + 0.5, base.getZ() + 0.5);
+        EquipmentContainer container = new EquipmentContainer(player.inventory, grinder);
+        container.getSlot(0).putStack(new ItemStack(Items.SPIDER_EYE));
+        container.getSlot(1).putStack(new ItemStack(CropManager.GRINDING_BLADE));
+        grinder.update();
+        check(grinder.progress == 0 && container.getSlot(0).getStack().getCount() == 1,
+                "Grinder leaves the eye in its slot without power");
         grinder.energy.setEnergyStored(1000);
-        grinder.inventory.setStackInSlot(0, new ItemStack(Items.SPIDER_EYE));
-        grinder.inventory.setStackInSlot(1, new ItemStack(CropManager.GRINDING_BLADE));
+        grinder.inventory.setStackInSlot(2, new ItemStack(Blocks.DIRT, 64));
+        grinder.update();
+        check(grinder.progress == 0 && grinder.getEnergy() == 1000 && container.getSlot(0).getStack().getCount() == 1,
+                "Grinder leaves input and EU intact when its output is blocked");
+        grinder.inventory.setStackInSlot(2, ItemStack.EMPTY);
         for (int i = 0; i < GrinGrinderTile.DURATION; i++) grinder.update();
+        check(container.canInteractWith(player) && world.getBlockState(base).getValue(ManagerBlock.ACTIVE),
+                "Grinder keeps its tile and inventory while active");
+        grinder.update();
+        check(container.canInteractWith(player) && !world.getBlockState(base).getValue(ManagerBlock.ACTIVE),
+                "Grinder keeps its tile and inventory when it stops");
         ItemStack powder = grinder.inventory.extractItem(2, 1, false);
         check(powder.getCount() == 1 && grinder.inventory.getStackInSlot(1).getItemDamage() == 1,
                 "Grin Grinder converts one spider eye and wears its reusable blade once");
@@ -104,8 +492,10 @@ public final class RuntimeChecks {
         extractor.water.fill(new FluidStack(FluidRegistry.WATER, GrinExtractorTile.WATER_PER_RECIPE), true);
         for (int i = 0; i < GrinExtractorTile.DURATION; i++) extractor.update();
         check(extractor.extract.getFluidAmount() == GrinExtractorTile.EXTRACT_PER_RECIPE
-                        && extractor.water.getFluidAmount() == 0 && heat.heat == 2000,
-                "Grin Extractor consumes water and IC2 heat through a connected thermal pipe");
+                        && extractor.water.getFluidAmount() == 0 && extractor.inventory.getStackInSlot(0).isEmpty(),
+                "Grin Extractor consumes water and Grin Powder without a heat source");
+        extractor.update();
+        check(world.getTileEntity(base.east()) == extractor, "Extractor retains its tile through a complete cycle");
         FluidStack extracted = extractor.getCapability(net.minecraftforge.fluids.capability.CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, EnumFacing.DOWN)
                 .drain(GrinExtractorTile.EXTRACT_PER_RECIPE, true);
         int inserted = mixer.getCapability(net.minecraftforge.fluids.capability.CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, EnumFacing.UP).fill(extracted, true);
@@ -126,7 +516,7 @@ public final class RuntimeChecks {
         check(restored.extract.getFluidAmount() == 250 && restored.progress == 37,
                 "Grin Extractor fluid and work state survive NBT reload");
         world.setBlockToAir(base); world.setBlockToAir(base.east()); world.setBlockToAir(base.east(2));
-        world.setBlockToAir(sourcePos); world.setBlockToAir(base.east(4));
+        world.setBlockToAir(base.east(4));
     }
 
     private void chestAndLinkerIntegration(WorldServer world) {
@@ -201,14 +591,6 @@ public final class RuntimeChecks {
         world.setBlockToAir(pipePos);
     }
 
-    private static final class TestHeatSource extends net.minecraft.tileentity.TileEntity implements IHeatSource {
-        int heat;
-        TestHeatSource(int heat) { this.heat = heat; }
-        @Override public int maxrequestHeatTick(EnumFacing side) { return 100; }
-        @Override public int requestHeat(EnumFacing side, int request) { return Math.min(heat, request); }
-        @Override public int drawHeat(EnumFacing side, int request, boolean simulate) { int amount = Math.min(heat, request); if (!simulate) heat -= amount; return amount; }
-    }
-
     private void beginTickedEnergyTest(WorldServer world) {
         tickWorld = world;
         BlockPos sourcePos = new BlockPos(100008, 106, 100008);
@@ -223,6 +605,36 @@ public final class RuntimeChecks {
         ((ManagerTile) world.getTileEntity(tickPos)).settings(1, 2, 0);
         BlockPos pulsePos = sourcePos.up(4); world.setBlockToAir(pulsePos); world.setBlockState(pulsePos, CropManager.MONITOR.getDefaultState(), 2);
         timedMonitor = (MonitorTile)world.getTileEntity(pulsePos); timedMonitor.outputMode = 0; timedMonitor.control(147, null);
+        BlockPos reservoirCenter = sourcePos.west(5);
+        for (int y = 0; y < 5; y++) {
+            for (int x = -1; x <= 1; x++) for (int z = -1; z <= 1; z++) {
+                BlockPos at = reservoirCenter.add(x, y, z);
+                boolean shell = y == 0 || y == 4 || x != 0 || z != 0;
+                world.setBlockState(at, shell ? CropManager.RESERVOIR_CASING.getDefaultState() : Blocks.AIR.getDefaultState(), 18);
+            }
+        }
+        BlockPos control = reservoirCenter.north().up();
+        world.setBlockState(control, CropManager.AGRICULTURAL_RESERVOIR.getDefaultState(), 18);
+        wiredReservoir = (AgriculturalReservoirTile) world.getTileEntity(control);
+        wiredReservoir.tryForm();
+        check(wiredReservoir.formed, "Reservoir forms before attaching the cable");
+        wiredReservoir.water.fill(new FluidStack(FluidRegistry.WATER, 1000), true);
+        wiredReservoir.inventory.setStackInSlot(0, new ItemStack(Items.BUCKET));
+        BlockPos cablePos = reservoirCenter.east(2).up();
+        BlockPos batBoxPos = cablePos.east();
+        wiredSource = batBoxPos;
+        world.setBlockToAir(cablePos);
+        world.setBlockToAir(batBoxPos);
+        net.minecraftforge.common.util.FakePlayer player = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(world);
+        ic2.core.block.wiring.TileEntityCable cable = new ic2.core.block.wiring.TileEntityCable(ic2.core.block.wiring.CableType.copper, 0);
+        check(ic2.core.item.block.ItemBlockTileEntity.placeTeBlock(
+                IC2Items.getItem("cable", "type:copper,insulation:0"), player, world, cablePos, EnumFacing.UP, cable),
+                "IC2 places a copper cable adjacent to only the reservoir casing");
+        world.setBlockState(batBoxPos, IC2Items.getItemAPI().getBlockState("te", "batbox"), 2);
+        TileEntityElectricBatBox reservoirSource = new TileEntityElectricBatBox();
+        world.setTileEntity(batBoxPos, reservoirSource);
+        reservoirSource.setFacing(EnumFacing.WEST);
+        reservoirSource.energy.addEnergy(2000);
         MinecraftForge.EVENT_BUS.register(this);
     }
 
@@ -242,10 +654,31 @@ public final class RuntimeChecks {
             check(tile != null && tile.getEnergy() > previousEnergy,
                     "EU arrives from real BatBox during server ticks, stage " + tickStage);
             if (tickStage == 0) {
+                check(wiredReservoir.getEnergy() > 0, "EU arrives through a real IC2 cable connected to the casing");
+                wiredReservoir.inventory.setStackInSlot(5, IC2Items.getItem("upgrade", "transformer"));
+                wiredReservoir.energy.setEnergyStored(0);
+                tickWorld.setBlockToAir(wiredSource);
+                tickWorld.setBlockState(wiredSource, IC2Items.getItemAPI().getBlockState("te", "cesu"), 2);
+                ic2.core.block.wiring.TileEntityElectricCESU cesu = new ic2.core.block.wiring.TileEntityElectricCESU();
+                tickWorld.setTileEntity(wiredSource, cesu);
+                cesu.setFacing(EnumFacing.WEST);
+                cesu.energy.addEnergy(4000);
                 check(timedMonitor.signal == 15, "Monitor test pulse remains active after 30 real server ticks");
                 tile.inventory.setStackInSlot(18, IC2Items.getItem("upgrade", "transformer"));
                 tile.inventory.setStackInSlot(19, IC2Items.getItem("upgrade", "energy_storage"));
             } else if (tickStage == 1) {
+                check(wiredReservoir.getEnergy() > 0 && wiredReservoir.energy.getSinkTier() == 2,
+                        "A real IC2 Tier 2 cable source feeds the upgraded casing");
+                check(wiredReservoir.water.getFluidAmount() == 0
+                                && wiredReservoir.inventory.getStackInSlot(2).getItem() == Items.WATER_BUCKET,
+                        "Filled bucket remains in the output slot across multiple reservoir ticks");
+                if (Boolean.getBoolean("cropmanager.testReservoirOnly")) {
+                    MinecraftForge.EVENT_BUS.unregister(this);
+                    tickWorld = null;
+                    CropManager.log.info("CROP_MANAGER_RUNTIME_TESTS_PASSED ({})", checks);
+                    server.initiateShutdown();
+                    return;
+                }
                 check(tile.energy.getSinkTier() == 3 && tile.energy.getCapacity() == 110000,
                         "EU reception continues after live tier and storage upgrade");
                 NBTTagCompound saved = tile.writeToNBT(new NBTTagCompound());
@@ -359,12 +792,14 @@ public final class RuntimeChecks {
         pulse(restored, 1);
         check(restored.inventory.getStackInSlot(3).getCount() == 64 && countItem(restored, Items.WHEAT) == 200,
                 "Partial insertion conserves all pending products");
+        check(restored.control(200, null), "Fixture switches the manager off");
         double stoppedEU = restored.getEnergy(); pulse(restored, 20);
         check(restored.getEnergy() == stoppedEU, "Disabled machine consumes no scan EU");
 
         for (int i = 4; i < 18; i++) restored.inventory.setStackInSlot(i, ItemStack.EMPTY);
         pulse(restored, 1);
         check(countItem(restored, Items.WHEAT) == 200, "Pending queue flush conserves products across several slots");
+        check(restored.control(200, null), "Fixture switches the manager back on");
         crop.setCurrentSize(1);
         ItemStack overclocker = IC2Items.getItem("upgrade", "overclocker");
         overclocker.setCount(2); restored.inventory.setStackInSlot(18, overclocker);
@@ -458,7 +893,7 @@ public final class RuntimeChecks {
         check(manager.getEnergy() == 1234 && manager.inventory.getStackInSlot(3).getCount() == 11 && manager.water.getFluidAmount() == 1600 && manager.functions == 15 && manager.radius == 2 && manager.layers == 2 && manager.redstoneMode == 2, "Migration preserves EU inventory tanks and area controls");
         check(world.getEntitiesWithinAABB(net.minecraft.entity.item.EntityItem.class, new net.minecraft.util.math.AxisAlignedBB(p).grow(1)).size() == beforeEntities, "Migration never drops or duplicates the old inventory");
         for(String name:new String[]{"crop_manager","seed_classifier","seed_workbench","configuration_card","agricultural_notebook","compost"})check(net.minecraft.item.Item.REGISTRY.getObject(new net.minecraft.util.ResourceLocation(CropManager.ID,name))==null || !new net.minecraft.util.ResourceLocation(CropManager.ID,name).equals(net.minecraft.item.Item.REGISTRY.getObject(new net.minecraft.util.ResourceLocation(CropManager.ID,name)).getRegistryName()),"Obsolete item registry removed: "+name);
-        for (String name : new String[]{"crop_manager", "seed_classifier", "seed_workbench", "configuration_card", "agricultural_notebook", "compost_fertilizer", "agricultural_reservoir", "agricultural_collector"}) check(net.minecraft.item.crafting.CraftingManager.REGISTRY.getObject(new net.minecraft.util.ResourceLocation(CropManager.ID, name)) == null, "Removed recipe absent: " + name);
+        for (String name : new String[]{"crop_manager", "seed_classifier", "seed_workbench", "configuration_card", "agricultural_notebook", "compost_fertilizer", "agricultural_collector"}) check(net.minecraft.item.crafting.CraftingManager.REGISTRY.getObject(new net.minecraft.util.ResourceLocation(CropManager.ID, name)) == null, "Removed recipe absent: " + name);
         for (String name : new String[]{"advanced_crop_manager", "agricultural_monitor", "electric_composter", "agricultural_probe", "wireless_eu_upgrade"}) check(net.minecraft.item.crafting.CraftingManager.REGISTRY.getObject(new net.minecraft.util.ResourceLocation(CropManager.ID, name)) != null, "Active recipe present: " + name);
         BlockPos cp = p.east(2); world.setBlockToAir(cp); world.setBlockState(cp, CropManager.COMPOSTER.getDefaultState(), 2);
         ComposterTile c = (ComposterTile)world.getTileEntity(cp); c.inventory.setStackInSlot(0, new ItemStack(Items.WHEAT, 4));
@@ -526,7 +961,7 @@ public final class RuntimeChecks {
     }
     private void placeBasicFixture(WorldServer world,BlockPos pos,int flags){world.setBlockState(pos,CropManager.ADVANCED.getDefaultState(),flags);world.setTileEntity(pos,new ManagerTile());}
     private void revision05(WorldServer world){
-        BlockPos p=new BlockPos(100008,165,100008);world.setBlockToAir(p);world.setBlockState(p,CropManager.ADVANCED.getDefaultState(),18);ManagerTile manager=(ManagerTile)world.getTileEntity(p);manager.energy.setEnergyStored(10000);manager.functions=0;manager.automation.mode=1;manager.weed.fill(new FluidStack(FluidName.weed_ex.getInstance(),3999),true);manager.update();
+        BlockPos p=new BlockPos(100008,165,100008);world.setBlockToAir(p);world.setBlockState(p,CropManager.ADVANCED.getDefaultState(),18);ManagerTile manager=(ManagerTile)world.getTileEntity(p);manager.energy.setEnergyStored(10000);manager.settings(manager.radius,manager.layers,0);manager.automation.mode=1;manager.weed.fill(new FluidStack(FluidName.weed_ex.getInstance(),3999),true);manager.update();
         check(manager.automation.stopped && manager.paused && manager.getEnergy()==10000,"Automation stops scanning below 20% Weed-Ex without consuming scan EU");manager.weed.fill(new FluidStack(FluidName.weed_ex.getInstance(),16000),true);manager.update();check(manager.paused,"Manager remains stopped at 19999 mB even after original threshold clears");
         ManagerTile saved=new AdvancedManagerTile();saved.setWorld(world);saved.setPos(p);saved.readFromNBT(manager.writeToNBT(new NBTTagCompound()));saved.update();check(saved.automation.stopped,"Automatic stop latch persists across save/load without monitor");
         manager.weed.fill(new FluidStack(FluidName.weed_ex.getInstance(),1),true);manager.update();check(!manager.paused && !manager.automation.stopped && manager.getEnergy()<10000,"Manager resumes only when Weed-Ex is completely full");manager.enabled=false;double eu=manager.getEnergy();manager.update();check(manager.paused && manager.getEnergy()==eu,"Manual off overrides automatic return and halts EU-consuming scans");
@@ -541,7 +976,9 @@ public final class RuntimeChecks {
         weeder.cursor=3;check(!weeder.scanOne() && crop.getCrop()==Crops.weed,"Unfuelled weeder never removes crops");weeder.gas.fill(new FluidStack(FluidName.biogas.getInstance(),100),true);weeder.cursor=3;
         check(weeder.scanOne() && crop.getCrop()==null && world.getTileEntity(weedPos)==crop && weeder.removed==1 && weeder.gas.getFluidAmount()==79,"Biogas weeder removes true weeds for 1+20 mB and preserves crop sticks");
         CropCard wheat=Crops.instance.getCropCard("ic2","wheat");crop.setCrop(wheat);crop.setCurrentSize(7);crop.setStatGrowth(31);weeder.cursor=3;check(!weeder.scanOne() && crop.getCrop()==wheat && crop.getStatGrowth()==31,"High-growth valuable crops are never mistaken for removable weeds");
-        check(weeder.gas.fill(new FluidStack(FluidRegistry.WATER,1000),true)==0,"Weeder rejects water as fuel");check(weeder.inventory.getSlots()==2,"Weeder uses fuel container slots");
+        check(weeder.gas.fill(new FluidStack(FluidRegistry.WATER,1000),true)==0,"Weeder rejects water as fuel");
+        check(weeder.inventory.getSlots()==3 && WeederTile.isWeedItem(weeder.inventory.getStackInSlot(2)),
+                "Weeder has dedicated fuel container slots and a harvested weed output");
         WeederTile savedWeeder=new WeederTile();savedWeeder.readFromNBT(weeder.writeToNBT(new NBTTagCompound()));check(savedWeeder.gas.getFluidAmount()==weeder.gas.getFluidAmount() && savedWeeder.removed==1 && savedWeeder.radius==1 && savedWeeder.layers==2,"Weeder fuel counter and area persist");weeder.enabled=false;int gas=weeder.gas.getFluidAmount();weeder.update();check(weeder.gas.getFluidAmount()==gas && weeder.paused,"Weeder manual off stops fuel consumption");
         check(!CropManager.WEEDER.isFullCube(world.getBlockState(wp)) && !CropManager.WEEDER.isOpaqueCube(world.getBlockState(wp)),"Weeder is a non-cubic 3D block");
         monitor.link(wp,0);check("weeder".equals(monitor.snapshot.getString("Target")) && monitor.snapshot.getInteger("Gas")==weeder.gas.getFluidAmount(),"Monitor reads the biogas weeder fuel and removal counter");check(monitor.control(200,player) && weeder.enabled,"Monitor switches the linked biogas weeder on");check(!monitor.control(201,player),"Weeder does not accept Manager-only harvest controls");

@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "cropmanager:wooden_sconce"
+    },
+    "facing=up": {
+      "model": "cropmanager:wooden_sconce_hanging"
+    },
+    "facing=north": {
+      "model": "cropmanager:wooden_sconce_wall"
+    },
+    "facing=east": {
+      "model": "cropmanager:wooden_sconce_wall",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "cropmanager:wooden_sconce_wall",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "cropmanager:wooden_sconce_wall",
+      "y": 270
+    }
+  }
+}

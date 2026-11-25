@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "charged=false": { "model": "cropmanager:pollinator_hive" },
+    "charged=true": { "model": "cropmanager:pollinator_hive_charged" }
+  }
+}

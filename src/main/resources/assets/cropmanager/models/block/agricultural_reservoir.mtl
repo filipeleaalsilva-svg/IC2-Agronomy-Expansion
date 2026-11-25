@@ -1,0 +1,54 @@
+# Rural-IC2 Agricultural Reservoir (Design A v2) Material Library
+newmtl steel
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/storage_steel
+
+newmtl iron_plate
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/water_tower_iron_plate
+
+newmtl wood
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/water_tower_wood
+
+newmtl sheetmetal_copper
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/sheetmetal_copper
+
+newmtl storage_copper
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/storage_copper
+
+newmtl glass
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/water_tower_glass
+
+newmtl copper
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/water_tower_copper
+
+newmtl controller
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/water_tower_controller
+
+newmtl brass
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/water_tower_brass

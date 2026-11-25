@@ -1,135 +1,159 @@
-# Crop Manager 0.5.0-alpha9
+**English** | [Português (PT-BR)](README.pt-BR.md)
 
-Addon para **Minecraft 1.12.2** e **IndustrialCraft 2 Experimental (`2.8.222-ex112`)**. Reúne automação agrícola avançada, monitoramento remoto, processamento de Weed-Ex e compostagem, análise e armazenamento indexado de sementes IC2 e uma linha própria de cultivos e fertilizantes.
+# IC2: Agronomy Expansion 0.5.0-alpha11
+
+![Minecraft](https://img.shields.io/badge/Minecraft-1.12.2-62B47A)
+![IC2](https://img.shields.io/badge/IC2%20Experimental-2.8.222--ex112-4B7BEC)
+![Java](https://img.shields.io/badge/Java-8%20target-ED8B00)
+![License](https://img.shields.io/badge/License-MIT-blue)
+
+Addon for **Minecraft 1.12.2** and **IndustrialCraft 2 Experimental (`2.8.222-ex112`)**. It brings together advanced crop automation, remote monitoring, Weed-Ex processing and composting, IC2 seed analysis and indexed storage, multiblock fluid/item logistics, pollination, and a custom line of IC2 crops and fertilizers.
 
 ---
 
-## Início Rápido (Desenvolvimento e Testes)
+## Quick Start (Development & Testing)
 
-O projeto usa **Gradle 9.7.0** com **RetroFuturaGradle 2.0.3** (alvo de bytecode Java 8). O Gradle 9.7 exige **Java 17 ou superior** para executar o daemon, enquanto o código do mod é compilado para Java 8.
+The project uses **Gradle 9.7.0** with **RetroFuturaGradle 2.0.3** (targeting Java 8 bytecode). Gradle 9.7 requires **Java 17 or newer** to run the daemon, while the mod code compiles to Java 8.
 
-Coloque o JAR auditado do IC2 em `libs/industrialcraft-2-2.8.222-ex112.jar` (o checksum SHA-256 é verificado pela task `verifyIc2`) e execute no PowerShell:
+Place the audited IC2 JAR at `libs/industrialcraft-2-2.8.222-ex112.jar` (its SHA-256 checksum is verified by the `verifyIc2` task) and run in PowerShell:
 
 ```powershell
-# Aponte GRADLE_USER_HOME para o cache local se trabalhar offline
+# Point GRADLE_USER_HOME to the local cache when working offline
 $env:GRADLE_USER_HOME = "$PWD\.gradle-home"
 
-# Rodar a suíte de testes unitários offline
+# Run the unit test suite offline
 .\gradlew.bat test --offline -x downloadFernflower
 
-# Compilar JAR principal e JAR de testes de runtime (Cleanroom)
+# Build the main JAR and Cleanroom runtime-test JAR
 .\gradlew.bat build reobfRuntimeTests
 py tools\verify_artifact.py
 ```
 
 ---
 
-## Instalação e Atualização
+## Installation & Upgrading
 
-1. Copie **somente** `CropManager-0.5.0-alpha9.jar` para a pasta `mods/` (não instale o JAR de `runtime-tests`).
-2. Cliente e servidor devem usar exatamente a mesma versão (`acceptableRemoteVersions = [0.5.0-alpha9]`).
-3. **IndustrialCraft 2 Experimental (`2.8.222-ex112`)** é obrigatório.
-4. Opcionalmente, ative o resource pack `CropManager-GUI-Dark-0.5.0-alpha9.zip` no cliente para interface em tema escuro (a cor do texto se adapta automaticamente à luminosidade do fundo carregado).
+1. Copy **only** `IC2-Agronomy-Expansion-0.5.0-alpha11.jar` into your `mods/` folder (do not install the `runtime-tests` JAR).
+2. Client and server must run the exact same version (`acceptableRemoteVersions = [0.5.0-alpha11]`).
+3. **IndustrialCraft 2 Experimental (`2.8.222-ex112`)** is required (**HEI/JEI** integration is optional).
+4. The dark theme UI (`#1C1C1D`) is the mod default (text color automatically adapts to the brightness of the loaded background).
 
-### Migração de Mundos Antigos
-- Faça backup do mundo antes de atualizar versões alpha.
-- O **Crop Manager básico** antigo migra automaticamente para o **Advanced Crop Manager** após o carregamento do chunk (até 32 migrações por tick via `LegacyMigration`), preservando inventário, EU, tanques, área e controles.
-- Blocos legados removidos (`agricultural_collector`, `agricultural_reservoir`, `seed_classifier`, `seed_workbench`) são retirados de forma adiada via `LegacyRecoveryTile`, devolvendo itens ao chão; itens guardados em inventário são remapeados conforme registro do Forge (`MissingMappings`).
-- O Crop-Matron e o Crop Harvester nativos do IC2 permanecem disponíveis.
-
----
-
-## Blocos e Funcionalidades
-
-### Crop Manager Avançado (`advanced_crop_manager`)
-- **Receita:** `HIC / CMC / III` (Crop Harvester, Iridium, Circuito Avançado, Crop-Matron).
-- **Especificações:** Tier 2, buffer base de `100.000 EU`, tanques de `20.000 mB` (água e Weed-Ex), 26 slots internos (fertilizantes, 15 saídas, 4 upgrades IC2 e recipientes de fluido).
-- **Operação:** Varre área de `3×3` até `17×17` (raio `1..8`, configurável no servidor) em até 3 camadas verticais (`abaixo / nível / acima`), nunca forçando carregamento de chunks.
-- **Censo integrado:** A aba **Dados** consolida espécies plantadas (respeitando o nível de análise do IC2) e leituras reais de nutrientes, umidade, ventilação e luz ao fim de cada volta completa.
-- **Automação:** Suporta entrada/saída via Capability (observação: na 0.5.0-alpha6+, `ITEM_HANDLER_CAPABILITY` é omitida na face inferior `DOWN` para evitar crash com conduítes do Ender IO 5.5.x Cleanroom).
-
-### Sonda e Monitor Agrícola (`agricultural_probe`, `agricultural_monitor`)
-- **Sonda:** Inspeciona cultivos IC2 (respeitando nível de análise) e vincula máquinas (`ManagerTile`, `WeederTile` ou `TileEntityCropmatron`) ao Monitor via *Agachar + Clique Direito*.
-- **Monitor:** Alcance base de `32` blocos na mesma dimensão, dobrando a cada *Upgrade de Alcance Sem Fio* (até `512` blocos com 4 upgrades).
-- **Recursos e Rede:** Buffer de `16.000 mB` de água e Weed-Ex, 3 slots de fertilizante, 1 slot de *Transferência de Colheita*, 1 slot de *Upgrade Wireless EU* (alimentando o alvo vinculado e máquinas de suporte em até `16` blocos) e saída redstone configurável (Desligada / Alarme / Normal / Teste 5s).
-- **Regras de Parada (Aba Auto.):** Desliga o Manager remotamente por limites de água, Weed-Ex, fertilizante, energia ou saída cheia; disparos por Weed-Ex ativam trava de histerese até o tanque atingir `100%`.
-
-### Capinador a Biogás (`biogas_weeder`)
-- Bloco 3D dedicado sem consumo de EU; utiliza tanque de `16.000 mB` de **Biogás IC2**.
-- Varre `2` posições por tick (`1 mB` por posição carregada examinada + `20 mB` por erva removida), removendo exclusivamente ervas daninhas reais (`Crops.weed`) sem destruir estacas ou cultivos de crescimento alto.
-
-### Composteiras (Manual e Elétrica)
-- **Composteira Manual (`manual_composter`):** Bloco de início de jogo sem energia; recebe `8` itens orgânicos por interação direta no mundo, acelera com água (`2x`) e gera **Adubo Orgânico** (`organic_compost`).
-- **Composteira Elétrica (`electric_composter`):** Tier 1, buffer `20.000 EU`, tanque `16.000 mB` de água. Converte **`4` itens orgânicos + `1.000 mB` de água → `1` fertilizante IC2** em `200` ticks a `5 EU/t`, aceitando 4 upgrades IC2 e slot de bateria.
-
-### Linha de Produção de Weed-Ex e Tubo Térmico
-- **Moedor de Grin (`grin_grinder`):** Tier 1, `100` ticks a `5 EU/t`; tritura `1` olho de aranha em `1` Grin Powder utilizando uma **Lâmina de Moagem** reutilizável (`256` usos).
-- **Extrator de Grin (`grin_extractor`):** Tier 1, `100` ticks a `5 EU/t` + `20 HU/t` contínuos via `IHeatSource` em qualquer uma das 6 faces; combina `1` Grin Powder + `1.000 mB` de água → `1.000 mB` de **Extrato de Grin**.
-- **Misturador de Weed-Ex (`weed_ex_fabricator`):** Tier 1, `100` ticks a `5 EU/t`; combina `1.000 mB` de Extrato de Grin + `1` redstone → `500 mB` de **Weed-Ex**.
-- **Tubo Térmico (`thermal_pipe`):** Conecta fontes `IHeatSource` ao Extrator de Grin (até `100 HU/t`). Aceita wrench IC2 para desmontagem com *Agachar + Clique Direito*.
-
-### Analisador, Armazenamento e Cultivos Customizados
-- **Analisador de Sementes (`seed_analyzer`):** Tier 1, `100` ticks a `5 EU/t`; analisa sacos de sementes até nível 4 e exibe genética e atributos na interface.
-- **Baú de Dados de Cultivos (`crop_database_chest`) e Database Portátil (`portable_crop_database`):** Armazenamento de `500` sacos de sementes em grade paginada `5×5` com busca textual, ordenação (Tipo / Tier / Atributos), favoritos (sem alterar o NBT das sementes), coleta magnética configurável, coleta automática no inventário e vínculo remoto interdimensional via **Vinculador de Upgrade (`upgrade_linker`)**.
-- **Upgrade Wireless EU (`wireless_eu_upgrade`):** Implementa `IUpgradeItem` do IC2; vincula-se via *Agachar + Clique Direito* em armazenadores `IEnergyStorage` (`BatBox`, `CESU`, `MFE`, `MFSU`) para alimentar qualquer máquina IC2 com slots de upgrade na mesma dimensão.
-- **Cultivos e Fertilizantes:** Registra 5 espécies IC2 (`grinbloom`, `bioreed`, `nitrobulb`, `cupric_bloom` e `auric_moss`), materiais (`bio_fiber`, `nitro_essence`) e fertilizantes (`organic_compost`, `catalytic_fertilizer`).
+### Legacy World Migration
+- Back up your world before upgrading between alpha versions.
+- The legacy **basic Crop Manager** automatically migrates to the **Advanced Crop Manager** after chunk load (up to 32 migrations per tick via `LegacyMigration`), preserving inventory, EU, tanks, area, and controls.
+- Removed legacy blocks (`agricultural_collector`, `agricultural_reservoir`, `seed_classifier`, `seed_workbench`) are retired lazily via `LegacyRecoveryTile`, dropping their items on the ground; stored items in inventories are remapped via Forge `MissingMappings`.
+- Native IC2 Crop-Matron and Crop Harvester remain available.
 
 ---
 
-## Visão Geral da Arquitetura
+## Blocks & Features
 
-| Pacote | Responsabilidade |
+### Advanced Crop Manager (`advanced_crop_manager`)
+- **Recipe:** `HIC / CMC / III` (Crop Harvester, Iridium, Advanced Circuit, Crop-Matron).
+- **Specs:** Tier 2, `100,000 EU` base buffer, `20,000 mB` tanks (water and Weed-Ex), 26 internal slots (fertilizers, 15 outputs, 4 IC2 upgrades, and fluid containers).
+- **Operation:** Scans from `3×3` up to `17×17` (`1..8` radius, server-configurable) across up to 3 vertical layers (`below / level / above`) with configurable 3D area offset (`offsetX`, `offsetY`, `offsetZ`), never force-loading chunks.
+- **Integrated Survey:** The **Data** tab consolidates planted species (respecting IC2 scan level) and real nutrient, hydration, air quality, and light readings at the end of each full sweep.
+- **Automation:** Supports Capability input/output (note: in 0.5.0-alpha6+, `ITEM_HANDLER_CAPABILITY` is omitted on the `DOWN` face to avoid crashes with Ender IO 5.5.x Cleanroom conduits).
+
+### Agricultural Probe & Monitor (`agricultural_probe`, `agricultural_monitor`)
+- **Probe:** Inspects IC2 crops (respecting scan level) and links machines (`ManagerTile`, `WeederTile`, or `TileEntityCropmatron`) to a Monitor via *Sneak + Right-Click*.
+- **Monitor:** `32`-block base range in the same dimension, doubling per *Wireless Range Upgrade* (up to `512` blocks with 4 upgrades).
+- **Resources & Network:** `16,000 mB` water and Weed-Ex buffers, 3 fertilizer slots, 1 *Harvest Transfer* slot, 1 *Wireless EU Upgrade* slot (powering the linked target and nearby support machines within `16` blocks), and configurable redstone output (Off / Alarm / Normal / 5s Test).
+- **Stop Rules (Auto. Tab):** Remotely pauses the Manager based on water, Weed-Ex, fertilizer, energy, or full-output thresholds; Weed-Ex triggers enable a hysteresis lock until the tank refills to `100%`.
+
+### Biogas Weeder (`biogas_weeder`)
+- Dedicated 3D machine with zero EU consumption; uses a `16,000 mB` **IC2 Biogas** tank.
+- Scans `2` positions per tick (`1 mB` per loaded position checked + `20 mB` per weed removed), removing only real weeds (`Crops.weed`) without breaking crop sticks or tall crops.
+- Each removed weed outputs an IC2 **Weed** item into the machine's dedicated output slot (if full, the weed remains on the Crop Stick).
+
+### Composters (Manual & Electric)
+- **Manual Composter (`manual_composter`):** Early-game zero-energy block; accepts `8` organic items via direct world interaction, accelerates with water (`2x`), and produces **Organic Compost** (`organic_compost`).
+- **Electric Composter (`electric_composter`):** Tier 1, `20,000 EU` buffer, `16,000 mB` water tank. Converts **`4` organic items + `1,000 mB` water → `1` IC2 Fertilizer** in `200` ticks at `5 EU/t`, supporting 4 IC2 upgrades and a battery slot.
+
+### Weed-Ex Production Line & Thermal Pipe
+- **Grin Grinder (`grin_grinder`):** Tier 1, `100` ticks at `5 EU/t`; grinds `1` spider eye into `1` Grin Powder using a reusable **Grinding Blade** (`256` uses).
+- **Grin Extractor (`grin_extractor`):** Tier 1, `100` ticks at `5 EU/t`; combines `1` Grin Powder + `1,000 mB` water → `1,000 mB` **Grin Extract**.
+- **Weed-Ex Fabricator (`weed_ex_fabricator`):** Tier 1, `100` ticks at `5 EU/t`; combines `1,000 mB` Grin Extract + `1` redstone → `500 mB` **Weed-Ex**.
+- **Thermal Pipe (`thermal_pipe`):** Connects `IHeatSource` blocks to compatible machines (up to `100 HU/t`). Supports IC2 wrench dismantling via *Sneak + Right-Click*.
+
+### Seed Analyzer, Storage, Multiblocks & Custom Crops
+- **Seed Analyzer (`seed_analyzer`):** Tier 1, `100` ticks at `5 EU/t`; analyzes seed bags up to level 4 and displays genetics and stats in the GUI.
+- **Crop Database Chest (`crop_database_chest`) & Portable Database (`portable_crop_database`):** Stores `500` seed bags in a paginated `5×5` grid with text search, sorting (Type / Tier / Stats), favorites (without mutating seed NBT), configurable magnetic pickup, inventory auto-collect, and interdimensional remote linking via **Upgrade Linker (`upgrade_linker`)**.
+- **Agricultural Sprinklers (`sprinkler_mk1`, `sprinkler_mk2`, `sprinkler_mk3`):** Zero-EU 3D blocks that hydrate farmland and IC2 crop sticks and accelerate growth (`9×9` on Mk1/Mk2, `17×17` on Mk3; `4×` speed on Mk2/Mk3), with 3 redstone modes via *Sneak + Right-Click*.
+- **Agricultural Reservoir (`agricultural_reservoir` + `reservoir_casing`):** `3×5×3` dual-tank multiblock with IC2 power, fluid filters, pump/reserve modules, and capacity upgrades.
+- **Industrial Fluid Tank (`fluid_tank` + `fluid_tank_casing`):** Zero-EU `3×5×3` multiblock for bulk single-fluid storage (`128,000 mB` base + up to 8 `+32,000 mB` upgrades), configurable face ports, and redstone auto-extract.
+- **Agricultural Silo (`agricultural_silo` + `silo_casing`):** Zero-EU `3×5×3` multiblock for bulk single-item storage (`128,000` base + up to 8 `+32,000` upgrades), template lock, configurable ports, and redstone auto-extract.
+- **Fluid Pipes (`fluid_pipe` — Pipe, Redstone Restrictor, and 6-Way Router):** Zero-EU fluid logistics with automatic tank equalization and directional routing.
+- **Pollinator Hive (`pollinator_hive`) & Greenhouse Glass (`greenhouse_glass`):** The Hive speeds up cross-breeding on nearby double crop sticks (optionally consuming **Mutagenic Powder** to triple cadence); Greenhouse Glass grants a random-tick growth bonus to the crop directly below under adequate light.
+- **Hydroponic Chamber (`hydroponic_chamber`):** Tier 2 EU machine (`50,000 EU`, `16 EU/t`, `16,000 mB` water tank) that grows IC2 Seed Bags in a controlled enclosure (`VirtualCropTile`). Requires `greenhouse_glass` above and valid subsoil below (`dirt`/`farmland`/`grass`, or `radioactive_soil` for `radbloom`), with optional `3×3` glass dome (`+25%` speed) and adjacent IC2 heat (`+50%` speed) bonuses.
+- **Wi-Fi EU Grid & Dish Antenna (`eu_wifi_plug`, `eu_wifi_point`, `eu_dish_antenna`):** 1,000 public/private EU channels (`100,000 EU` smoothing buffer, selectable `T1–T4` output and redstone control) plus area wireless power distribution integrated with `WirelessEuUpgrade`.
+- **Biogas Ecosystem (`biogas_generator` + `biogas_generator_casing`, `biogas_sprayer`, `biogas_heat_burner`):** `3×3×3` multiblock EU generator with 3D OBJ/TESR model, EU-free crop sprayer, and IC2 `IHeatSource` burner (`32 HU/t`).
+- **Diagonal Sprinkler (`sprinkler_diagonal`) & Crossing Tool (`crossing_tool`):** Independently switched 4-quadrant `9×9` sprinkler with a dry cross walkway, plus a portable tool for harvesting and rearming double crop sticks.
+- **Greenhouse Decor & Lighting (`greenhouse_frame`, `garden_trellis`, `farm_lantern`, `wooden_sconce`, `industrial_lantern`, `glass_lamp`):** Structural frames, trellises, and light-level-15 wall/floor/ceiling lamps.
+- **Agricultural Manual (`agricultural_manual`) & HEI/JEI Plugin:** In-game illustrated guide with search and category index, plus optional HEI/JEI integration for IC2 seeds and mod crops.
+- **Wireless EU Upgrade (`wireless_eu_upgrade`):** Implements IC2 `IUpgradeItem`; binds via *Sneak + Right-Click* to `IEnergyStorage` blocks (`BatBox`, `CESU`, `MFE`, `MFSU`), Wi-Fi EU channels, or Dish Antennas to power any IC2 machine with upgrade slots.
+- **Custom Crops & Fertilizers:** Registers `15` IC2 crop species (`grinbloom`, `bioreed`, `nitrobulb`, `glowbloom`, `sulfurbud`, `lazuli_bloom`, `quartzreed`, `lithivine`, `irid_moss`, `radbloom` with `radioactive_soil`, plus `resincane`, `cryolotus`, `cupric_moss`, `stannum_herb`, and `voltreed`), materials (`bio_fiber`, `nitro_essence`, `mutagenic_powder`), and fertilizers (`organic_compost`, `catalytic_fertilizer`).
+
+---
+
+## Architecture Overview
+
+| Package | Responsibility |
 |---|---|
-| `br.cropmanager` | Registro central (`CropManager`), configuração (`ManagerConfig`), rede (`ManagerNetwork`), proxies (`CommonProxy`/`ClientProxy`), máquinas e TileEntities (`FarmTile`, `ManagerTile`, `MonitorTile`, `WeederTile`, `ComposterTile`, `GrinGrinderTile`, `GrinExtractorTile`, `WeedExFabricatorTile`, `SeedAnalyzerTile`, `ManualComposterTile`, `ThermalPipeTile`), lógica pura (`ScanLogic`, `AutomationRules`, `CropSurvey`, `ManagerSettings`, `AlarmLogic`, `EnergyWarning`) e GUIs/renderers. |
-| `br.cropmanager.crop` | Registro (`CropRegistry`) e classe base (`BaseCropCard`) das espécies customizadas de cultivos IC2 e mecânica de solo catalisado. |
-| `br.cropmanager.chest.block` | Bloco animado do Baú de Dados de Cultivos (`BlockCropDatabaseChest`). |
-| `br.cropmanager.chest.inventory` | Inventário unitário de sementes (`SeedInventory`), TileEntity do baú (`TileCropDatabaseChest` + variantes legadas), inventário portátil em NBT (`PortableCropInventory`), configurações (`ChestSettings`), ordenação (`SeedSortMode`) e container sincronizado por revisão (`ContainerCropDatabaseChest`). |
-| `br.cropmanager.chest.item` | Database Portátil (`ItemPortableCropDatabase`), Vinculador (`ItemUpgradeLinker`) e coleta automática de sementes (`PortableSeedPickup`). |
-| `br.cropmanager.chest.network` | Pacotes do baú (`ChestMessage` para busca/favoritos/ack de revisão e `ChestSettingsMessage`). |
-| `br.cropmanager.chest.crafting` | Receitas customizadas (`CropChestRecipe`, `PortableCropRecipe`, `PortableLinkRecipe`). |
-| `br.cropmanager.chest.integration` | Leitura segura de genética (`CropInformation`), produção (`ProductionInformation`, `PackCropProducts`) e busca (`SeedSearch`). |
-| `br.cropmanager.chest.client` | Interface (`GuiCropDatabaseChest`), geometria compartilhada (`CropGuiLayout`) e renderer (`CropChestRenderer`). |
+| `br.cropmanager` | Central registry (`CropManager`), configuration (`ManagerConfig`), networking (`ManagerNetwork`), proxies (`CommonProxy`/`ClientProxy`), shared bases (`FarmTile`, `PoweredMachineTile`, `EquipmentLayout`, `StorageMultiblockSupport`), machines and TileEntities (`ManagerTile`, `MonitorTile`, `WeederTile`, `ComposterTile`, `GrinGrinderTile`, `GrinExtractorTile`, `WeedExFabricatorTile`, `SeedAnalyzerTile`, `HydroponicChamberTile`, `VirtualCropTile`, `ManualComposterTile`, `ThermalPipeTile`, `SprinklerTile`, `DiagonalSprinklerTile`, `PollinatorHiveTile`, `FluidPipeTile`, `AgriculturalReservoirTile`, `IndustrialTankTile`, `AgriculturalSiloTile`, `BiogasGeneratorTile`, `BiogasSprayerTile`, `BiogasHeatBurnerTile`, `EuWifiPlugTile`, `EuWifiPointTile`, `EuDishAntennaTile`, `WirelessEuGridData`), tools (`CrossingTool`, `FarmTool`, `WirelessEuUpgrade`), pure logic (`ScanLogic`, `AutomationRules`, `CropSurvey`, `ManagerSettings`, `AlarmLogic`, `EnergyWarning`, `CrossBreedingHelper`, `StorageMultiblock`), and GUIs/renderers. |
+| `br.cropmanager.crop` | Registry (`CropRegistry`), base card (`BaseCropCard`), `RadbloomCropCard`, and catalyzed soil mechanics. |
+| `br.cropmanager.chest.*` | Block, unit inventory, portable item, linker, networking, recipes, search/genetics integration, and Crop Database Chest GUI (`500` slots). |
+| `br.cropmanager.guide` | In-game Agricultural Manual (`ItemAgriculturalManual`, `GuiAgriculturalManual`, `ManualRegistry`, `ManualCategory`, `ManualEntry`). |
+| `br.cropmanager.jei` | Optional HEI/JEI integration (`CropManagerJeiPlugin`, `CropRecipeCategory`, `CropRecipeWrapper`). |
 
 ---
 
-## Configuração (`config/cropmanager.cfg`)
+## Configuration (`config/cropmanager.cfg`)
 
-Principais chaves carregadas por `ManagerConfig`:
+Main keys loaded by `ManagerConfig`:
 
-| Categoria | Chave | Padrão | Intervalo | Descrição |
+| Category | Key | Default | Range | Description |
 |---|---|---:|---:|---|
-| `processing` | `baseIntervalTicks` | `2` | `1–20` | Ticks por posição sem upgrades |
-| `processing` | `maxPositionsPerTick` | `8` | `1–32` | Teto de posições varridas por tick |
-| `area` | `maxRadius` | `8` | `1–16` | Raio horizontal máximo permitido pelo servidor |
-| `area` | `defaultRadius` | `4` | `1–maxRadius` | Raio inicial de novas máquinas |
-| `area` | `defaultLayers` | `7` | `1–7` | Máscara de camadas (`1` abaixo, `2` nível, `4` acima) |
-| `energy` | `scanEU` / `careEU` / `harvestEU` | `1` / `10` / `20` | `1–1000` | Custo base de EU por leitura, cuidado e colheita |
-| `advanced_manager` | `advancedEnergyCapacity` | `100000` | `1000–10M` | Buffer base de EU do Advanced Crop Manager |
-| `advanced_manager` | `advancedTankCapacity` | `20000` | `1000–1M` | Capacidade dos tanques de água e Weed-Ex (mB) |
-| `monitor` | `baseRange` | `32` | `1–512` | Alcance base do Monitor em blocos |
-| `monitor` | `wirelessEuRatePerUpgrade` | `256` | `1–100000` | Taxa (EU/t) por upgrade Wireless EU |
-| `weeder` | `gasCapacity` | `16000` | `1000–1M` | Capacidade do tanque de Biogás (mB) |
-| `composter` | `requiredItems` / `waterPerRecipe` | `4` / `1000` | `1–64` / `0–16000` | Insumos orgânicos e água por fertilizante |
-| `grin_extractor` | `heatPerTick` | `20` | `0–10000` | Calor (HU/t) exigido durante a extração |
-| `thermal_pipe` | `maxHeatPerTick` | `100` | `1–100000` | Limite de transferência térmica por tick (HU/t) |
-| `database_chest` | `autoCollectRadius` | `3` | `1–16` | Raio de coleta magnética do Baú de Dados |
-| `crops` | `enableCustomCrops` | `true` | `true/false` | Ativa o registro das 5 espécies IC2 do mod |
+| `processing` | `baseIntervalTicks` | `2` | `1–20` | Ticks per position without upgrades |
+| `processing` | `maxPositionsPerTick` | `8` | `1–32` | Cap on positions scanned per tick |
+| `area` | `maxRadius` | `8` | `1–16` | Maximum horizontal radius allowed by server |
+| `area` | `defaultRadius` | `4` | `1–maxRadius` | Default radius for newly placed machines |
+| `area` | `defaultLayers` | `7` | `1–7` | Layer bitmask (`1` below, `2` level, `4` above) |
+| `energy` | `scanEU` / `careEU` / `harvestEU` | `1` / `10` / `20` | `1–1000` | Base EU cost per scan, care, and harvest |
+| `advanced_manager` | `advancedEnergyCapacity` | `100000` | `1000–10M` | Advanced Crop Manager base EU buffer |
+| `advanced_manager` | `advancedTankCapacity` | `20000` | `1000–1M` | Water and Weed-Ex tank capacity (mB) |
+| `monitor` | `baseRange` | `32` | `1–512` | Base Monitor range in blocks |
+| `monitor` | `wirelessEuRatePerUpgrade` | `256` | `1–100000` | Transfer rate (EU/t) per Wireless EU upgrade |
+| `weeder` | `gasCapacity` | `16000` | `1000–1M` | Biogas tank capacity (mB) |
+| `composter` | `requiredItems` / `waterPerRecipe` | `4` / `1000` | `1–64` / `0–16000` | Organic inputs and water per fertilizer |
+| `thermal_pipe` | `maxHeatPerTick` | `100` | `1–100000` | Heat transfer cap per tick (HU/t) |
+| `database_chest` | `autoCollectRadius` | `3` | `1–16` | Magnetic pickup radius of the Database Chest |
+| `crops` | `enableCustomCrops` | `true` | `true/false` | Enables registration of custom IC2 crop species |
+| `hydroponic_chamber` | `durationTicks` / `euPerTick` | `200` / `16` | `10–72k` / `1–10k` | Base cycle duration and EU/t of the Hydroponic Chamber |
+| `wifi_grid` | `channelBufferEU` | `100000` | `1k–10M` | Smoothing EU buffer per Wi-Fi EU channel |
+| `dish_antenna` | `baseRadius` / `maxTransferPerTick` | `16` / `512` | `4–64` / `32–16k` | Dish Antenna base radius and max wireless EU/t |
 
-Mais detalhes de cálculo em [docs/CONFIGURACAO.md](docs/CONFIGURACAO.md).
-
----
-
-## Testes e Qualidade
-
-- **`src/test/java/br/cropmanager/**`:** **135 testes unitários** distribuídos em **25 suítes** cobrindo lógica de varredura, regras de automação, persistência NBT, capabilities, integridade de assets/i18n (`362` chaves `en_us`/`pt_br`), inventário do Baú de Dados, receitas e proteção contra duplicação.
-- **`src/runtimeTest/java/br/cropmanager/**`:** Addon separado (`cropmanager_tests`, nunca empacotado no JAR final) para validação em runtime real no Cleanroom (`RuntimeChecks.java` e `ClientChecks.java`).
+See [docs/CONFIGURACAO.md](docs/CONFIGURACAO.md) for detailed formulas.
 
 ---
 
-## Documentação Adicional
+## Tests & Quality
 
-- [Relatório de Revisão de Código (`docs/REVISAO_CODIGO.md`)](docs/REVISAO_CODIGO.md) — auditoria detalhada nos 5 eixos (correção, legibilidade, arquitetura, segurança e desempenho) e achados por severidade.
-- [Histórico de Versões (`CHANGELOG.md`)](CHANGELOG.md)
-- [Configuração e Fórmulas (`docs/CONFIGURACAO.md`)](docs/CONFIGURACAO.md)
-- [Guia de Validação Cleanroom (`docs/VALIDACAO.md`)](docs/VALIDACAO.md)
-- [Verificação Técnica Anterior (`VERIFICACAO.md`)](VERIFICACAO.md)
+- **`src/test/java/br/cropmanager/**`:** **269 unit tests** across **45 suites** covering scan logic, automation rules, NBT persistence, capabilities, asset/i18n integrity (`796` `en_us`/`pt_br` keys), Hydroponic Chamber, Wi-Fi EU grid, Dish Antenna, Biogas machines, multiblocks, fluid pipes, pollination, Database Chest inventory, recipes, and dupe protection.
+- **`src/runtimeTest/java/br/cropmanager/**`:** Separate addon (`cropmanager_tests`, never packaged in the release JAR) for live Cleanroom runtime validation (`RuntimeChecks.java` and `ClientChecks.java`).
+
+---
+
+## Additional Documentation
+
+- [Code Review Report (`docs/REVISAO_CODIGO.md`)](docs/REVISAO_CODIGO.md)
+- [Changelog (`CHANGELOG.md`)](CHANGELOG.md)
+- [Configuration & Formulas (`docs/CONFIGURACAO.md`)](docs/CONFIGURACAO.md)
+- [Cleanroom Validation Guide (`docs/VALIDACAO.md`)](docs/VALIDACAO.md)
+- [Previous Technical Verification (`VERIFICACAO.md`)](VERIFICACAO.md)
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE).

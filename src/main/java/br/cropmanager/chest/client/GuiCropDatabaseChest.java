@@ -378,9 +378,9 @@ public final class GuiCropDatabaseChest extends GuiContainer {
         for (int tab = 0; tab < (container.hasManagement() ? 3 : 0); tab++) {
             drawDrawerFrame(tabX(), tabY(tab), true);
             int drawerTab = tab;
-            if (openTab == drawerTab) drawRect(tabX() + 2, tabY(tab) + 2, tabX() + 22, tabY(tab) + 22, tab == 0 ? 0xFF8F803A : tab == 1 ? 0xFF914C4C : 0xFF587B8B);
+            if (openTab == drawerTab) drawRect(tabX() + 2, tabY(tab) + 2, tabX() + TAB_WIDTH - 2, tabY(tab) + 22, tab == 0 ? 0xFF8F803A : tab == 1 ? 0xFF914C4C : 0xFF587B8B);
             RenderHelper.enableGUIStandardItemLighting();
-            itemRender.renderItemAndEffectIntoGUI(TAB_ICONS[tab], tabX() + 4, tabY(tab) + 4);
+            itemRender.renderItemAndEffectIntoGUI(TAB_ICONS[tab], tabX() + (TAB_WIDTH - 16) / 2, tabY(tab) + 4);
             RenderHelper.disableStandardItemLighting();
         }
         GlStateManager.enableDepth();

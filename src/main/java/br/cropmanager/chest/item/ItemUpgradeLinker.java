@@ -5,7 +5,6 @@ import br.cropmanager.chest.inventory.TileCropDatabaseChest;
 import java.util.List;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -31,7 +30,7 @@ public final class ItemUpgradeLinker extends Item {
         setRegistryName(CropManager.ID, "upgrade_linker");
         setTranslationKey(CropManager.ID + ".upgrade_linker");
         setMaxStackSize(1);
-        setCreativeTab(CreativeTabs.REDSTONE);
+        setCreativeTab(CropManager.TAB);
     }
 
     public static boolean hasLink(ItemStack stack) {

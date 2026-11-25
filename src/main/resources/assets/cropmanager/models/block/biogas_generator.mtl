@@ -1,0 +1,30 @@
+# Crop Manager - IC2 Biogas Generator Material Library
+newmtl base
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/biogas_generator_obj
+
+newmtl tank
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/biogas_generator_obj
+
+newmtl copper
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/biogas_generator_obj
+
+newmtl steel
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/biogas_generator_obj
+
+newmtl glass
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/water_tower_glass

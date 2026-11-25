@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "facing=down":  { "model": "cropmanager:farm_lantern" },
+    "facing=up":    { "model": "cropmanager:farm_lantern_hanging" },
+    "facing=north": { "model": "cropmanager:farm_lantern_wall" },
+    "facing=south": { "model": "cropmanager:farm_lantern_wall", "y": 180 },
+    "facing=west":  { "model": "cropmanager:farm_lantern_wall", "y": 270 },
+    "facing=east":  { "model": "cropmanager:farm_lantern_wall", "y": 90 }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "particle": "cropmanager:blocks/hydroponic_chamber_side",
+    "down": "cropmanager:blocks/hydroponic_chamber_bottom",
+    "up": "cropmanager:blocks/hydroponic_chamber_top",
+    "north": "cropmanager:blocks/hydroponic_chamber_front_active",
+    "south": "cropmanager:blocks/hydroponic_chamber_back",
+    "east": "cropmanager:blocks/hydroponic_chamber_side",
+    "west": "cropmanager:blocks/hydroponic_chamber_side"
+  }
+}

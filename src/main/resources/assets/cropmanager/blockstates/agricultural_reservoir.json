@@ -1,0 +1,58 @@
+{
+  "variants": {
+    "facing=north,formed=false,tower=false": {
+      "model": "cropmanager:reservoir_controller"
+    },
+    "facing=north,formed=false,tower=true": {
+      "model": "cropmanager:reservoir_empty"
+    },
+    "facing=north,formed=true,tower=false": {
+      "model": "cropmanager:reservoir_controller"
+    },
+    "facing=north,formed=true,tower=true": {
+      "model": "cropmanager:reservoir_empty"
+    },
+    "facing=east,formed=false,tower=false": {
+      "model": "cropmanager:reservoir_controller",
+      "y": 90
+    },
+    "facing=east,formed=false,tower=true": {
+      "model": "cropmanager:reservoir_empty"
+    },
+    "facing=east,formed=true,tower=false": {
+      "model": "cropmanager:reservoir_controller",
+      "y": 90
+    },
+    "facing=east,formed=true,tower=true": {
+      "model": "cropmanager:reservoir_empty"
+    },
+    "facing=south,formed=false,tower=false": {
+      "model": "cropmanager:reservoir_controller",
+      "y": 180
+    },
+    "facing=south,formed=false,tower=true": {
+      "model": "cropmanager:reservoir_empty"
+    },
+    "facing=south,formed=true,tower=false": {
+      "model": "cropmanager:reservoir_controller",
+      "y": 180
+    },
+    "facing=south,formed=true,tower=true": {
+      "model": "cropmanager:reservoir_empty"
+    },
+    "facing=west,formed=false,tower=false": {
+      "model": "cropmanager:reservoir_controller",
+      "y": 270
+    },
+    "facing=west,formed=false,tower=true": {
+      "model": "cropmanager:reservoir_empty"
+    },
+    "facing=west,formed=true,tower=false": {
+      "model": "cropmanager:reservoir_controller",
+      "y": 270
+    },
+    "facing=west,formed=true,tower=true": {
+      "model": "cropmanager:reservoir_empty"
+    }
+  }
+}

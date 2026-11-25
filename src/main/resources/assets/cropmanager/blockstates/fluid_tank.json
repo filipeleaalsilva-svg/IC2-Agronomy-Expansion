@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,formed=false": { "model": "cropmanager:fluid_tank_controller" },
+    "facing=north,formed=true": { "model": "cropmanager:fluid_tank_empty" },
+    "facing=east,formed=false": { "model": "cropmanager:fluid_tank_controller", "y": 90 },
+    "facing=east,formed=true": { "model": "cropmanager:fluid_tank_empty" },
+    "facing=south,formed=false": { "model": "cropmanager:fluid_tank_controller", "y": 180 },
+    "facing=south,formed=true": { "model": "cropmanager:fluid_tank_empty" },
+    "facing=west,formed=false": { "model": "cropmanager:fluid_tank_controller", "y": 270 },
+    "facing=west,formed=true": { "model": "cropmanager:fluid_tank_empty" }
+  }
+}

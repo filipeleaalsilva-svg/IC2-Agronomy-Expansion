@@ -5,6 +5,44 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/)
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.5.0-alpha.11] - 2026-11-25
+
+### Adicionado
+- **Câmara Hidropônica (`hydroponic_chamber`)** — máquina Tier 2 EU (`50.000 EU`, `16 EU/t`, tanque de `16.000 mB` de água) que cultiva Sacos de Sementes IC2 em ambiente fechado via `VirtualCropTile` (contendo radiação de `radbloom`). Exige `greenhouse_glass` diretamente acima e subsolo válido abaixo (`dirt`/`farmland`/`grass`, ou `radioactive_soil` para `radbloom`), com bônus opcionais de cúpula `3×3` (`+25%`) e fonte de calor IC2 (`+50%`), automação segura (preserva a Seed Bag) e suporte a Fertilizante Catalítico e upgrades IC2.
+- **Gerador a Biogás Agrícola (`biogas_generator` + `biogas_generator_casing`)** — estrutura multibloco oca `3×3×3` que queima Biogás IC2 (`16.000 mB`) para gerar e emitir até `32 EU/t` pela face frontal.
+- **Queimador Térmico a Biogás (`biogas_heat_burner`)** — fonte térmica (`IHeatSource`) alimentada por Biogás IC2 entregando até `32 HU/t` sob demanda pela face frontal.
+- **Pulverizador Agrícola a Biogás (`biogas_sprayer`)** — aplica água (`25 mB` + `1 mB` de biogás) e fertilizantes em área `9×9` ao redor usando Biogás IC2.
+- **Regador Diagonal (`sprinkler_diagonal`)** — regador `19×19` com 4 quadrantes `9×9` independentes (NO, NE, SO, SE) selecionáveis e 3 modos de redstone.
+- **Ferramenta de Cruzamento (`crossing_tool`)** — vincula estacas duplas vazias, armazena estoque interno em 3 slots e colhe/rearma o cruzamento automaticamente com 1 clique direito.
+- **Rede Wi-Fi de EU (`eu_wifi_plug`, `eu_wifi_point`) e Antena Parabólica de EU (`eu_dish_antenna`)** — transmissão sem fio por canais compartilhados (públicos/privados com perda configurável entre dimensões) e transmissão em área para máquinas com `wireless_eu_upgrade`.
+- **5 Novos Crops IC2 (`resincane`, `cryolotus`, `cupric_moss`, `stannum_herb`, `voltreed`)** — expandindo a linha para `15` espécies customizadas integradas ao HEI/JEI e ao Manual Agrícola.
+- **Blocos Decorativos e Luminárias (`greenhouse_frame`, `garden_trellis`, `farm_lantern`, `wooden_sconce`, `industrial_lantern`, `glass_lamp`)** — iluminação nível `15` montável em chão, parede ou teto e acabamentos para estufas.
+- **Reservatório Agrícola (`agricultural_reservoir`) e Carcaça (`reservoir_casing`)** — controlador de estrutura multibloco `3×5×3` com dois tanques independentes, filtros por fluido, suporte a recipientes e transferência automática com energia IC2.
+- **Tanque Industrial de Fluido (`fluid_tank`) e Carcaça (`fluid_tank_casing`)** — multibloco `3×5×3` sem consumo de EU para armazenamento em massa (`128.000 mB` base + até 8 upgrades de capacidade), portas por face e auto-extração por redstone.
+- **Silo Agrícola (`agricultural_silo`) e Carcaça (`silo_casing`)** — multibloco `3×5×3` sem consumo de EU para armazenamento em massa de um tipo de item (`128.000` base + até 8 upgrades de capacidade), trava de item e auto-extração por redstone.
+- **Tubos de Fluido (`fluid_pipe`)** — logística de fluidos sem EU com equalização entre tanques e distribuição round-robin.
+- **Colmeia Polinizadora (`pollinator_hive`) e Vidro de Estufa (`greenhouse_glass`)** — aceleração de cruzamentos em estacas duplas (com carga de **Pó Mutagênico**) e bônus de crescimento por random tick sob vidro de estufa.
+- **Manual Agrícola (`agricultural_manual`)** — guia ilustrado in-game com busca, navegação por categorias e páginas detalhadas.
+
+### Alterado
+- **Identidade do Mod:** nome de exibição atualizado para **IC2: Agronomy Expansion** (`CropManager.NAME`) com aba criativa dedicada (`CropManager.TAB`) e artefato `IC2-Agronomy-Expansion-0.5.0-alpha11.jar`.
+- **Regadores Agrícolas (`sprinkler_mk1..3`)** — adição de 3 modos de redstone alternáveis via *Agachar + Clique Direito*.
+- **Capinador a Biogás** — cada erva daninha removida rende um item **Weed** do IC2 em uma saída dedicada, acessível por conduítes. Se a saída estiver cheia, a erva permanece na estaca de cultivo.
+- **Composteiras Manual e Elétrica** — aceitam **Weed** do IC2 como insumo orgânico.
+
+### Corrigido
+- **Manual Agrícola (`ManualRegistry`)** — corrigido texto duplicado em `biogas_heat_burner`, `biogas_generator`, `biogas_generator_casing`, `biogas_sprayer` e `sprinkler_diagonal`, movendo-os para as categorias corretas (`Máquinas` e `Irrigação`).
+- **Empacotamento do JAR** — removido `items.zip` residual dos recursos do mod (`src/main/resources/assets/cropmanager/textures/`).
+- **Baú de Dados de Cultivos** — usa texturas próprias nas seis faces.
+- **Interface da Ferramenta de Cruzamento (`CrossingToolGui`)** — atualizada para o tema escuro padrão `#1C1C1D`.
+
+### Corrigido
+- **`EuDishContainer` e `EuWifiContainer`:** registro de `EuDishContainer` em `FarmTile.openMachine` para sincronização de estado e botão redstone na GUI da Antena Parabólica; transferência Shift-Clique no slot de fertilizante do Pulverizador a Biogás.
+- **Plugin HEI/JEI (`CropManagerJeiPlugin` / `CropRecipeCategory`):** lookup corrigido para `IC2Items.getItem("crop_stick")` e nome do mod sincronizado com `CropManager.NAME`.
+- **Multibloco do Gerador a Biogás (`BiogasGeneratorTile` / `AgriculturalMachineBlock`) e Queimador Térmico (`BiogasHeatBurnerTile`):** desvinculação imediata das cascas em `casingBroken` e `breakBlock`, preservação do estado `formed` em chunks descarregados (`DEFER`) e proteção contra leitura de estado após substituição do bloco.
+- **Rede Wi-Fi de EU (`WirelessEuGridData`, `WirelessEuUpgrade`, `EuWifiPointTile`):** bloqueio de alteração de privacidade de canais públicos pertencentes a outro jogador, conservação de EU e preservação de `lastSourceDim` ao atender máquinas cheias em outra dimensão, atualização de `EnergyNet` ao trocar Tier, ciclagem completa de taxa e guarda contra `NaN` em `drawEnergy`.
+- **Renderers (`TESR`) e Traduções:** verificação do bloco antes de ler `FACING` em `AgriculturalSiloRenderer`, `IndustrialTankRenderer`, `BiogasGeneratorRenderer`, `MonitorRenderer` e `CropChestRenderer`; adição das 6 chaves de localização faltantes do Silo Agrícola em `en_us.lang` e `pt_br.lang`.
+
 ## [0.5.0-alpha.10] - 2026-11-21
 
 ### Adicionado

@@ -28,15 +28,21 @@ import net.minecraftforge.items.ItemStackHandler;
  * <p>Converte itens orgânicos (vanilla, OreDictionary e materiais do mod) e água em fertilizante IC2,
  * suportando upgrades nativos IC2, Wireless EU Upgrade e bateria de descarga direta.
  */
-public final class ComposterTile extends FarmTile implements ITickable, IUpgradableBlock {
+public final class ComposterTile extends PoweredMachineTile {
     public static final int REQUIRED = 4, WATER_PER_RECIPE = 1000, CAPACITY = 16000, DURATION = 200, EU_PER_TICK = 5;
-    public int progress, workTicks = ManagerConfig.composterDuration;
-    public double euPerTick = ManagerConfig.composterEuPerTick;
-    private boolean upgradesDirty = true;
-    public String condition = "compost_input";
-    public final BasicSink energy = createSink(ManagerConfig.composterEnergyCapacity, ManagerConfig.composterSinkTier);
-    @Override public BasicSink energySink() { return energy; }
-    @Override public boolean isSupportMachine() { return true; }
+    public ComposterTile() {
+        super(ManagerConfig.composterEnergyCapacity, ManagerConfig.composterSinkTier,
+                ManagerConfig.composterDuration, ManagerConfig.composterEuPerTick, "compost_input");
+    }
+    @Override protected ItemStackHandler machineInventory() { return inventory; }
+    @Override protected int upgradeStartSlot() { return 2; }
+    @Override protected int upgradeEndSlot() { return 6; }
+    @Override protected int batterySlot() { return 6; }
+    @Override protected int baseDuration() { return ManagerConfig.composterDuration; }
+    @Override protected double baseEuPerTick() { return ManagerConfig.composterEuPerTick; }
+    @Override protected int baseEnergyCapacity() { return ManagerConfig.composterEnergyCapacity; }
+    @Override protected int baseSinkTier() { return ManagerConfig.composterSinkTier; }
+    @Override protected boolean processMachineTick() { return processTick(); }
     public final FluidTank water = new FluidTank(ManagerConfig.composterTankCapacity) {
         { setCanDrain(false); }
         @Override public boolean canFillFluidType(FluidStack stack) { return stack != null && stack.getFluid() == FluidRegistry.WATER; }
@@ -48,6 +54,11 @@ public final class ComposterTile extends FarmTile implements ITickable, IUpgrada
     };
     public static boolean organic(ItemStack stack) {
         if (stack.isEmpty()) return false;
+        // IC2 Crop Resources: Weed (ic2:crop_res, variant "weed", metadata 5).
+        // Use the IC2 item API instead of a hard-coded metadata value so this
+        // remains tied to the configured IC2 resource item.
+        ItemStack weed = ic2.api.item.IC2Items.getItem("crop_res", "weed");
+        if (weed != null && !weed.isEmpty() && ItemStack.areItemsEqual(stack, weed)) return true;
         Item item = stack.getItem();
         if (item == CropManager.BIO_FIBER || item == CropManager.NITRO_ESSENCE) return true;
         if (item == Items.WHEAT || item == Items.WHEAT_SEEDS || item == Items.PUMPKIN_SEEDS || item == Items.MELON_SEEDS
@@ -63,18 +74,6 @@ public final class ComposterTile extends FarmTile implements ITickable, IUpgrada
                     || name.equals("cropCarrot") || name.equals("cropPotato") || name.equals("cropBeetroot")) return true;
         }
         return false;
-    }
-    @Override public void onLoad() { if (!world.isRemote) { recalculateUpgrades(); energy.onLoad(); } }
-    @Override public void invalidate() { energy.invalidate(); super.invalidate(); }
-    @Override public void onChunkUnload() { energy.onChunkUnload(); super.onChunkUnload(); }
-    @Override public boolean shouldRefresh(net.minecraft.world.World w, net.minecraft.util.math.BlockPos p, IBlockState a, IBlockState b) { return a.getBlock() != b.getBlock(); }
-    @Override public void update() {
-        if (world.isRemote) return;
-        if (upgradesDirty) recalculateUpgrades();
-        tickUpgrades(this, inventory, 2, 6);
-        dischargeBattery(inventory, 6, energy);
-        energy.update(); boolean working = processTick();
-        setActive(working);
     }
     boolean processTick() {
         if (upgradesDirty) recalculateUpgrades();
@@ -92,43 +91,24 @@ public final class ComposterTile extends FarmTile implements ITickable, IUpgrada
         }
         return true;
     }
-    private void recalculateUpgrades() {
-        double[] multipliers = applyIc2Upgrades(this, inventory, 2, 6, energy, 1, ManagerConfig.composterEnergyCapacity, ManagerConfig.composterSinkTier);
-        int next = Math.max(1, (int)Math.ceil(ManagerConfig.composterDuration * multipliers[0]));
-        progress = Math.min(next - 1, (int)((long)progress * next / Math.max(1, workTicks))); workTicks = next;
-        euPerTick = Math.ceil(ManagerConfig.composterEuPerTick * multipliers[1]);
-        upgradesDirty = false;
-    }
-    @Override public double getEnergy() { return energy.getEnergyStored(); }
-    @Override public boolean useEnergy(double amount) { boolean used = energy.useEnergy(amount); if (used) markDirty(); return used; }
-    @Override public Set<UpgradableProperty> getUpgradableProperties() { return EnumSet.of(UpgradableProperty.Processing, UpgradableProperty.EnergyStorage, UpgradableProperty.Transformer); }
     public IItemHandler itemsForFace(@Nullable EnumFacing face) {
-        return new IItemHandler() {
-            public int getSlots() { return inventory.getSlots(); }
-            public ItemStack getStackInSlot(int slot) { return inventory.getStackInSlot(slot); }
-            public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-                // Automation only feeds organics; upgrades are installed by hand.
-                if (slot != 0 || !inventory.isItemValid(slot, stack)) return stack;
-                return inventory.insertItem(slot, stack, simulate);
-            }
-            public ItemStack extractItem(int slot, int amount, boolean simulate) {
-                return slot == 1 ? inventory.extractItem(slot, amount, simulate) : ItemStack.EMPTY;
-            }
-            public int getSlotLimit(int slot) { return inventory.getSlotLimit(slot); }
-        };
+        return exposedItems(inventory, 1, 1);
     }
     @Override public boolean hasCapability(Capability<?> cap, @Nullable EnumFacing face) { return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY || super.hasCapability(cap, face); }
     @Override public <T> T getCapability(Capability<T> cap, @Nullable EnumFacing face) { if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemsForFace(face)); if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(water); return super.getCapability(cap, face); }
     @Override public NBTTagCompound guiState() { NBTTagCompound t = new NBTTagCompound(); t.setDouble("EU", energy.getEnergyStored()); t.setInteger("Water", water.getFluidAmount()); t.setInteger("TankCapacity", water.getCapacity()); t.setInteger("Work", progress); t.setInteger("Duration", workTicks); t.setDouble("Demand", euPerTick); t.setDouble("Capacity", energy.getCapacity()); t.setInteger("Tier", energy.getSinkTier()); t.setString("Condition", condition); return t; }
     @Override public void acceptGuiState(NBTTagCompound t) { energy.setCapacity(t.getDouble("Capacity")); energy.setSinkTier(t.getInteger("Tier")); energy.setEnergyStored(t.getDouble("EU")); if (t.getInteger("TankCapacity") > 0) water.setCapacity(t.getInteger("TankCapacity")); water.setFluid(t.getInteger("Water") > 0 ? new FluidStack(FluidRegistry.WATER, t.getInteger("Water")) : null); workTicks = Math.max(1, t.getInteger("Duration")); euPerTick = t.getDouble("Demand"); progress = t.getInteger("Work"); condition = t.getString("Condition"); }
-    @Override public NBTTagCompound writeToNBT(NBTTagCompound t) { super.writeToNBT(t); energy.writeToNBT(t); t.setTag("Inventory", inventory.serializeNBT()); t.setTag("Water", water.writeToNBT(new NBTTagCompound())); t.setInteger("Work", progress); t.setInteger("Duration", workTicks); return t; }
+    @Override public NBTTagCompound writeToNBT(NBTTagCompound t) { super.writeToNBT(t); writePoweredNBT(t); t.setTag("Water", water.writeToNBT(new NBTTagCompound())); return t; }
     @Override public void readFromNBT(NBTTagCompound t) {
-        super.readFromNBT(t); energy.readFromNBT(t); double eu = energy.getEnergyStored();
-        NBTTagCompound items = t.getCompoundTag("Inventory").copy(); items.setInteger("Size", 7); inventory.deserializeNBT(items);
+        super.readFromNBT(t);
         water.readFromNBT(t.getCompoundTag("Water")); resizeTank(water, ManagerConfig.composterTankCapacity);
-        workTicks = Math.max(1, t.hasKey("Duration") ? t.getInteger("Duration") : ManagerConfig.composterDuration);
-        progress = Math.max(0, t.getInteger("Work")); upgradesDirty = true; recalculateUpgrades();
-        energy.setEnergyStored(Double.isFinite(eu) ? Math.max(0, Math.min(energy.getCapacity(), eu)) : 0);
+        readPoweredNBT(t);
     }
-    @Override public void dropContents() { dropHandler(inventory); }
+    @Override EquipmentLayout equipmentLayout() {
+        return new EquipmentLayout(inventory, 126,
+                new int[]{54, 112, 148, 148, 148, 148, 8},
+                new int[]{42, 42, 22, 40, 58, 76, 62},
+                1, false,
+                s -> isBattery(s) ? new int[]{6, 7} : ManagerTile.isIc2Upgrade(s) ? new int[]{2, 6} : new int[]{0, 1});
+    }
 }

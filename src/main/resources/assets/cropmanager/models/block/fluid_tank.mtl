@@ -1,0 +1,36 @@
+# Crop Manager - Industrial Fluid Reservoir (Iron) Material Library
+newmtl steel
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/storage_steel
+
+newmtl iron_plate
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/fluid_tank_iron
+
+newmtl iron_band
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/fluid_tank_band
+
+newmtl glass
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/water_tower_glass
+
+newmtl brass
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/water_tower_brass
+
+newmtl controller
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+d 1.0
+map_Kd cropmanager:blocks/fluid_tank_controller

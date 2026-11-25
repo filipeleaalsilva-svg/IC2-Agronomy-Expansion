@@ -1,5 +1,6 @@
 package br.cropmanager;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -10,7 +11,9 @@ import net.minecraft.util.EnumFacing;
 public final class MonitorRenderer extends TileEntitySpecialRenderer<MonitorTile> {
     @Override public void render(MonitorTile tile, double x, double y, double z, float ticks, int destroy, float alpha) {
         if (tile.getWorld() == null) return;
-        EnumFacing facing = tile.getWorld().getBlockState(tile.getPos()).getValue(ManagerBlock.FACING);
+        IBlockState state = tile.getWorld().getBlockState(tile.getPos());
+        if (!(state.getBlock() instanceof ManagerBlock)) return;
+        EnumFacing facing = state.getValue(ManagerBlock.FACING);
         float lightX = OpenGlHelper.lastBrightnessX, lightY = OpenGlHelper.lastBrightnessY;
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240, 240);
         GlStateManager.pushMatrix();

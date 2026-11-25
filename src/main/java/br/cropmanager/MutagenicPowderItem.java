@@ -5,7 +5,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -23,7 +22,7 @@ public final class MutagenicPowderItem extends Item {
     public MutagenicPowderItem() {
         setRegistryName(CropManager.ID, "mutagenic_powder");
         setTranslationKey("cropmanager.mutagenic_powder");
-        setCreativeTab(CreativeTabs.MATERIALS);
+        setCreativeTab(CropManager.TAB);
         setMaxStackSize(64);
     }
 

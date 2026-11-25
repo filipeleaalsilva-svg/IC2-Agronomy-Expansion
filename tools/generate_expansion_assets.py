@@ -247,47 +247,50 @@ def generate_seed_analyzer_assets() -> None:
 
 
 def generate_manual_composter_assets() -> None:
-    # 1. Hand-pixeled warm dark-oak timber slats (16x16, rich grain + bevels)
+    # 1. Warm oak barrel/tub planks inspired by Actually Additions' Compost
     wood = from_grid([
+        "wWWWWWWWWWWWWWWw",
+        "WttMtMMttMMtMttW",
+        "WMmMMmmMMmMMmmMW",
+        "WmmWmmmWWmmmWmmW",
+        "WWWWWWWWWWWWWWWW",
+        "wttttMMttMMttttw",
+        "WMmmMMmMMmMMmmMW",
+        "WmmWWmmWWmmWWmmW",
+        "WWWWWWWWWWWWWWWW",
+        "wttMMtMttMtMMttw",
+        "WMmMMmmMMmmMMmMW",
+        "WmmmWmmWWmmWmmmW",
+        "WWWWWWWWWWWWWWWW",
+        "wtMttMMttMMttMtw",
+        "WMmmWmmMMmmWmmMW",
         "wwwwwwwwwwwwwwww",
-        "MMmMMmmMMmMMmmMM",
-        "mWmMmMWmmWmMMmWm",
-        "mmWWmmWmMMmWWmmm",
-        "mWmmWmmWmWmmWmmW",
-        "WWmWWmmWWmmWWmWW",
-        "wwWwwWWwwWWwwWww",
-        "kkkkkkkkkkkkkkkk",
-        "MMmmMMmMMmmMMmMM",
-        "mMMmWmmWmMWmmWmM",
-        "mmWmmWWmmWmWWmmm",
-        "mWWmWmmWWmWmmWWm",
-        "WWmmWWmWWmmWWmWW",
-        "wWWwwWwwWWwwWwwW",
-        "wwwwwwwwwwwwwwww",
-        "kkkkkkkkkkkkkkkk",
     ])
     save_png(TEX_BLOCKS / "manual_composter_wood.png", wood)
 
-    # 2. Riveted IC2 steel corner bracket / rim plate (Section 1.1 palette)
-    steel = from_grid([
-        "1111111111111111",
-        "1666666666666662",
-        "1673555555553752",
-        "1635555555555352",
-        "1655444444445552",
-        "1655455555545552",
-        "1655455655545552",
-        "1655455545545552",
-        "1655455555545552",
-        "1655455555545552",
-        "1655444444445552",
-        "1655555555555552",
-        "1635555555555352",
-        "1673555555553752",
-        "1222222222222222",
-        "1111111111111111",
+    # 2. Dark-oak / spruce wooden rim & corner posts (Actually Additions wooden trough trim, no steel posts)
+    rim = from_grid([
+        "kkkkkkkkkkkkkkkk",
+        "kMMMMMMMMMMMMMMw",
+        "kMtWWWWWWWWWWtWw",
+        "kMWmmmmmmmmmmWWw",
+        "kMWmWWWWWWWWmWWw",
+        "kMWmWwwwwwwWmWWw",
+        "kMWmWwWWWWwWmWWw",
+        "kMWmWwWmmWwWmWWw",
+        "kMWmWwWmmWwWmWWw",
+        "kMWmWwWWWWwWmWWw",
+        "kMWmWwwwwwwWmWWw",
+        "kMWmWWWWWWWWmWWw",
+        "kMWmmmmmmmmmmWWw",
+        "kMtWWWWWWWWWWtWw",
+        "kwwwwwwwwwwwwwww",
+        "kkkkkkkkkkkkkkkk",
     ])
-    save_png(TEX_BLOCKS / "manual_composter_steel.png", steel)
+    save_png(TEX_BLOCKS / "manual_composter_rim.png", rim)
+    legacy_steel = TEX_BLOCKS / "manual_composter_steel.png"
+    if legacy_steel.exists():
+        legacy_steel.unlink()
 
     # 3. Raw organic matter (fresh chopped leaves, twigs & straw - IC2 plant_ball inspired)
     raw = from_grid([
@@ -352,18 +355,18 @@ def generate_manual_composter_assets() -> None:
     ])
     save_png(TEX_BLOCKS / "manual_composter_ready.png", ready)
 
-    # Enhanced 3D JSON model (slatted timber bin + IC2 riveted steel corner posts, lower brace, top rim & feet)
+    # Half-height (8px / 0.5 block) open wooden tub inspired by Actually Additions' Compost
     def faces_all(tex, uv=None):
         f = {"texture": f"#{tex}"}
         if uv is not None:
             f["uv"] = uv
         return {side: dict(f) for side in ("up", "down", "north", "south", "east", "west")}
 
-    def slat_ns(y0, y1, z0, z1):
+    def plank_ns(y0, y1, z0, z1):
         uv_side = [0, 0, 16, 8]
         return {
-            "from": [2.5, y0, z0],
-            "to": [13.5, y1, z1],
+            "from": [3, y0, z0],
+            "to": [13, y1, z1],
             "faces": {
                 "north": {"texture": "#wood", "uv": uv_side},
                 "south": {"texture": "#wood", "uv": uv_side},
@@ -372,11 +375,11 @@ def generate_manual_composter_assets() -> None:
             },
         }
 
-    def slat_ew(y0, y1, x0, x1):
+    def plank_ew(y0, y1, x0, x1):
         uv_side = [0, 0, 16, 8]
         return {
-            "from": [x0, y0, 2.5],
-            "to": [x1, y1, 13.5],
+            "from": [x0, y0, 3],
+            "to": [x1, y1, 13],
             "faces": {
                 "east": {"texture": "#wood", "uv": uv_side},
                 "west": {"texture": "#wood", "uv": uv_side},
@@ -386,66 +389,57 @@ def generate_manual_composter_assets() -> None:
         }
 
     base_elements = [
-        # Bottom wooden floor
-        {"from": [2, 1, 2], "to": [14, 2.5, 14], "faces": faces_all("wood", [0, 0, 16, 16])},
-        # 4 IC2 Steel vertical corner posts (with riveted steel texture)
-        {"from": [1, 0, 1], "to": [3, 15, 3], "faces": faces_all("steel", [0, 0, 4, 16])},
-        {"from": [13, 0, 1], "to": [15, 15, 3], "faces": faces_all("steel", [12, 0, 16, 16])},
-        {"from": [1, 0, 13], "to": [3, 15, 15], "faces": faces_all("steel", [0, 0, 4, 16])},
-        {"from": [13, 0, 13], "to": [15, 15, 15], "faces": faces_all("steel", [12, 0, 16, 16])},
-        # Lower IC2 steel base rails (y=1..2.5)
-        {"from": [3, 1, 1.2], "to": [13, 2.5, 2.6], "faces": faces_all("steel", [2, 13, 14, 16])},
-        {"from": [3, 1, 13.4], "to": [13, 2.5, 14.8], "faces": faces_all("steel", [2, 13, 14, 16])},
-        {"from": [1.2, 1, 3], "to": [2.6, 2.5, 13], "faces": faces_all("steel", [2, 13, 14, 16])},
-        {"from": [13.4, 1, 3], "to": [14.8, 2.5, 13], "faces": faces_all("steel", [2, 13, 14, 16])},
-        # 3 tiers of warm timber slats with 0.75px aeration gaps
-        slat_ns(3.0, 6.2, 1.5, 2.5),
-        slat_ns(3.0, 6.2, 13.5, 14.5),
-        slat_ew(3.0, 6.2, 1.5, 2.5),
-        slat_ew(3.0, 6.2, 13.5, 14.5),
-        slat_ns(6.9, 10.0, 1.5, 2.5),
-        slat_ns(6.9, 10.0, 13.5, 14.5),
-        slat_ew(6.9, 10.0, 1.5, 2.5),
-        slat_ew(6.9, 10.0, 13.5, 14.5),
-        slat_ns(10.7, 13.5, 1.5, 2.5),
-        slat_ns(10.7, 13.5, 13.5, 14.5),
-        slat_ew(10.7, 13.5, 1.5, 2.5),
-        slat_ew(10.7, 13.5, 13.5, 14.5),
-        # Top IC2 steel rim rails (y=13.5..15)
-        {"from": [3, 13.5, 1], "to": [13, 15, 3], "faces": faces_all("steel", [2, 0, 14, 3])},
-        {"from": [3, 13.5, 13], "to": [13, 15, 15], "faces": faces_all("steel", [2, 0, 14, 3])},
-        {"from": [1, 13.5, 3], "to": [3, 15, 13], "faces": faces_all("steel", [0, 2, 3, 14])},
-        {"from": [13, 13.5, 3], "to": [15, 15, 13], "faces": faces_all("steel", [13, 2, 16, 14])},
+        # Bottom wooden floor (y=0.5..1.5)
+        {"from": [2, 0.5, 2], "to": [14, 1.5, 14], "faces": faces_all("wood", [0, 0, 16, 16])},
+        # 4 Low dark-oak corner posts (y=0..8, exact half-block height)
+        {"from": [1, 0, 1], "to": [3, 8, 3], "faces": faces_all("rim", [0, 0, 4, 16])},
+        {"from": [13, 0, 1], "to": [15, 8, 3], "faces": faces_all("rim", [12, 0, 16, 16])},
+        {"from": [1, 0, 13], "to": [3, 8, 15], "faces": faces_all("rim", [0, 0, 4, 16])},
+        {"from": [13, 0, 13], "to": [15, 8, 15], "faces": faces_all("rim", [12, 0, 16, 16])},
+        # 2 tiers of tight oak barrel planks (y=1.0..4.0 and y=4.2..7.0)
+        plank_ns(1.0, 4.0, 1.5, 2.5),
+        plank_ns(1.0, 4.0, 13.5, 14.5),
+        plank_ew(1.0, 4.0, 1.5, 2.5),
+        plank_ew(1.0, 4.0, 13.5, 14.5),
+        plank_ns(4.2, 7.0, 1.5, 2.5),
+        plank_ns(4.2, 7.0, 13.5, 14.5),
+        plank_ew(4.2, 7.0, 1.5, 2.5),
+        plank_ew(4.2, 7.0, 13.5, 14.5),
+        # Top dark-oak lip rails (y=7.0..8.0)
+        {"from": [3, 7.0, 1], "to": [13, 8.0, 2.6], "faces": faces_all("rim", [2, 0, 14, 3])},
+        {"from": [3, 7.0, 13.4], "to": [13, 8.0, 15], "faces": faces_all("rim", [2, 0, 14, 3])},
+        {"from": [1, 7.0, 3], "to": [2.6, 8.0, 13], "faces": faces_all("rim", [0, 2, 3, 14])},
+        {"from": [13.4, 7.0, 3], "to": [15, 8.0, 13], "faces": faces_all("rim", [13, 2, 16, 14])},
     ]
 
     fill_specs = {
         0: (None, None),
-        1: (5.2, "cropmanager:blocks/manual_composter_raw"),
-        2: (8.2, "cropmanager:blocks/manual_composter_raw"),
-        3: (11.2, "cropmanager:blocks/manual_composter_raw"),
-        4: (13.0, "cropmanager:blocks/manual_composter_fermenting"),
-        5: (13.0, "cropmanager:blocks/manual_composter_ready"),
+        1: (3.2, "cropmanager:blocks/manual_composter_raw"),
+        2: (4.8, "cropmanager:blocks/manual_composter_raw"),
+        3: (6.2, "cropmanager:blocks/manual_composter_raw"),
+        4: (7.2, "cropmanager:blocks/manual_composter_fermenting"),
+        5: (7.2, "cropmanager:blocks/manual_composter_ready"),
     }
 
     variants = {}
     for level, (top_y, fill_tex) in fill_specs.items():
         textures = {
             "wood": "cropmanager:blocks/manual_composter_wood",
-            "steel": "cropmanager:blocks/manual_composter_steel",
+            "rim": "cropmanager:blocks/manual_composter_rim",
             "particle": "cropmanager:blocks/manual_composter_wood",
         }
         elements = list(base_elements)
         if top_y is not None and fill_tex is not None:
             textures["fill"] = fill_tex
             elements.append({
-                "from": [2.5, 2.5, 2.5],
+                "from": [2.5, 1.5, 2.5],
                 "to": [13.5, top_y, 13.5],
                 "faces": {
                     "up": {"texture": "#fill", "uv": [1, 1, 15, 15]},
-                    "north": {"texture": "#fill", "uv": [1, 2, 15, 14]},
-                    "south": {"texture": "#fill", "uv": [1, 2, 15, 14]},
-                    "east": {"texture": "#fill", "uv": [1, 2, 15, 14]},
-                    "west": {"texture": "#fill", "uv": [1, 2, 15, 14]},
+                    "north": {"texture": "#fill", "uv": [1, 4, 15, 12]},
+                    "south": {"texture": "#fill", "uv": [1, 4, 15, 12]},
+                    "east": {"texture": "#fill", "uv": [1, 4, 15, 12]},
+                    "west": {"texture": "#fill", "uv": [1, 4, 15, 12]},
                 },
             })
         save_json(MODELS_BLOCK / f"manual_composter_{level}.json", {
@@ -453,9 +447,9 @@ def generate_manual_composter_assets() -> None:
             "textures": textures,
             "elements": elements,
             "display": {
-                "gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [0.625, 0.625, 0.625]},
+                "gui": {"rotation": [30, 225, 0], "translation": [0, 1.5, 0], "scale": [0.65, 0.65, 0.65]},
                 "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [0.25, 0.25, 0.25]},
-                "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0.5, 0.5, 0.5]},
+                "fixed": {"rotation": [0, 0, 0], "translation": [0, 1, 0], "scale": [0.5, 0.5, 0.5]},
             },
         })
         variants[f"fill={level}"] = {"model": f"cropmanager:manual_composter_{level}"}

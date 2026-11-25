@@ -109,6 +109,36 @@ public class PortableInventoryTest {
         assertNull(PortableCropInventory.open(player, 1));
         assertNull(new br.cropmanager.CommonProxy().getServerGuiElement(12, player, world, 1, 0, 0));
     }
+    @Test public void linkedTransferKeepsOverflowAndCanRetryWithoutDuplicatingSeeds() {
+        br.cropmanager.chest.inventory.TileCropDatabaseChest chest =
+                new br.cropmanager.chest.inventory.TileCropDatabaseChest(1) {
+                    @Override public void markDirty() { }
+                };
+        chest.setWorld(world);
+        chest.setPos(net.minecraft.util.math.BlockPos.ORIGIN);
+        when(world.getTileEntity(chest.getPos())).thenReturn(chest);
+        ItemStack first = SeedFixtures.bag(1, 4);
+        ItemStack second = SeedFixtures.bag(2, 4);
+        inventory.seeds().setStackInSlot(0, first);
+        inventory.seeds().setStackInSlot(1, second);
+        br.cropmanager.chest.item.ItemUpgradeLinker.setLink(carrier, 0, chest.getPos());
+
+        inventory.transferSeedsTo(chest);
+        assertTrue(chest.isEmpty());
+        assertFalse(PortableCropInventory.open(player, 0).isEmpty());
+        when(world.isBlockLoaded(chest.getPos())).thenReturn(true);
+        inventory.transferSeedsTo(chest);
+        PortableCropInventory reopened = PortableCropInventory.open(player, 0);
+        assertEquals(first.serializeNBT(), chest.getStackInSlot(0).serializeNBT());
+        assertTrue(reopened.getStackInSlot(0).isEmpty());
+        assertEquals(second.serializeNBT(), reopened.getStackInSlot(1).serializeNBT());
+        reopened.transferSeedsTo(chest);
+        assertEquals(first.serializeNBT(), chest.decrStackSize(0, 1).serializeNBT());
+        reopened.transferSeedsTo(chest);
+        assertEquals(second.serializeNBT(), chest.getStackInSlot(0).serializeNBT());
+        assertTrue(PortableCropInventory.open(player, 0).isEmpty());
+        assertTrue(br.cropmanager.chest.item.ItemUpgradeLinker.hasLink(carrier));
+    }
     @Test public void pickupToggleIsServerValidatedAndPersists() throws java.io.IOException {
         assertFalse(container.isPickupEnabled());
         net.minecraft.network.PacketBuffer buffer = new net.minecraft.network.PacketBuffer(io.netty.buffer.Unpooled.buffer());

@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "cropmanager:biogas_heat_burner",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "cropmanager:biogas_heat_burner",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "cropmanager:biogas_heat_burner",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "cropmanager:biogas_heat_burner",
+      "y": 270
+    }
+  }
+}

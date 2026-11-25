@@ -2,6 +2,7 @@ package br.cropmanager;
 
 /** Pure traversal and budgeting rules, shared by the machine and its tests. */
 public final class ScanLogic {
+    public static final int MAX_HORIZONTAL_OFFSET = 16, MAX_VERTICAL_OFFSET = 5;
     private ScanLogic() {}
 
     public static int volume(int radius, int layers) {
@@ -20,6 +21,17 @@ public final class ScanLogic {
             }
         }
         return new int[] {index % side - radius, y, index % plane / side - radius};
+    }
+
+    public static int[] offset(int index, int radius, int layers, int offsetX, int offsetY, int offsetZ) {
+        int[] base = offset(index, radius, layers);
+        return new int[] {base[0] + offsetX, base[1] + offsetY, base[2] + offsetZ};
+    }
+
+    public static boolean validOffsets(int offsetX, int offsetY, int offsetZ) {
+        return Math.abs(offsetX) <= MAX_HORIZONTAL_OFFSET
+                && Math.abs(offsetZ) <= MAX_HORIZONTAL_OFFSET
+                && Math.abs(offsetY) <= MAX_VERTICAL_OFFSET;
     }
 
     public static double credit(double previous, double interval, int cap) {

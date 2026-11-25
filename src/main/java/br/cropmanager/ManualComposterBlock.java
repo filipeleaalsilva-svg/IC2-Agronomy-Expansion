@@ -8,7 +8,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.PotionTypes;
@@ -30,17 +29,17 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-/** Wooden + IC2-steel framed manual composter with direct right-click world interaction. */
+/** Wooden Actually-Additions-style half-height manual composter with direct right-click interaction. */
 public final class ManualComposterBlock extends Block {
     /** 0=empty, 1..3=raw filling, 4=fermenting, 5=ready compost. */
     public static final PropertyInteger FILL = PropertyInteger.create("fill", 0, 5);
-    private static final AxisAlignedBB BOUNDS = new AxisAlignedBB(0.0625, 0.0, 0.0625, 0.9375, 0.9375, 0.9375);
+    private static final AxisAlignedBB BOUNDS = new AxisAlignedBB(0.0625, 0.0, 0.0625, 0.9375, 0.5, 0.9375);
 
     public ManualComposterBlock() {
         super(Material.WOOD);
         setRegistryName(CropManager.ID, "manual_composter");
         setTranslationKey("cropmanager.manual_composter");
-        setCreativeTab(CreativeTabs.DECORATIONS);
+        setCreativeTab(CropManager.TAB);
         setHardness(2.0F);
         setResistance(5.0F);
         setSoundType(SoundType.WOOD);
@@ -74,7 +73,7 @@ public final class ManualComposterBlock extends Block {
             ItemStack out = composter.collectCompost();
             if (!out.isEmpty()) {
                 if (!player.inventory.addItemStackToInventory(out)) {
-                    InventoryHelper.spawnItemStack(world, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, out);
+                    InventoryHelper.spawnItemStack(world, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, out);
                 }
                 world.playSound(null, pos, SoundEvents.BLOCK_GRAVEL_BREAK, SoundCategory.BLOCKS, 0.7F, 1.1F);
                 return true;
@@ -88,7 +87,7 @@ public final class ManualComposterBlock extends Block {
                 held.shrink(1);
                 if (held.isEmpty()) player.setHeldItem(hand, empty);
                 else if (!player.inventory.addItemStackToInventory(empty)) {
-                    InventoryHelper.spawnItemStack(world, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, empty);
+                    InventoryHelper.spawnItemStack(world, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, empty);
                 }
             }
             world.playSound(null, pos, SoundEvents.ITEM_BUCKET_EMPTY, SoundCategory.BLOCKS, 0.7F, 1.0F);
@@ -145,12 +144,12 @@ public final class ManualComposterBlock extends Block {
         int fill = state.getValue(FILL);
         if (fill == 4 && rand.nextInt(3) == 0) {
             double x = pos.getX() + 0.25 + rand.nextDouble() * 0.5;
-            double y = pos.getY() + 0.92;
+            double y = pos.getY() + 0.52;
             double z = pos.getZ() + 0.25 + rand.nextDouble() * 0.5;
             world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, x, y, z, 0.0, 0.015, 0.0);
         } else if (fill == 5 && rand.nextInt(4) == 0) {
             double x = pos.getX() + 0.25 + rand.nextDouble() * 0.5;
-            double y = pos.getY() + 0.95;
+            double y = pos.getY() + 0.55;
             double z = pos.getZ() + 0.25 + rand.nextDouble() * 0.5;
             world.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY, x, y, z, 0.0, 0.02, 0.0);
         }

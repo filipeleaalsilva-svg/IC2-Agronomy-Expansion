@@ -154,16 +154,42 @@ public final class ContainerCropDatabaseChest extends Container {
     }
 
     private void sendView(IContainerListener listener) {
+        if (hasManagement() && listener instanceof EntityPlayerMP) {
+            br.cropmanager.ManagerNetwork.CHANNEL.sendTo(
+                    new br.cropmanager.chest.network.ChestSettingsMessage(windowId, chest.managementTag()),
+                    (EntityPlayerMP) listener);
+        }
+        if (listener instanceof EntityPlayerMP) {
+            br.cropmanager.ManagerNetwork.CHANNEL.sendTo(
+                    new br.cropmanager.chest.network.ChestViewMessage(
+                            windowId, page, pageCount, occupied, isPickupEnabled(), favoritesOnly, revision, positions),
+                    (EntityPlayerMP) listener);
+            return;
+        }
         listener.sendWindowProperty(this, 0, page);
         listener.sendWindowProperty(this, 1, pageCount);
         listener.sendWindowProperty(this, 2, occupied);
         listener.sendWindowProperty(this, 4, isPickupEnabled() ? 1 : 0);
         listener.sendWindowProperty(this, 5, favoritesOnly ? 1 : 0);
-        if (hasManagement() && listener instanceof EntityPlayerMP) br.cropmanager.ManagerNetwork.CHANNEL.sendTo(new br.cropmanager.chest.network.ChestSettingsMessage(windowId, chest.managementTag()), (EntityPlayerMP) listener);
 
         for (int i = 0; i < positions.length; i++) listener.sendWindowProperty(this, 10 + i, positions[i]);
         // Commit after every position: the client never displays a partially received mapping.
         listener.sendWindowProperty(this, 3, revision);
+    }
+
+    public void applyView(int page, int pageCount, int occupied, boolean pickup,
+            boolean favoritesOnly, int revision, int[] mappedPositions) {
+        this.page = page;
+        this.pageCount = Math.max(1, pageCount);
+        this.occupied = occupied;
+        if (isPortable()) getPortableInventory().setPickupEnabled(pickup);
+        this.favoritesOnly = favoritesOnly;
+        int len = Math.min(positions.length, mappedPositions.length);
+        Arrays.fill(positions, -1);
+        System.arraycopy(mappedPositions, 0, positions, 0, len);
+        System.arraycopy(positions, 0, pendingPositions, 0, positions.length);
+        this.revision = revision;
+        positionSlots();
     }
 
     @Override public void detectAndSendChanges() {
@@ -275,10 +301,13 @@ public final class ContainerCropDatabaseChest extends Container {
         // Rebuild before checking the acknowledged layout; pipes can change it between ticks.
         if (!player.world.isRemote) rebuildView();
         boolean current = !(player instanceof EntityPlayerMP) || acknowledged == revision;
-        acknowledged = -1;
         if (!current || (slotId >= 0 && slotId < capacity && !visible(slotId))) {
             dragging = false;
             resetDrag();
+            if (player instanceof EntityPlayerMP) {
+                ((EntityPlayerMP) player).sendAllContents(this, getInventory());
+                ((EntityPlayerMP) player).updateHeldItem();
+            }
             for (IContainerListener listener : listeners) sendView(listener);
             return ItemStack.EMPTY;
         }
@@ -293,11 +322,15 @@ public final class ContainerCropDatabaseChest extends Container {
         } else dragging = false;
         long revBefore = chest.getContentsRevision();
         ItemStack result = super.slotClick(slotId, button, type, player);
-        if (isPortable() && chest.getContentsRevision() != revBefore && player instanceof EntityPlayerMP) {
+        if (chest.getContentsRevision() != revBefore && !player.world.isRemote) {
             rebuildView();
-            ((EntityPlayerMP) player).sendAllContents(this, getInventory());
-            for (IContainerListener listener : listeners) sendView(listener);
-            sentContentsRevision = contentsRevision;
+            if (player instanceof EntityPlayerMP) {
+                if (isPortable()) ((EntityPlayerMP) player).sendAllContents(this, getInventory());
+                for (IContainerListener listener : listeners) sendView(listener);
+                sentContentsRevision = contentsRevision;
+                sentPageCount = pageCount;
+                acknowledged = revision;
+            }
         }
         return result;
     }

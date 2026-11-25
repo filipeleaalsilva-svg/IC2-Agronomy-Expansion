@@ -43,10 +43,18 @@ public final class ManagerContainer extends Container {
     private void sendState(EntityPlayerMP player, NBTTagCompound tag) {
         ManagerNetwork.CHANNEL.sendTo(new ManagerNetwork.State(machine.getPos(), windowId, tag), player);
     }
+    static boolean sameVisibleState(NBTTagCompound a, NBTTagCompound b) {
+        if (b == null || a.getSize() != b.getSize()) return false;
+        for (String key : a.getKeySet()) {
+            if ("ReportAge".equals(key)) continue;
+            if (!a.getTag(key).equals(b.getTag(key))) return false;
+        }
+        return true;
+    }
     @Override public void detectAndSendChanges() {
         super.detectAndSendChanges();
         NBTTagCompound state = machine.guiState();
-        if (!state.equals(lastState)) {
+        if (!sameVisibleState(state, lastState)) {
             for (IContainerListener listener : listeners)
                 if (listener instanceof EntityPlayerMP) sendState((EntityPlayerMP) listener, state);
             lastState = state;

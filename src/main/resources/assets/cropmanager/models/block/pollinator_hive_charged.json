@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "particle": "cropmanager:blocks/pollinator_hive_side",
+    "down": "cropmanager:blocks/pollinator_hive_side",
+    "up": "cropmanager:blocks/pollinator_hive_top",
+    "north": "cropmanager:blocks/pollinator_hive_front_charged",
+    "south": "cropmanager:blocks/pollinator_hive_side",
+    "west": "cropmanager:blocks/pollinator_hive_side",
+    "east": "cropmanager:blocks/pollinator_hive_side"
+  }
+}

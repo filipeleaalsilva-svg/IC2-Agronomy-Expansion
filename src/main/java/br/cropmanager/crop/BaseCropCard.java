@@ -8,6 +8,7 @@ import ic2.api.crops.ICropTile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -22,20 +23,32 @@ public class BaseCropCard extends CropCard {
     private final int maxSize;
     private final int sizeAfterHarvest;
     private final int matureLight;
+    private final Predicate<ICropTile> subsoilCheck;
     private final List<ResourceLocation> textures;
 
     public BaseCropCard(String id, CropProperties properties, String[] attributes,
             Supplier<ItemStack> gainSupplier, boolean catalyzed) {
-        this(id, properties, attributes, gainSupplier, catalyzed, 4, 2, 0);
+        this(id, properties, attributes, gainSupplier, catalyzed, 4, 2, 0, null);
+    }
+
+    public BaseCropCard(String id, CropProperties properties, String[] attributes,
+            Supplier<ItemStack> gainSupplier, boolean catalyzed, Predicate<ICropTile> subsoilCheck) {
+        this(id, properties, attributes, gainSupplier, catalyzed, 4, 2, 0, subsoilCheck);
     }
 
     public BaseCropCard(String id, CropProperties properties, String[] attributes,
             Supplier<ItemStack> gainSupplier, boolean catalyzed, int matureLight) {
-        this(id, properties, attributes, gainSupplier, catalyzed, 4, 2, matureLight);
+        this(id, properties, attributes, gainSupplier, catalyzed, 4, 2, matureLight, null);
     }
 
     public BaseCropCard(String id, CropProperties properties, String[] attributes,
             Supplier<ItemStack> gainSupplier, boolean catalyzed, int maxSize, int sizeAfterHarvest, int matureLight) {
+        this(id, properties, attributes, gainSupplier, catalyzed, maxSize, sizeAfterHarvest, matureLight, null);
+    }
+
+    public BaseCropCard(String id, CropProperties properties, String[] attributes,
+            Supplier<ItemStack> gainSupplier, boolean catalyzed, int maxSize, int sizeAfterHarvest, int matureLight,
+            Predicate<ICropTile> subsoilCheck) {
         this.id = id;
         this.properties = properties;
         this.attributes = attributes.clone();
@@ -44,6 +57,7 @@ public class BaseCropCard extends CropCard {
         this.maxSize = maxSize;
         this.sizeAfterHarvest = sizeAfterHarvest;
         this.matureLight = matureLight;
+        this.subsoilCheck = subsoilCheck;
         List<ResourceLocation> list = new ArrayList<>(maxSize);
         for (int stage = 1; stage <= maxSize; stage++) {
             list.add(new ResourceLocation(CropManager.ID, "blocks/crops/" + id + "_" + stage));
@@ -60,7 +74,7 @@ public class BaseCropCard extends CropCard {
     @Override public String getId() { return id; }
     @Override public String getOwner() { return CropManager.ID; }
     @Override public String getUnlocalizedName() { return CropManager.ID + ".crop." + id; }
-    @Override public String getDiscoveredBy() { return "Crop Manager"; }
+    @Override public String getDiscoveredBy() { return CropManager.NAME; }
     @Override public CropProperties getProperties() { return properties; }
     @Override public String[] getAttributes() { return attributes.clone(); }
     @Override public int getMaxSize() { return maxSize; }
@@ -74,7 +88,13 @@ public class BaseCropCard extends CropCard {
     }
 
     @Override
+    public int getRootsLength(ICropTile crop) {
+        return subsoilCheck != null ? 4 : super.getRootsLength(crop);
+    }
+
+    @Override
     public boolean canGrow(ICropTile crop) {
+        if (subsoilCheck != null && !subsoilCheck.test(crop)) return false;
         if (crop.getCurrentSize() >= maxSize) return false;
         if (crop.getLightLevel() < 9) return false;
         // Catalyzed species grow up to stage 2 normally, then require Catalytic Fertilizer soil charges.

@@ -12,7 +12,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 
-/** HEI/JEI category displaying Crop Manager custom crops, their soil/catalyst needs, and drops. */
+/** HEI/JEI category displaying IC2: Agronomy Expansion custom crops, their soil/catalyst needs, and drops. */
 public final class CropRecipeCategory implements IRecipeCategory<CropRecipeWrapper> {
     public static final String UID = CropManager.ID + ".crops";
     private final IDrawable background;
@@ -27,7 +27,7 @@ public final class CropRecipeCategory implements IRecipeCategory<CropRecipeWrapp
 
     @Override public String getUid() { return UID; }
     @Override public String getTitle() { return I18n.format("cropmanager.jei_crops_title"); }
-    @Override public String getModName() { return "Crop Manager"; }
+    @Override public String getModName() { return CropManager.NAME; }
     @Override public IDrawable getBackground() { return background; }
     @Override public IDrawable getIcon() { return icon; }
 

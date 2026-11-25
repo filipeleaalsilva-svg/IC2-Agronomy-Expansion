@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=true": {
+      "model": "cropmanager:biogas_generator_empty"
+    },
+    "formed=false": {
+      "model": "cropmanager:biogas_generator_casing"
+    }
+  }
+}

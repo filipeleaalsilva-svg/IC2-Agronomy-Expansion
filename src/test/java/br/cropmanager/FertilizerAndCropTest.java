@@ -1,5 +1,6 @@
 package br.cropmanager;
 
+import br.cropmanager.chest.integration.ProductionInformation;
 import br.cropmanager.crop.BaseCropCard;
 import br.cropmanager.crop.CropRegistry;
 import ic2.api.crops.CropCard;
@@ -131,12 +132,64 @@ public final class FertilizerAndCropTest {
 
     @Test
     public void allCustomCropsExposeExpectedMetadataAndFourTextures() {
-        assertEquals(10, CropRegistry.ALL.size());
+        assertEquals(15, CropRegistry.ALL.size());
         for (BaseCropCard card : CropRegistry.ALL) {
             assertEquals(CropManager.ID, card.getOwner());
             assertEquals(4, card.getMaxSize());
             assertEquals(4, card.getTexturesLocation().size());
             assertEquals("cropmanager.crop." + card.getId(), card.getUnlocalizedName());
+        }
+    }
+
+    @Test
+    public void newCropsRespectSubsoilAndCatalystGates() {
+        NBTTagCompound custom = new NBTTagCompound();
+        assertFalse(CropRegistry.RESINCANE.requiresCatalyst());
+        assertFalse(CropRegistry.CRYOLOTUS.requiresCatalyst());
+        assertTrue(CropRegistry.RESINCANE.canGrow(fakeCrop(CropRegistry.RESINCANE, 1, 100, 100, 12, custom)));
+        assertTrue(CropRegistry.CRYOLOTUS.canGrow(fakeCrop(CropRegistry.CRYOLOTUS, 1, 100, 100, 12, custom)));
+
+        assertTrue(CropRegistry.CUPRIC_MOSS.requiresCatalyst());
+        assertEquals(4, CropRegistry.CUPRIC_MOSS.getRootsLength(fakeCrop(CropRegistry.CUPRIC_MOSS, 1, 100, 100, 12, custom)));
+        ICropTile noCopper = fakeCrop(CropRegistry.CUPRIC_MOSS, 1, 100, 100, 12, custom);
+        Mockito.when(noCopper.isBlockBelow("blockCopper")).thenReturn(false);
+        assertFalse(CropRegistry.CUPRIC_MOSS.canGrow(noCopper));
+        ICropTile withCopper = fakeCrop(CropRegistry.CUPRIC_MOSS, 1, 100, 100, 12, custom);
+        Mockito.when(withCopper.isBlockBelow("blockCopper")).thenReturn(true);
+        assertTrue(CropRegistry.CUPRIC_MOSS.canGrow(withCopper));
+
+        assertTrue(CropRegistry.STANNUM_HERB.requiresCatalyst());
+        assertEquals(4, CropRegistry.STANNUM_HERB.getRootsLength(fakeCrop(CropRegistry.STANNUM_HERB, 1, 100, 100, 12, custom)));
+        ICropTile noTin = fakeCrop(CropRegistry.STANNUM_HERB, 1, 100, 100, 12, custom);
+        Mockito.when(noTin.isBlockBelow("blockTin")).thenReturn(false);
+        assertFalse(CropRegistry.STANNUM_HERB.canGrow(noTin));
+        ICropTile withTin = fakeCrop(CropRegistry.STANNUM_HERB, 1, 100, 100, 12, custom);
+        Mockito.when(withTin.isBlockBelow("blockTin")).thenReturn(true);
+        assertTrue(CropRegistry.STANNUM_HERB.canGrow(withTin));
+
+        assertTrue(CropRegistry.VOLTREED.requiresCatalyst());
+        assertEquals(4, CropRegistry.VOLTREED.getRootsLength(fakeCrop(CropRegistry.VOLTREED, 1, 100, 100, 12, custom)));
+        ICropTile noRed = fakeCrop(CropRegistry.VOLTREED, 1, 100, 100, 12, custom);
+        Mockito.when(noRed.isBlockBelow(net.minecraft.init.Blocks.REDSTONE_BLOCK)).thenReturn(false);
+        Mockito.when(noRed.isBlockBelow("blockRedstone")).thenReturn(false);
+        assertFalse(CropRegistry.VOLTREED.canGrow(noRed));
+        ICropTile withRed = fakeCrop(CropRegistry.VOLTREED, 1, 100, 100, 12, custom);
+        Mockito.when(withRed.isBlockBelow(net.minecraft.init.Blocks.REDSTONE_BLOCK)).thenReturn(true);
+        assertTrue(CropRegistry.VOLTREED.canGrow(withRed));
+    }
+
+    @Test
+    public void databaseShowsTheHarvestPreviewForEveryCustomCrop() {
+        for (BaseCropCard card : CropRegistry.ALL) {
+            ItemStack expected = card.previewGain();
+            ProductionInformation production = ProductionInformation.query(card);
+            assertFalse(card.getId(), expected.isEmpty());
+            assertEquals(card.getId(), ProductionInformation.Status.DECLARED, production.status);
+            assertEquals(1, production.products.size());
+            assertTrue(card.getId(), ItemStack.areItemStacksEqual(expected, production.products.get(0)));
+            production.products.get(0).setCount(0);
+            assertTrue(card.getId(), ItemStack.areItemStacksEqual(expected,
+                    ProductionInformation.query(card).products.get(0)));
         }
     }
 }

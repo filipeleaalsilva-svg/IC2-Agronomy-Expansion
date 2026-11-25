@@ -6,7 +6,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -38,7 +37,7 @@ public final class FertilizerItem extends Item {
         this.kind = kind;
         setRegistryName(CropManager.ID, name);
         setTranslationKey("cropmanager." + name);
-        setCreativeTab(CreativeTabs.MATERIALS);
+        setCreativeTab(CropManager.TAB);
         setMaxStackSize(64);
     }
 

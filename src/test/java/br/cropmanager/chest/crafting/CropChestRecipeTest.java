@@ -38,15 +38,7 @@ public class CropChestRecipeTest {
     @SuppressWarnings("unchecked")
     @BeforeClass public static void bootstrap() throws ReflectiveOperationException {
         SeedFixtures.bootstrap();
-        // Unit tests do not run FML's capability injection lifecycle.
-        if (CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY == null) {
-            CapabilityFluidHandler.register();
-            Field providers = CapabilityManager.class.getDeclaredField("providers");
-            providers.setAccessible(true);
-            Map<String, Capability<?>> capabilities = (Map<String, Capability<?>>) providers.get(CapabilityManager.INSTANCE);
-            CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY =
-                    (Capability<IFluidHandlerItem>) capabilities.get(IFluidHandlerItem.class.getName().intern());
-        }
+        br.cropmanager.TestCapabilityHelper.ensureFluidCapabilities();
         can = new TestCan().setRegistryName("cropdatabasechest_test", "fluid_can");
         otherCan = new TestCan().setRegistryName("cropdatabasechest_test", "other_can");
         ForgeRegistries.ITEMS.register(can);

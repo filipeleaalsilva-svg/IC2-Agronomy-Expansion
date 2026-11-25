@@ -83,7 +83,7 @@ As máquinas do Crop Manager comunicam visualmente ao jogador quando estão oper
 | **Advanced Crop Manager** | `advanced_crop_manager_front_active.png` | 16×32 | 2 | `{"animation":{"frametime":8,"interpolate":false}}` | LED indicador de varredura alternando pulso verde/azul |
 | **Electric Composter** | `electric_composter_front_active.png` | 16×32 | 2 | `{"animation":{"frametime":8,"interpolate":false}}` | Misturador interno com rotação cíclica sob o visor |
 | **Grin Grinder** | `grin_grinder_front_active.png` | 16×64 | 4 | `{"animation":{"frametime":4,"interpolate":false}}` | Lâminas de trituração rotacionando em 4 fases contínuas |
-| **Grin Extractor** | `grin_extractor_front_active.png` | 16×64 | 4 | `{"animation":{"frametime":5,"interpolate":false}}` | Ebulição e circulação de vapor/extrato verde sob aquecimento |
+| **Grin Extractor** | `grin_extractor_front_active.png` | 16×64 | 4 | `{"animation":{"frametime":5,"interpolate":false}}` | Circulação e borbulhamento de extrato verde no visor frontal em 4 fases |
 | **Agricultural Monitor** | `agricultural_monitor_front_active.png` | 16×16 | 1 | *(Estático por troca de modelo no blockstate)* | Visor frontal iluminado com sinal de status ativo |
 | **Biogas Weeder** | `biogas_weeder_front_active.png` | 16×16 | 1 | *(Controlado via modelo 3D ativo no blockstate)* | Queimadores e cabeçote de corte em posição de capina |
 
@@ -163,8 +163,6 @@ Tabela auditada confrontando o código de renderização (`FarmGuiStyle.java`), 
 | **Aviso / Atenção (Triângulo Amarelo)** | `cropmanager:textures/gui/ic2_widgets.png` | `(162, 37)` | 30×26 | 16×14 | `FarmGuiStyle.warningTriangle(false)` |
 | **Seta de Reciclagem (Inativa)** | `cropmanager:textures/gui/ic2_widgets.png` | `(135, 9)` | 18×17 | 18×17 | `FarmGuiStyle.recycle(false)` |
 | **Seta de Reciclagem (Ativa)** | `cropmanager:textures/gui/ic2_widgets.png` | `(135, 30)` | 18×17 | 18×17 | `FarmGuiStyle.recycle(true)` |
-| **Chamas de Calor (Inativas)** | `ic2:textures/gui/common.png` | `(97, 81)` | 13×13 | 13×13 | `FarmGuiStyle.heat(false)` |
-| **Chamas de Calor (Acesas)** | `ic2:textures/gui/common.png` | `(112, 80)` | 13×13 | 13×13 | `FarmGuiStyle.heat(true)` |
 | **Escala de Tanque (Tiques Verdes)** | `ic2:textures/gui/common.png` | `(46, 109)` | 8×37 | 8 × min(37, h-6) | `FarmGuiStyle.tankScale(...)` |
 | **Botão de Info Azul** | `ic2:textures/gui/infobutton.png` | `(0, 0)` | 10×10 | 10×10 | `FarmGuiStyle.info(...)` |
 

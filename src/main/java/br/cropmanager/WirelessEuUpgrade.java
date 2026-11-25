@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -48,11 +47,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public final class WirelessEuUpgrade extends Item implements IUpgradeItem {
     public static final String LINK_TAG = "WirelessSource";
+    public static final String WIFI_CHANNEL_TAG = "WifiChannel";
+    public static final String WIFI_OWNER_TAG = "WifiOwner";
+    public static final String DISH_TAG = "DishSource";
 
     public WirelessEuUpgrade() {
         setRegistryName(CropManager.ID, "wireless_eu_upgrade");
         setTranslationKey(CropManager.ID + ".wireless_eu_upgrade");
-        setCreativeTab(CreativeTabs.REDSTONE);
+        setCreativeTab(CropManager.TAB);
         setMaxStackSize(MonitorTile.MAX_WIRELESS_EU_UPGRADES);
     }
 
@@ -61,10 +63,45 @@ public final class WirelessEuUpgrade extends Item implements IUpgradeItem {
             float hitX, float hitY, float hitZ, EnumHand hand) {
         if (!player.isSneaking()) return EnumActionResult.PASS;
         TileEntity tile = world.getTileEntity(pos);
+        ItemStack stack = player.getHeldItem(hand);
+        if (tile instanceof EuWifiPlugTile || tile instanceof EuWifiPointTile) {
+            if (world.isRemote) return EnumActionResult.SUCCESS;
+            int channel = tile instanceof EuWifiPlugTile
+                    ? ((EuWifiPlugTile) tile).channel
+                    : ((EuWifiPointTile) tile).channel;
+            if (!WirelessEuGridData.get(world).canAccess(channel, player.getUniqueID())) {
+                return EnumActionResult.FAIL;
+            }
+            NBTTagCompound root = stack.hasTagCompound() ? stack.getTagCompound() : new NBTTagCompound();
+            root.removeTag(LINK_TAG);
+            root.removeTag(DISH_TAG);
+            root.setInteger(WIFI_CHANNEL_TAG, channel);
+            root.setUniqueId(WIFI_OWNER_TAG, player.getUniqueID());
+            stack.setTagCompound(root);
+            player.sendStatusMessage(new TextComponentTranslation("cropmanager.wireless_eu_linked_wifi", channel), true);
+            return EnumActionResult.SUCCESS;
+        }
+        if (tile instanceof EuDishAntennaTile) {
+            if (world.isRemote) return EnumActionResult.SUCCESS;
+            NBTTagCompound root = stack.hasTagCompound() ? stack.getTagCompound() : new NBTTagCompound();
+            root.removeTag(LINK_TAG);
+            root.removeTag(WIFI_CHANNEL_TAG);
+            NBTTagCompound dish = new NBTTagCompound();
+            dish.setInteger("Dim", world.provider.getDimension());
+            dish.setInteger("X", pos.getX());
+            dish.setInteger("Y", pos.getY());
+            dish.setInteger("Z", pos.getZ());
+            root.setTag(DISH_TAG, dish);
+            stack.setTagCompound(root);
+            player.sendStatusMessage(new TextComponentTranslation("cropmanager.wireless_eu_linked_dish",
+                    pos.getX(), pos.getY(), pos.getZ()), true);
+            return EnumActionResult.SUCCESS;
+        }
         if (!(tile instanceof IEnergyStorage)) return EnumActionResult.PASS;
         if (world.isRemote) return EnumActionResult.SUCCESS;
-        ItemStack stack = player.getHeldItem(hand);
         NBTTagCompound root = stack.hasTagCompound() ? stack.getTagCompound() : new NBTTagCompound();
+        root.removeTag(WIFI_CHANNEL_TAG);
+        root.removeTag(DISH_TAG);
         NBTTagCompound link = new NBTTagCompound();
         link.setInteger("Dim", world.provider.getDimension());
         link.setInteger("X", pos.getX());
@@ -77,6 +114,22 @@ public final class WirelessEuUpgrade extends Item implements IUpgradeItem {
         return EnumActionResult.SUCCESS;
     }
 
+    static boolean acceptsDish(ItemStack stack, int dim, BlockPos dishPos) {
+        if (stack.isEmpty() || !(stack.getItem() instanceof WirelessEuUpgrade)) return false;
+        NBTTagCompound tag = stack.getTagCompound();
+        return tag == null || (!tag.hasKey(LINK_TAG) && !tag.hasKey(WIFI_CHANNEL_TAG) && !tag.hasKey(DISH_TAG))
+                || isLinkedToDish(stack, dim, dishPos);
+    }
+
+    public static boolean isLinkedToDish(ItemStack stack, int dim, BlockPos dishPos) {
+        if (stack.isEmpty() || !stack.hasTagCompound() || !stack.getTagCompound().hasKey(DISH_TAG, 10)) return false;
+        NBTTagCompound dish = stack.getTagCompound().getCompoundTag(DISH_TAG);
+        return dish.getInteger("Dim") == dim
+                && dish.getInteger("X") == dishPos.getX()
+                && dish.getInteger("Y") == dishPos.getY()
+                && dish.getInteger("Z") == dishPos.getZ();
+    }
+
     @Override
     public boolean isSuitableFor(ItemStack stack, Set<UpgradableProperty> types) {
         return types != null && !types.isEmpty();
@@ -87,25 +140,50 @@ public final class WirelessEuUpgrade extends Item implements IUpgradeItem {
         if (!(parent instanceof TileEntity)) return false;
         TileEntity target = (TileEntity) parent;
         World world = target.getWorld();
-        if (world == null || world.isRemote) return false;
-        if (!stack.hasTagCompound() || !stack.getTagCompound().hasKey(LINK_TAG, 10)) return false;
-        NBTTagCompound link = stack.getTagCompound().getCompoundTag(LINK_TAG);
+        if (world == null || world.isRemote || !stack.hasTagCompound()) return false;
+        double free = freeEnergy(parent);
+        if (free <= 0) return false;
+        NBTTagCompound root = stack.getTagCompound();
+        int maxRate = Math.max(1, ManagerConfig.monitorWirelessEuRatePerUpgrade * Math.max(1, stack.getCount()));
+        if (root.hasKey(WIFI_CHANNEL_TAG, 3)) {
+            int channel = WirelessEuGridData.clampChannel(root.getInteger(WIFI_CHANNEL_TAG));
+            java.util.UUID owner = root.hasUniqueId(WIFI_OWNER_TAG) ? root.getUniqueId(WIFI_OWNER_TAG) : null;
+            double want = Math.min(maxRate, free);
+            WirelessEuGridData grid = WirelessEuGridData.get(world);
+            double available = grid.extractEu(channel, want, world.provider.getDimension(), owner);
+            if (available <= 0) return false;
+            double accepted = injectEnergy(parent, available);
+            if (accepted < available) {
+                grid.refundEu(channel, available - accepted);
+            }
+            return accepted > 0;
+        }
+        if (!root.hasKey(LINK_TAG, 10)) return false;
+        NBTTagCompound link = root.getCompoundTag(LINK_TAG);
         if (link.getInteger("Dim") != world.provider.getDimension()) return false;
         BlockPos sourcePos = new BlockPos(link.getInteger("X"), link.getInteger("Y"), link.getInteger("Z"));
         if (!world.isBlockLoaded(sourcePos, false)) return false;
         TileEntity sourceTile = world.getTileEntity(sourcePos);
         if (!(sourceTile instanceof IEnergyStorage) || sourceTile == target) return false;
         IEnergyStorage storage = (IEnergyStorage) sourceTile;
-        int maxRate = Math.max(1, ManagerConfig.monitorWirelessEuRatePerUpgrade * Math.max(1, stack.getCount()));
-        int available = Math.min(maxRate, storage.getStored());
-        if (available <= 0) return false;
-        double accepted = injectEnergy(parent, available);
+        int want = Math.min(Math.min(maxRate, storage.getStored()), (int) Math.floor(free));
+        if (want <= 0) return false;
+        double accepted = injectEnergy(parent, want);
         if (accepted <= 0) return false;
-        storage.addEnergy(-(int) Math.ceil(accepted));
+        storage.addEnergy(-(int) Math.round(accepted));
         return true;
     }
 
-    private static double injectEnergy(IUpgradableBlock parent, double amount) {
+    static double freeEnergy(IUpgradableBlock parent) {
+        if (parent instanceof TileEntityBlock) {
+            Energy energy = ((TileEntityBlock) parent).getComponent(Energy.class);
+            return energy == null ? 0 : Math.max(0, energy.getFreeEnergy());
+        }
+        BasicSink sink = sinkOf(parent);
+        return sink == null ? 0 : Math.max(0, sink.getFreeCapacity());
+    }
+
+    static double injectEnergy(IUpgradableBlock parent, double amount) {
         if (parent instanceof TileEntityBlock) {
             Energy energy = ((TileEntityBlock) parent).getComponent(Energy.class);
             if (energy == null) return 0;
@@ -137,7 +215,13 @@ public final class WirelessEuUpgrade extends Item implements IUpgradeItem {
     @Override
     public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag flag) {
         tooltip.add(I18n.format("cropmanager.wireless_eu_help"));
-        if (stack.hasTagCompound() && stack.getTagCompound().hasKey(LINK_TAG, 10)) {
+        if (stack.hasTagCompound() && stack.getTagCompound().hasKey(WIFI_CHANNEL_TAG, 3)) {
+            tooltip.add(I18n.format("cropmanager.wireless_eu_target_wifi", stack.getTagCompound().getInteger(WIFI_CHANNEL_TAG)));
+        } else if (stack.hasTagCompound() && stack.getTagCompound().hasKey(DISH_TAG, 10)) {
+            NBTTagCompound dish = stack.getTagCompound().getCompoundTag(DISH_TAG);
+            tooltip.add(I18n.format("cropmanager.wireless_eu_target_dish",
+                    dish.getInteger("X"), dish.getInteger("Y"), dish.getInteger("Z")));
+        } else if (stack.hasTagCompound() && stack.getTagCompound().hasKey(LINK_TAG, 10)) {
             NBTTagCompound link = stack.getTagCompound().getCompoundTag(LINK_TAG);
             tooltip.add(I18n.format("cropmanager.wireless_eu_target",
                     link.getInteger("X"), link.getInteger("Y"), link.getInteger("Z")));

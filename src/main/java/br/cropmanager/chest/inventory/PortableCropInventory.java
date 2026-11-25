@@ -46,6 +46,17 @@ public final class PortableCropInventory extends TileCropDatabaseChest {
         return player == owner && !isInvalid() && owner.inventory.getStackInSlot(carrierSlot) == carrier;
     }
     public boolean isPickupEnabled() { return pickupEnabled; }
+    public void transferSeedsTo(TileCropDatabaseChest chest) {
+        if (world.isRemote || !isUsableByPlayer(owner) || chest.isPortable()
+                || !chest.isRemotelyUsableByPlayer(owner)) return;
+        for (int slot = 0; slot < seeds().getSlots(); slot++) {
+            ItemStack seed = seeds().getStackInSlot(slot);
+            if (seed.isEmpty()) continue;
+            ItemStack remaining = chest.seeds().insertAnywhere(seed, false);
+            if (remaining.getCount() != seed.getCount()) seeds().setStackInSlot(slot, remaining);
+        }
+    }
+
     public void setPickupEnabled(boolean enabled) {
         if (pickupEnabled != enabled) { pickupEnabled = enabled; markDirty(); }
     }

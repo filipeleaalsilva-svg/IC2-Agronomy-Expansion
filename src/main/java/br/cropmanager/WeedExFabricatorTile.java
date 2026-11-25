@@ -32,16 +32,22 @@ import net.minecraftforge.items.ItemStackHandler;
  * <p>Aceita upgrades IC2, bateria auxiliar, recipientes de fluido nos slots de entrada/saída e
  * preserva itens de layouts legados de 5 slots em {@code legacyDrops} para nunca descartar itens do jogador.
  */
-public final class WeedExFabricatorTile extends FarmTile implements ITickable, IUpgradableBlock {
+public final class WeedExFabricatorTile extends PoweredMachineTile {
     public static final int EXTRACT_CAPACITY = 16000, WEED_CAPACITY = 16000, EXTRACT_PER_RECIPE = 1000;
     public static final int WEED_PER_RECIPE = 500, DURATION = 100, EU_PER_TICK = 5;
-    public int progress, clientDuration = ManagerConfig.fabricatorDuration, workTicks = ManagerConfig.fabricatorDuration;
-    public double euPerTick = ManagerConfig.fabricatorEuPerTick;
-    private boolean upgradesDirty = true;
-    public String condition = "weedex_ready";
-    public final BasicSink energy = createSink(ManagerConfig.fabricatorEnergyCapacity, ManagerConfig.fabricatorSinkTier);
-    @Override public BasicSink energySink() { return energy; }
-    @Override public boolean isSupportMachine() { return true; }
+    public int clientDuration = ManagerConfig.fabricatorDuration;
+    public WeedExFabricatorTile() {
+        super(ManagerConfig.fabricatorEnergyCapacity, ManagerConfig.fabricatorSinkTier,
+                ManagerConfig.fabricatorDuration, ManagerConfig.fabricatorEuPerTick, "weedex_ready");
+    }
+    @Override protected ItemStackHandler machineInventory() { return inventory; }
+    @Override protected int upgradeStartSlot() { return 4; }
+    @Override protected int upgradeEndSlot() { return 8; }
+    @Override protected int batterySlot() { return 8; }
+    @Override protected int baseDuration() { return ManagerConfig.fabricatorDuration; }
+    @Override protected double baseEuPerTick() { return ManagerConfig.fabricatorEuPerTick; }
+    @Override protected int baseEnergyCapacity() { return ManagerConfig.fabricatorEnergyCapacity; }
+    @Override protected int baseSinkTier() { return ManagerConfig.fabricatorSinkTier; }
     public final FluidTank extract = new FluidTank(ManagerConfig.fabricatorExtractCapacity) {
         @Override public boolean canFillFluidType(FluidStack fluid) { return fluid != null && fluid.getFluid() == CropManager.GRIN_EXTRACT; }
         @Override protected void onContentsChanged() { markDirty(); }
@@ -94,36 +100,15 @@ public final class WeedExFabricatorTile extends FarmTile implements ITickable, I
         return fluid != null && fluid.getFluid() == CropManager.GRIN_EXTRACT;
     }
 
-    @Override public boolean shouldRefresh(net.minecraft.world.World world, BlockPos pos, net.minecraft.block.state.IBlockState oldState,
-            net.minecraft.block.state.IBlockState newState) { return oldState.getBlock() != newState.getBlock(); }
-    @Override public void onLoad() { if (!world.isRemote) { recalculateUpgrades(); energy.onLoad(); } }
-    @Override public void invalidate() { energy.invalidate(); super.invalidate(); }
-    @Override public void onChunkUnload() { energy.onChunkUnload(); super.onChunkUnload(); }
-    @Override public void update() {
-        if (world.isRemote) return;
+    @Override protected boolean processMachineTick() {
         if (!legacyDrops.isEmpty()) {
             for (ItemStack stack : legacyDrops) InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY() + 1, pos.getZ(), stack);
             legacyDrops.clear(); markDirty();
         }
-        if (upgradesDirty) recalculateUpgrades();
-        tickUpgrades(this, inventory, 4, 8);
-        dischargeBattery(inventory, 8, energy);
-        energy.update();
         emptyFluidContainer(inventory, EXTRACT_IN, CONTAINER_OUT, extract);
         fillFluidContainer(inventory, BOTTLE_IN, CONTAINER_OUT, weed);
-        boolean working = processRecipe();
-        setActive(working);
+        return processRecipe();
     }
-    private void recalculateUpgrades() {
-        double[] multipliers = applyIc2Upgrades(this, inventory, 4, 8, energy, 1, ManagerConfig.fabricatorEnergyCapacity, ManagerConfig.fabricatorSinkTier);
-        int next = Math.max(1, (int)Math.ceil(ManagerConfig.fabricatorDuration * multipliers[0]));
-        progress = Math.min(next - 1, (int)((long)progress * next / Math.max(1, workTicks))); workTicks = next;
-        euPerTick = Math.ceil(ManagerConfig.fabricatorEuPerTick * multipliers[1]);
-        upgradesDirty = false;
-    }
-    @Override public double getEnergy() { return energy.getEnergyStored(); }
-    @Override public boolean useEnergy(double amount) { boolean used = energy.useEnergy(amount); if (used) markDirty(); return used; }
-    @Override public Set<UpgradableProperty> getUpgradableProperties() { return EnumSet.of(UpgradableProperty.Processing, UpgradableProperty.EnergyStorage, UpgradableProperty.Transformer); }
 
     private boolean processRecipe() {
         ItemStack redstone = inventory.getStackInSlot(REDSTONE);
@@ -142,18 +127,14 @@ public final class WeedExFabricatorTile extends FarmTile implements ITickable, I
     }
 
     private IItemHandler itemsForFace(@Nullable EnumFacing face) {
-        return new IItemHandler() {
-            private void valid(int slot) { if (slot < 0 || slot >= inventory.getSlots()) throw new IndexOutOfBoundsException("slot " + slot); }
-            @Override public int getSlots() { return inventory.getSlots(); }
-            @Override public ItemStack getStackInSlot(int slot) { valid(slot); return inventory.getStackInSlot(slot); }
-            @Override public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-                valid(slot); return slot >= 3 || !inventory.isItemValid(slot, stack) ? stack : inventory.insertItem(slot, stack, simulate);
-            }
-            @Override public ItemStack extractItem(int slot, int amount, boolean simulate) {
-                valid(slot); return slot == CONTAINER_OUT ? inventory.extractItem(slot, amount, simulate) : ItemStack.EMPTY;
-            }
-            @Override public int getSlotLimit(int slot) { valid(slot); return inventory.getSlotLimit(slot); }
-        };
+        return exposedItems(inventory, 3, CONTAINER_OUT);
+    }
+    @Override EquipmentLayout equipmentLayout() {
+        return new EquipmentLayout(inventory, 126,
+                new int[]{72, 28, 84, 116, 148, 148, 148, 148, 8},
+                new int[]{32, 84, 84, 84, 22, 40, 58, 76, 62},
+                CONTAINER_OUT, false,
+                s -> isBattery(s) ? new int[]{8, 9} : ManagerTile.isIc2Upgrade(s) ? new int[]{4, 8} : new int[]{0, 3});
     }
 
     @Override public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing face) {

@@ -1,0 +1,243 @@
+{
+  "parent": "block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "cropmanager:blocks/storage_steel",
+    "mount": "cropmanager:blocks/storage_steel",
+    "glow": "minecraft:blocks/redstone_lamp_on",
+    "glass": "minecraft:blocks/glass"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        13,
+        4
+      ],
+      "to": [
+        12,
+        16,
+        12
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#mount"
+        },
+        "south": {
+          "texture": "#mount"
+        },
+        "east": {
+          "texture": "#mount"
+        },
+        "west": {
+          "texture": "#mount"
+        },
+        "up": {
+          "texture": "#mount"
+        },
+        "down": {
+          "texture": "#mount"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        5,
+        5
+      ],
+      "to": [
+        11,
+        13,
+        11
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#glow"
+        },
+        "south": {
+          "texture": "#glow"
+        },
+        "east": {
+          "texture": "#glow"
+        },
+        "west": {
+          "texture": "#glow"
+        },
+        "up": {
+          "texture": "#glow"
+        },
+        "down": {
+          "texture": "#glow"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        3,
+        4
+      ],
+      "to": [
+        12,
+        5,
+        12
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#mount"
+        },
+        "south": {
+          "texture": "#mount"
+        },
+        "east": {
+          "texture": "#mount"
+        },
+        "west": {
+          "texture": "#mount"
+        },
+        "up": {
+          "texture": "#mount"
+        },
+        "down": {
+          "texture": "#mount"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        5,
+        4
+      ],
+      "to": [
+        5,
+        13,
+        5
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#mount"
+        },
+        "south": {
+          "texture": "#mount"
+        },
+        "east": {
+          "texture": "#mount"
+        },
+        "west": {
+          "texture": "#mount"
+        },
+        "up": {
+          "texture": "#mount"
+        },
+        "down": {
+          "texture": "#mount"
+        }
+      }
+    },
+    {
+      "from": [
+        11,
+        5,
+        11
+      ],
+      "to": [
+        12,
+        13,
+        12
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#mount"
+        },
+        "south": {
+          "texture": "#mount"
+        },
+        "east": {
+          "texture": "#mount"
+        },
+        "west": {
+          "texture": "#mount"
+        },
+        "up": {
+          "texture": "#mount"
+        },
+        "down": {
+          "texture": "#mount"
+        }
+      }
+    },
+    {
+      "from": [
+        11,
+        5,
+        4
+      ],
+      "to": [
+        12,
+        13,
+        5
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#mount"
+        },
+        "south": {
+          "texture": "#mount"
+        },
+        "east": {
+          "texture": "#mount"
+        },
+        "west": {
+          "texture": "#mount"
+        },
+        "up": {
+          "texture": "#mount"
+        },
+        "down": {
+          "texture": "#mount"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        5,
+        11
+      ],
+      "to": [
+        5,
+        13,
+        12
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#mount"
+        },
+        "south": {
+          "texture": "#mount"
+        },
+        "east": {
+          "texture": "#mount"
+        },
+        "west": {
+          "texture": "#mount"
+        },
+        "up": {
+          "texture": "#mount"
+        },
+        "down": {
+          "texture": "#mount"
+        }
+      }
+    }
+  ]
+}

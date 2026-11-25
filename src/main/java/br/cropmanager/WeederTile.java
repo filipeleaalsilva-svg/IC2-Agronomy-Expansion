@@ -23,16 +23,23 @@ import net.minecraftforge.items.*;
  * ({@link Crops#weed}), preservando estacas vazias e cultivos de alto crescimento sem usar {@code CropCard.isWeed}.
  */
 public final class WeederTile extends FarmTile implements ITickable {
+    static ItemStack weedStack(){ItemStack stack=ic2.api.item.IC2Items.getItem("crop_res","weed");return stack==null?ItemStack.EMPTY:stack.copy();}
+    static boolean isWeedItem(ItemStack stack){ItemStack weed=weedStack();return !stack.isEmpty() && !weed.isEmpty() && ItemStack.areItemsEqual(stack,weed);}
     public int serverMaxRadius=ManagerConfig.maxRadius;
     public int radius=ManagerConfig.defaultRadius,layers=ManagerConfig.defaultLayers,redstoneMode,removed,cursor;
     public boolean enabled=true,paused;
-    private int activeTicks;
+    private int activeTicks, dirtyTicks;
     public final FluidTank gas=new FluidTank(ManagerConfig.weederGasCapacity) {
         @Override public boolean canFillFluidType(FluidStack f){return f!=null && f.getFluid()==FluidName.biogas.getInstance();}
         @Override protected void onContentsChanged(){markDirty();}
     };
-    public final ItemStackHandler inventory=new ItemStackHandler(2) {
-        @Override public boolean isItemValid(int slot,ItemStack stack){FluidStack f=FluidUtil.getFluidContained(stack);return slot==0 && f!=null && f.getFluid()==FluidName.biogas.getInstance();}
+    public final ItemStackHandler inventory=new ItemStackHandler(3) {
+        @Override public boolean isItemValid(int slot,ItemStack stack){
+            if(slot==0){FluidStack f=FluidUtil.getFluidContained(stack);return f!=null && f.getFluid()==FluidName.biogas.getInstance();}
+            if(slot==1)return true; // internal return slot for emptied biogas containers
+            if(slot==2)return isWeedItem(stack);
+            return false;
+        }
         @Override protected void onContentsChanged(int slot){markDirty();}
     };
     @Override public boolean shouldRefresh(net.minecraft.world.World w,BlockPos p,net.minecraft.block.state.IBlockState a,net.minecraft.block.state.IBlockState b){return a.getBlock()!=b.getBlock();}
@@ -43,7 +50,7 @@ public final class WeederTile extends FarmTile implements ITickable {
         setActive(!paused && activeTicks>0);
     }
     boolean scanOne(){
-        int[] offset=ScanLogic.offset(cursor,radius,layers);cursor=(cursor+1)%ScanLogic.volume(radius,layers);markDirty();BlockPos target=pos.add(offset[0],offset[1],offset[2]);
+        int[] offset=ScanLogic.offset(cursor,radius,layers);cursor=(cursor+1)%ScanLogic.volume(radius,layers);if(++dirtyTicks>=20){dirtyTicks=0;markDirty();}BlockPos target=pos.add(offset[0],offset[1],offset[2]);
         if(target.getY()<0 || target.getY()>=world.getHeight() || !world.isBlockLoaded(target,false) || gas.getFluidAmount()<ManagerConfig.weederScanGasCostMB)return false;
         TileEntity tile=world.getTileEntity(target);
         if(!(tile instanceof TileEntityCrop))return false;
@@ -51,7 +58,13 @@ public final class WeederTile extends FarmTile implements ITickable {
         TileEntityCrop crop=(TileEntityCrop)tile;
         // CropCard.isWeed also flags valuable high-growth crops; never use it for deletion.
         if(crop.getCrop()!=Crops.weed || gas.getFluidAmount()<ManagerConfig.weederRemoveGasCostMB)return false;
-        crop.reset();crop.updateState();world.markChunkDirty(target,crop);if(ManagerConfig.weederRemoveGasCostMB>0)gas.drain(ManagerConfig.weederRemoveGasCostMB,true);if(removed<Integer.MAX_VALUE)removed++;activeTicks=8;markDirty();return true;
+        ItemStack weed=weedStack();
+        if(weed.isEmpty() || !inventory.insertItem(2,weed,true).isEmpty())return false;
+        // Only reset the IC2 tile after confirming it is a weed and the output has room.
+        // Normal crops and even weeds blocked by a full output slot stay untouched.
+        crop.reset();crop.updateState();world.markChunkDirty(target,crop);
+        inventory.insertItem(2,weed,false);
+        if(ManagerConfig.weederRemoveGasCostMB>0)gas.drain(ManagerConfig.weederRemoveGasCostMB,true);if(removed<Integer.MAX_VALUE)removed++;activeTicks=8;markDirty();return true;
     }
     @Override public boolean control(int action,EntityPlayer player){
         if(action==200)enabled=!enabled;
@@ -61,9 +74,9 @@ public final class WeederTile extends FarmTile implements ITickable {
         else return false;markDirty();return true;
     }
     private final IItemHandler items=new IItemHandler(){
-        public int getSlots(){return 2;} public ItemStack getStackInSlot(int slot){return inventory.getStackInSlot(slot);}
-        public ItemStack insertItem(int slot,ItemStack stack,boolean simulate){return inventory.isItemValid(slot,stack)?inventory.insertItem(slot,stack,simulate):stack;}
-        public ItemStack extractItem(int slot,int amount,boolean simulate){return slot==1?inventory.extractItem(slot,amount,simulate):ItemStack.EMPTY;}
+        public int getSlots(){return 3;} public ItemStack getStackInSlot(int slot){return inventory.getStackInSlot(slot);}
+        public ItemStack insertItem(int slot,ItemStack stack,boolean simulate){return slot==0 && inventory.isItemValid(slot,stack)?inventory.insertItem(slot,stack,simulate):stack;}
+        public ItemStack extractItem(int slot,int amount,boolean simulate){return slot==1 || slot==2?inventory.extractItem(slot,amount,simulate):ItemStack.EMPTY;}
         public int getSlotLimit(int slot){return 64;}
     };
     @Override public boolean hasCapability(Capability<?> c,@Nullable EnumFacing f){return c==CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY || c==CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(c,f);}
@@ -71,6 +84,13 @@ public final class WeederTile extends FarmTile implements ITickable {
     @Override public NBTTagCompound guiState(){NBTTagCompound t=new NBTTagCompound();t.setInteger("MaxRadius",ManagerConfig.maxRadius);t.setInteger("Gas",gas.getFluidAmount());t.setInteger("GasCapacity",gas.getCapacity());t.setInteger("Removed",removed);t.setInteger("Radius",radius);t.setInteger("Layers",layers);t.setInteger("Redstone",redstoneMode);t.setBoolean("Enabled",enabled);t.setBoolean("Paused",paused);return t;}
     @Override public void acceptGuiState(NBTTagCompound t){serverMaxRadius=t.getInteger("MaxRadius");if(t.getInteger("GasCapacity")>0)gas.setCapacity(t.getInteger("GasCapacity"));gas.setFluid(t.getInteger("Gas")>0?new FluidStack(FluidName.biogas.getInstance(),t.getInteger("Gas")):null);removed=t.getInteger("Removed");radius=t.getInteger("Radius");layers=t.getInteger("Layers");redstoneMode=t.getInteger("Redstone");enabled=t.getBoolean("Enabled");paused=t.getBoolean("Paused");}
     @Override public NBTTagCompound writeToNBT(NBTTagCompound t){super.writeToNBT(t);t.setTag("Gas",gas.writeToNBT(new NBTTagCompound()));t.setTag("Inventory",inventory.serializeNBT());t.setInteger("Removed",removed);t.setInteger("Radius",radius);t.setInteger("Layers",layers);t.setInteger("Redstone",redstoneMode);t.setBoolean("Enabled",enabled);t.setInteger("Cursor",cursor);return t;}
-    @Override public void readFromNBT(NBTTagCompound t){super.readFromNBT(t);gas.readFromNBT(t.getCompoundTag("Gas"));resizeTank(gas,ManagerConfig.weederGasCapacity);NBTTagCompound items=t.getCompoundTag("Inventory").copy();items.setInteger("Size",2);inventory.deserializeNBT(items);removed=Math.max(0,t.getInteger("Removed"));radius=Math.max(1,Math.min(ManagerConfig.maxRadius,t.hasKey("Radius")?t.getInteger("Radius"):ManagerConfig.defaultRadius));layers=t.getInteger("Layers")&7;if(layers==0)layers=ManagerConfig.defaultLayers;redstoneMode=Math.max(0,Math.min(2,t.getInteger("Redstone")));enabled=!t.hasKey("Enabled") || t.getBoolean("Enabled");cursor=Math.floorMod(t.getInteger("Cursor"),ScanLogic.volume(radius,layers));}
+    @Override public void readFromNBT(NBTTagCompound t){super.readFromNBT(t);gas.readFromNBT(t.getCompoundTag("Gas"));resizeTank(gas,ManagerConfig.weederGasCapacity);NBTTagCompound items=t.getCompoundTag("Inventory").copy();items.setInteger("Size",3);inventory.deserializeNBT(items);removed=Math.max(0,t.getInteger("Removed"));radius=Math.max(1,Math.min(ManagerConfig.maxRadius,t.hasKey("Radius")?t.getInteger("Radius"):ManagerConfig.defaultRadius));layers=t.getInteger("Layers")&7;if(layers==0)layers=ManagerConfig.defaultLayers;redstoneMode=Math.max(0,Math.min(2,t.getInteger("Redstone")));enabled=!t.hasKey("Enabled") || t.getBoolean("Enabled");cursor=Math.floorMod(t.getInteger("Cursor"),ScanLogic.volume(radius,layers));}
     @Override public void dropContents(){dropHandler(inventory);}
+    @Override EquipmentLayout equipmentLayout() {
+        return new EquipmentLayout(inventory, 126,
+                new int[]{44, 104, 134},
+                new int[]{64, 64, 64},
+                slot -> slot == 0,
+                s -> new int[]{0, 1});
+    }
 }

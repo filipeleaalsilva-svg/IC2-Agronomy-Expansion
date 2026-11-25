@@ -35,6 +35,7 @@ final class FarmGuiStyle {
     }
     private static double linear(int value) { double channel = value / 255.0; return channel <= 0.04045 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4); }
     static int ink() { return ink; }
+    static boolean darkTheme() { return lightText; }
     static int warningInk() { return lightText ? 0xffb08a : 0x922d20; }
     static int goodInk() { return lightText ? 0x9cdeb0 : 0x245d37; }
     static int mutedInk() { return lightText ? 0xbcbcbc : 0x555555; }
@@ -50,14 +51,17 @@ final class FarmGuiStyle {
     private static void piece(int x,int y,int w,int h,int u,int v,int sw,int sh) {
         Gui.drawScaledCustomSizeModalRect(x,y,u,v,sw,sh,w,h,256,256);
     }
+    private static void piece512(int x,int y,int w,int h,int u,int v,int sw,int sh) {
+        Gui.drawScaledCustomSizeModalRect(x,y,u,v,sw,sh,w,h,512,512);
+    }
     static void panel(int x,int y,int w,int h) {
         Minecraft.getMinecraft().getTextureManager().bindTexture(PANEL);
         float tint = 1;
         GlStateManager.color(tint,tint,tint,1);
-        piece(x+4,y+4,w-8,h-8,4,4,1,1);
-        piece(x,y,4,4,0,0,4,4); piece(x+4,y,w-8,4,4,0,168,4); piece(x+w-4,y,4,4,172,0,4,4);
-        piece(x,y+4,4,h-8,0,4,4,182); piece(x+w-4,y+4,4,h-8,172,4,4,182);
-        piece(x,y+h-4,4,4,0,186,4,4); piece(x+4,y+h-4,w-8,4,4,186,168,4); piece(x+w-4,y+h-4,4,4,172,186,4,4);
+        piece512(x+4,y+4,w-8,h-8,4,4,1,1);
+        piece512(x,y,4,4,0,0,4,4); piece512(x+4,y,w-8,4,4,0,168,4); piece512(x+w-4,y,4,4,318,0,4,4);
+        piece512(x,y+4,4,h-8,0,4,4,248); piece512(x+w-4,y+4,4,h-8,318,4,4,248);
+        piece512(x,y+h-4,4,4,0,252,4,4); piece512(x+4,y+h-4,w-8,4,4,252,168,4); piece512(x+w-4,y+h-4,4,4,318,252,4,4);
         GlStateManager.color(1,1,1,1);
     }
     static void background(String name,int x,int y,int w,int h) {
@@ -68,7 +72,7 @@ final class FarmGuiStyle {
     static void slot(int x,int y) {
         Minecraft.getMinecraft().getTextureManager().bindTexture(PANEL);
         float tint = 1; GlStateManager.color(tint,tint,tint,1);
-        piece(x-1,y-1,18,18,7,109,18,18); GlStateManager.color(1,1,1,1);
+        piece512(x-1,y-1,18,18,7,172,18,18); GlStateManager.color(1,1,1,1);
     }
     static void info(int x,int y) {
         Minecraft.getMinecraft().getTextureManager().bindTexture(INFO); GlStateManager.color(1,1,1,1);
@@ -108,13 +112,6 @@ final class FarmGuiStyle {
         GlStateManager.color(1, 1, 1, 1);
         if (active) piece(x, y, 18, 17, 135, 30, 18, 17);
         else piece(x, y, 18, 17, 135, 9, 18, 17);
-    }
-    /** Draws the IC2 three-flame heat indicator (13x13). */
-    static void heat(int x, int y, boolean active) {
-        Minecraft.getMinecraft().getTextureManager().bindTexture(COMMON);
-        GlStateManager.color(1, 1, 1, 1);
-        piece(x, y, 13, 13, 97, 81, 13, 13);
-        if (active) piece(x, y, 13, 13, 112, 80, 13, 13);
     }
     /** Draws the IC2 green gauge tick marks over a fluid tank. */
     static void tankScale(int x, int y, int w, int h) {

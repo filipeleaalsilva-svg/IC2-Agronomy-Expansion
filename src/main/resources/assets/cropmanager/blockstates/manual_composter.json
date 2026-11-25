@@ -1,22 +1,10 @@
 {
   "variants": {
-    "fill=0": {
-      "model": "cropmanager:manual_composter_0"
-    },
-    "fill=1": {
-      "model": "cropmanager:manual_composter_1"
-    },
-    "fill=2": {
-      "model": "cropmanager:manual_composter_2"
-    },
-    "fill=3": {
-      "model": "cropmanager:manual_composter_3"
-    },
-    "fill=4": {
-      "model": "cropmanager:manual_composter_4"
-    },
-    "fill=5": {
-      "model": "cropmanager:manual_composter_5"
-    }
+    "fill=0": {"model": "cropmanager:manual_composter_0"},
+    "fill=1": {"model": "cropmanager:manual_composter_1"},
+    "fill=2": {"model": "cropmanager:manual_composter_2"},
+    "fill=3": {"model": "cropmanager:manual_composter_3"},
+    "fill=4": {"model": "cropmanager:manual_composter_4"},
+    "fill=5": {"model": "cropmanager:manual_composter_5"}
   }
 }

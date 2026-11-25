@@ -9,7 +9,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
@@ -23,7 +22,7 @@ public final class RadioactiveSoilBlock extends Block {
         super(Material.GROUND);
         setRegistryName(CropManager.ID, "radioactive_soil");
         setTranslationKey("cropmanager.radioactive_soil");
-        setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+        setCreativeTab(CropManager.TAB);
         setHardness(0.8F);
         setResistance(4.0F);
         setSoundType(SoundType.GROUND);

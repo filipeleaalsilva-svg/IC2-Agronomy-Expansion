@@ -73,7 +73,6 @@ public final class ManagerConfig {
     public static int extractorTankCapacity = 16000;
     public static int extractorDuration = 100;
     public static int extractorEuPerTick = 5;
-    public static int extractorHeatPerTick = 20;
     public static int extractorWaterPerRecipe = 1000;
     public static int extractorExtractPerRecipe = 1000;
     public static int extractorEnergyCapacity = 20000;
@@ -130,6 +129,52 @@ public final class ManagerConfig {
     public static int sprinklerBaseInterval = 80;
     public static int sprinklerHydrationBonus = 25;
     public static int sprinklerGrowthBonus = 15;
+
+    // Pollinator Hive
+    public static int pollinatorRadius = 2;
+    public static int pollinatorBaseInterval = 100;
+    public static int pollinatorChargesPerPowder = 16;
+    public static int pollinatorMaxCharges = 64;
+
+    // Greenhouse Glass
+    public static int greenhouseGrowthBonus = 20;
+
+    // Industrial Fluid Reservoir
+    public static int industrialTankBaseCapacity = 128000;
+    public static int industrialTankCapacityPerUpgrade = 32000;
+    public static int industrialTankAutoEjectRate = 2000;
+
+    // Agricultural Grain Silo
+    public static int siloBaseCapacity = 128000;
+    public static int siloCapacityPerUpgrade = 32000;
+    public static int siloAutoEjectRate = 64;
+
+    // Fluid Logistics Pipes
+    public static int fluidPipeTransferMb = 250;
+    public static int fluidPipeIntervalTicks = 5;
+
+    // Wi-Fi EU Grid
+    public static int wifiChannelBufferEU = 100000;
+    public static int wifiPlugSinkTier = 4;
+    public static int wifiPointMaxOutputTier = 4;
+    public static float wifiCrossDimLossPercent = 0.0F;
+
+    // Dish Antenna
+    public static int dishBaseRadius = 16;
+    public static int dishRadiusPerUpgrade = 16;
+    public static int dishMaxTransferPerTick = 512;
+    public static int dishEnergyCapacity = 100000;
+    public static int dishSinkTier = 4;
+    public static int dishScanIntervalTicks = 20;
+
+    // Hydroponic Chamber
+    public static int hydroponicDuration = 200;
+    public static int hydroponicEuPerTick = 16;
+    public static int hydroponicEnergyCapacity = 50000;
+    public static int hydroponicSinkTier = 2;
+    public static int hydroponicTankCapacity = 16000;
+    public static int hydroponicWaterPerCycle = 500;
+    public static int hydroponicHeatPerTick = 20;
 
     private ManagerConfig() {}
 
@@ -192,7 +237,6 @@ public final class ManagerConfig {
         extractorTankCapacity = c.getInt("tankCapacity", "grin_extractor", 16000, 1000, 1000000, "Capacity (mB) of both water and Grin Extract tanks.");
         extractorDuration = c.getInt("durationTicks", "grin_extractor", 100, 1, 72000, "Ticks required per extraction batch.");
         extractorEuPerTick = c.getInt("euPerTick", "grin_extractor", 5, 1, 10000, "EU/t consumed while extracting.");
-        extractorHeatPerTick = c.getInt("heatPerTick", "grin_extractor", 20, 0, 10000, "IC2 Heat (HU/t) drawn from an adjacent heat source or Thermal Pipe.");
         extractorWaterPerRecipe = c.getInt("waterPerRecipe", "grin_extractor", 1000, 1, extractorTankCapacity, "Water (mB) consumed per extraction batch.");
         extractorExtractPerRecipe = c.getInt("extractPerRecipe", "grin_extractor", 1000, 1, extractorTankCapacity, "Grin Extract (mB) produced per extraction batch.");
         extractorEnergyCapacity = c.getInt("energyCapacity", "grin_extractor", 20000, 1000, 10000000, "Internal EU buffer capacity.");
@@ -241,6 +285,44 @@ public final class ManagerConfig {
         sprinklerBaseInterval = c.getInt("baseIntervalTicks", "sprinklers", 80, 10, 1200, "Base ticks between hydration pulses for Sprinkler Mk1.");
         sprinklerHydrationBonus = c.getInt("hydrationBonus", "sprinklers", 25, 1, 100, "Water hydration added to IC2 crops per pulse.");
         sprinklerGrowthBonus = c.getInt("growthBonus", "sprinklers", 15, 0, 200, "Base growth points added to IC2 crops per pulse (scaled by tier speed).");
+
+        pollinatorRadius = c.getInt("radius", "pollinator_hive", 2, 1, 8, "Horizontal radius of the Pollinator Hive scan area.");
+        pollinatorBaseInterval = c.getInt("baseIntervalTicks", "pollinator_hive", 100, 10, 1200, "Base ticks per pollination pulse; charged operation runs at three pulses per interval.");
+        pollinatorChargesPerPowder = c.getInt("chargesPerPowder", "pollinator_hive", 16, 1, 64, "Charges added when one Mutagenic Powder is inserted.");
+        pollinatorMaxCharges = c.getInt("maxCharges", "pollinator_hive", 64, 1, 64, "Maximum stored Mutagenic Powder charges.");
+
+        greenhouseGrowthBonus = c.getInt("growthBonus", "greenhouse", 20, 0, 200, "Growth points granted to a valid IC2 crop directly below Greenhouse Glass per random tick.");
+
+        industrialTankBaseCapacity = c.getInt("baseCapacity", "industrial_tank", 128000, 16000, 10000000, "Base fluid capacity (mB) for the Industrial Fluid Reservoir.");
+        industrialTankCapacityPerUpgrade = c.getInt("capacityPerUpgrade", "industrial_tank", 32000, 1000, 1000000, "Extra capacity (mB) added per Capacity Expansion upgrade (up to 8).");
+        industrialTankAutoEjectRate = c.getInt("autoEjectRateMB", "industrial_tank", 2000, 100, 100000, "Maximum fluid (mB) auto-ejected per second when Redstone allows (0 EU).");
+
+        siloBaseCapacity = c.getInt("baseCapacity", "agricultural_silo", 128000, 1000, 10000000, "Base item capacity for the Agricultural Grain Silo.");
+        siloCapacityPerUpgrade = c.getInt("capacityPerUpgrade", "agricultural_silo", 32000, 100, 1000000, "Extra capacity added per Capacity Expansion upgrade (up to 8).");
+        siloAutoEjectRate = c.getInt("autoEjectRate", "agricultural_silo", 64, 1, 10000, "Maximum items auto-ejected per second when Redstone allows (0 EU).");
+
+        fluidPipeTransferMb = c.getInt("transferMbPerPulse", "fluid_pipe", 250, 10, 10000, "Maximum fluid (mB) transferred per pulse through Fluid Pipes, Restrictors, and Routers.");
+        fluidPipeIntervalTicks = c.getInt("intervalTicks", "fluid_pipe", 5, 1, 200, "Ticks between automatic fluid transfer pulses.");
+
+        wifiChannelBufferEU = c.getInt("channelBufferEU", "wifi_grid", 100000, 1000, 10000000, "Smoothing EU buffer per Wi-Fi EU channel.");
+        wifiPlugSinkTier = c.getInt("plugSinkTier", "wifi_grid", 4, 1, 8, "IC2 energy input tier for the Wi-Fi EU Plug.");
+        wifiPointMaxOutputTier = c.getInt("pointMaxOutputTier", "wifi_grid", 4, 1, 4, "Maximum selectable Wi-Fi EU Point output tier.");
+        wifiCrossDimLossPercent = finiteFloat(c, "wifi_grid", "crossDimLossPercent", 0.0F, 0.0F, 50.0F, "Optional EU transmission loss percentage across dimensions (0-50).");
+
+        dishBaseRadius = c.getInt("baseRadius", "dish_antenna", 16, 4, 64, "Base horizontal/vertical radius in blocks for the EU Dish Antenna.");
+        dishRadiusPerUpgrade = c.getInt("radiusPerUpgrade", "dish_antenna", 16, 4, 32, "Extra radius per Wireless Range upgrade (up to 4).");
+        dishMaxTransferPerTick = c.getInt("maxTransferPerTick", "dish_antenna", 512, 32, 16384, "Maximum EU/t distributed by a Dish Antenna across linked machines.");
+        dishEnergyCapacity = c.getInt("energyCapacity", "dish_antenna", 100000, 1000, 10000000, "Internal EU buffer capacity for the EU Dish Antenna.");
+        dishSinkTier = c.getInt("sinkTier", "dish_antenna", 4, 1, 8, "IC2 energy input tier for the EU Dish Antenna.");
+        dishScanIntervalTicks = c.getInt("scanIntervalTicks", "dish_antenna", 20, 5, 200, "Ticks between loaded-chunk receiver cache refreshes.");
+
+        hydroponicDuration = c.getInt("durationTicks", "hydroponic_chamber", 200, 10, 72000, "Base ticks per harvest cycle in the Hydroponic Chamber before dome/heat/Overclocker bonuses.");
+        hydroponicEuPerTick = c.getInt("euPerTick", "hydroponic_chamber", 16, 1, 10000, "Base EU/t consumed while growing a crop in the Hydroponic Chamber.");
+        hydroponicEnergyCapacity = c.getInt("energyCapacity", "hydroponic_chamber", 50000, 1000, 10000000, "Internal EU buffer capacity for the Hydroponic Chamber.");
+        hydroponicSinkTier = c.getInt("sinkTier", "hydroponic_chamber", 2, 1, 8, "IC2 energy input tier for the Hydroponic Chamber.");
+        hydroponicTankCapacity = c.getInt("tankCapacity", "hydroponic_chamber", 16000, 1000, 1000000, "Internal water tank capacity (mB) for the Hydroponic Chamber.");
+        hydroponicWaterPerCycle = c.getInt("waterPerCycle", "hydroponic_chamber", 500, 0, hydroponicTankCapacity, "Water (mB) consumed per completed harvest cycle.");
+        hydroponicHeatPerTick = c.getInt("heatPerTick", "hydroponic_chamber", 20, 1, 1000, "IC2 Heat (HU/t) drawn from adjacent heat sources for the +50% thermal speed bonus.");
 
         if (c.hasChanged()) c.save();
     }

@@ -19,7 +19,7 @@ public final class EquipmentGui extends GuiContainer {
     private boolean weeder() { return machine instanceof WeederTile; }
     private boolean side() { return monitor() || weeder(); }
     private boolean monitor() { return machine instanceof MonitorTile; }
-    public EquipmentGui(InventoryPlayer player, FarmTile tile) { super(new EquipmentContainer(player, tile)); machine = tile; xSize = 176; ySize = tile instanceof MonitorTile ? 264 : 208; }
+    public EquipmentGui(InventoryPlayer player, FarmTile tile) { super(new EquipmentContainer(player, tile)); machine = tile; xSize = 176; ySize = tile instanceof MonitorTile ? 256 : 208; }
     @Override public void initGui() {
         xSize = side() && sidebarExpanded ? 322 : 176; buttonList.clear(); super.initGui();
         guiLeft = (width - xSize) / 2;
@@ -96,21 +96,14 @@ public final class EquipmentGui extends GuiContainer {
         if(monitor()){
             MonitorTile m=(MonitorTile)machine;NBTTagCompound st=m.snapshot;
             if(sidebarExpanded && tab<2){java.util.List<String> tips=survey.tooltip(x-guiLeft,y-guiTop,st,182,46,132,tab==1);if(!tips.isEmpty())drawHoveringText(tips,x,y);}
-            if(isPointInRegion(8,6,160,24,x,y))drawHoveringText(ManagerGui.tr("target_"+st.getString("Target"))+" | "+m.targetCoordinates()+" | "+ManagerGui.tr("range")+": "+m.connectionRange(),x,y);
-            if(isPointInRegion(52,40,14,17,x,y))drawHoveringText(UiNumbers.exactResource(st.getDouble("EU"),st.getDouble("Capacity"),"EU"),x,y);
-            if(isPointInRegion(27,130,62,16,x,y))drawHoveringText(m.wirelessEuUpgrades()>0?Arrays.asList(ManagerGui.tr("wireless_eu_buffer")+": "+UiNumbers.exactResource(m.energy.getEnergyStored(),m.wirelessEuCapacity(),"EU"),"T"+m.energy.getSinkTier()+" · "+m.wirelessEuRate()+" EU/t"):Arrays.asList(ManagerGui.tr("wireless_eu_buffer")+": 0 / 0 EU",ManagerGui.tr("wireless_eu_help")),x,y);
+            if(isPointInRegion(7,17,162,16,x,y) || isPointInRegion(8,6,130,11,x,y))drawHoveringText(ManagerGui.tr("target_"+st.getString("Target"))+" | "+m.targetCoordinates()+" | "+ManagerGui.tr("range")+": "+m.connectionRange(),x,y);
+            if(!("connected".equals(m.connection) && "weeder".equals(st.getString("Target"))) && isPointInRegion(52,40,14,17,x,y))drawHoveringText(UiNumbers.exactResource(st.getDouble("EU"),st.getDouble("Capacity"),"EU"),x,y);
+            if(isPointInRegion(27,151,62,16,x,y))drawHoveringText(m.wirelessEuUpgrades()>0?Arrays.asList(ManagerGui.tr("wireless_eu_buffer")+": "+UiNumbers.exactResource(m.energy.getEnergyStored(),m.wirelessEuCapacity(),"EU"),"T"+m.energy.getSinkTier()+" · "+m.wirelessEuRate()+" EU/t"):Arrays.asList(ManagerGui.tr("wireless_eu_buffer")+": 0 / 0 EU",ManagerGui.tr("wireless_eu_help")),x,y);
             if(isPointInRegion(8,42,16,36,x,y))drawHoveringText(Arrays.asList(UiNumbers.exactResource(st.hasKey("Water")?st.getInteger("Water"):m.water.getFluidAmount(),st.hasKey("TankCapacity")?st.getInteger("TankCapacity"):m.water.getCapacity(),"mB"),ManagerGui.tr("monitor_buffer")+": "+UiNumbers.exactResource(m.water.getFluidAmount(),m.water.getCapacity(),"mB")),x,y);
             if(isPointInRegion(30,42,16,36,x,y))drawHoveringText(Arrays.asList(UiNumbers.exactResource(st.hasKey("Weed")?st.getInteger("Weed"):m.weed.getFluidAmount(),st.hasKey("WeedCapacity")?st.getInteger("WeedCapacity"):m.weed.getCapacity(),"mB"),ManagerGui.tr("monitor_buffer")+": "+UiNumbers.exactResource(m.weed.getFluidAmount(),m.weed.getCapacity(),"mB")),x,y);
             if("connected".equals(m.connection) && "manager".equals(st.getString("Target"))){
-                NBTTagList mSlots=st.getTagList("ManagerSlots",10);
-                for(int i=0;i<mSlots.tagCount() && i<15;i++){
-                    int sx=76+(i%5)*18, sy=36+(i/5)*18;
-                    if(isPointInRegion(sx,sy,16,16,x,y)){
-                        ItemStack stack=new ItemStack(mSlots.getCompoundTagAt(i));
-                        if(!stack.isEmpty())renderToolTip(stack,x,y);
-                        break;
-                    }
-                }
+                monitorStackTooltip(st.getTagList("ManagerSlots", 10), 15, 76, 36, 5, x, y);
+                monitorStackTooltip(st.getTagList("ManagerUpgrades", 10), 4, 98, 92, 4, x, y);
             }
             Slot monitorSlot=getSlotUnderMouse();
             if(monitorSlot!=null && monitorSlot.slotNumber<9 && !monitorSlot.getHasStack())drawHoveringText(ManagerGui.tr(monitorSlot.slotNumber<4?"wireless_upgrade_help":monitorSlot.slotNumber==7?"harvest_transfer_help":monitorSlot.slotNumber==8?"wireless_eu_help":"fertilizer_buffer_help"),x,y);
@@ -120,7 +113,7 @@ public final class EquipmentGui extends GuiContainer {
             if (b.id == 200) { boolean on = monitor() ? ((MonitorTile)machine).snapshot.getBoolean("Enabled") : !weeder() || ((WeederTile)machine).enabled; drawHoveringText(Arrays.asList(ManagerGui.tr("tip.power_title"), (on ? "\u00a7a" : "\u00a7c") + ManagerGui.tr(on ? "on" : "off"), ManagerGui.tr("tip.power_desc")), x, y); }
             if (b.id == 13) { int rs = monitor() ? ((MonitorTile)machine).snapshot.getInteger("Redstone") : weeder() ? ((WeederTile)machine).redstoneMode : 0; drawHoveringText(Arrays.asList(ManagerGui.tr("tip.redstone_title"), "\u00a7e" + ManagerGui.tr("redstone_" + rs), ManagerGui.tr("tip.redstone_cycle")), x, y); }
             if (b.id == 201 && monitor()) { boolean h = (((MonitorTile)machine).snapshot.getInteger("Functions") & 1) != 0; drawHoveringText(Arrays.asList(ManagerGui.tr("tip.harvest_title"), (h ? "\u00a7a" : "\u00a7c") + ManagerGui.tr(h ? "on" : "off"), ManagerGui.tr("tip.harvest_desc")), x, y); }
-            if (b.id == 12) drawHoveringText((machine instanceof ComposterTile || machine instanceof GrinGrinderTile || machine instanceof GrinExtractorTile || machine instanceof WeedExFabricatorTile || machine instanceof SeedAnalyzerTile) ? Arrays.asList(ManagerGui.tr("compatible_upgrades"), ManagerGui.tr("upgrade_overclocker"), ManagerGui.tr("upgrade_storage"), ManagerGui.tr("upgrade_transformer"), ManagerGui.tr("wireless_eu_help")) : monitor() ? Arrays.asList(ManagerGui.tr("compatible_upgrades"),ManagerGui.tr("wireless_upgrade_help"),ManagerGui.tr("harvest_transfer_help"),ManagerGui.tr("wireless_eu_help")) : Arrays.asList(ManagerGui.tr("compatible_upgrades"),ManagerGui.tr("no_upgrades")),x,y);
+            if (b.id == 12) drawHoveringText((machine instanceof ComposterTile || machine instanceof GrinGrinderTile || machine instanceof GrinExtractorTile || machine instanceof WeedExFabricatorTile || machine instanceof SeedAnalyzerTile || machine instanceof HydroponicChamberTile) ? Arrays.asList(ManagerGui.tr("compatible_upgrades"), ManagerGui.tr("upgrade_overclocker"), ManagerGui.tr("upgrade_storage"), ManagerGui.tr("upgrade_transformer"), ManagerGui.tr("wireless_eu_help")) : monitor() ? Arrays.asList(ManagerGui.tr("compatible_upgrades"),ManagerGui.tr("wireless_upgrade_help"),ManagerGui.tr("harvest_transfer_help"),ManagerGui.tr("wireless_eu_help")) : Arrays.asList(ManagerGui.tr("compatible_upgrades"),ManagerGui.tr("no_upgrades")),x,y);
             if (b.id == 146 && monitor()) drawHoveringText(ManagerGui.tr("signal_level")+": "+((MonitorTile)machine).signal,x,y);
             if (b.id == 147) drawHoveringText(ManagerGui.tr("test_signal_help"),x,y);
         }
@@ -140,7 +133,6 @@ public final class EquipmentGui extends GuiContainer {
             if (isPointInRegion(11,42,12,17,x,y)) drawHoveringText(UiNumbers.exactResource(e.energy.getEnergyStored(),e.energy.getCapacity(),"EU")+" | T"+e.energy.getSinkTier(),x,y);
             if (isPointInRegion(28,28,20,50,x,y)) drawHoveringText(ManagerGui.tr("water")+": "+UiNumbers.exactResource(e.water.getFluidAmount(),e.water.getCapacity(),"mB"),x,y);
             if (isPointInRegion(112,28,20,50,x,y)) drawHoveringText(ManagerGui.tr("grin_extract")+": "+UiNumbers.exactResource(e.extract.getFluidAmount(),e.extract.getCapacity(),"mB"),x,y);
-            if (isPointInRegion(56,36,48,20,x,y)) drawHoveringText(e.clientHeatPerTick+" HU/t · "+ManagerGui.tr(e.heatConnected?"ready":"extractor_heat"),x,y);
             Slot s=getSlotUnderMouse();
             if(s!=null && s.slotNumber<4 && !s.getHasStack())drawHoveringText(ManagerGui.tr(s.slotNumber==0?"grin_powder":s.slotNumber==1?"slot_water_container":s.slotNumber==2?"slot_empty_container":"slot_output"),x,y);
         }
@@ -155,9 +147,17 @@ public final class EquipmentGui extends GuiContainer {
         if (machine instanceof SeedAnalyzerTile) {
             SeedAnalyzerTile a=(SeedAnalyzerTile)machine;
             if (isPointInRegion(11,42,12,17,x,y)) drawHoveringText(UiNumbers.exactResource(a.energy.getEnergyStored(),a.energy.getCapacity(),"EU")+" | T"+a.energy.getSinkTier(),x,y);
-            if (isPointInRegion(56,24,48,20,x,y)) drawHoveringText(UiNumbers.exact(a.euPerTick)+" EU/t | "+a.clientDuration+" t",x,y);
+            if (isPointInRegion(56,20,48,24,x,y)) drawHoveringText(UiNumbers.exact(a.euPerTick)+" EU/t | "+a.clientDuration+" t",x,y);
             Slot s=getSlotUnderMouse();
             if (s!=null && s.slotNumber<2 && !s.getHasStack()) drawHoveringText(ManagerGui.tr(s.slotNumber==0?"analyzer_slot_in":"analyzer_slot_out"),x,y);
+        }
+        if (machine instanceof HydroponicChamberTile) {
+            HydroponicChamberTile h=(HydroponicChamberTile)machine;
+            if (isPointInRegion(11,42,12,17,x,y)) drawHoveringText(UiNumbers.exactResource(h.energy.getEnergyStored(),h.energy.getCapacity(),"EU")+" | T"+h.energy.getSinkTier(),x,y);
+            if (isPointInRegion(28,28,20,50,x,y)) drawHoveringText(ManagerGui.tr("water")+": "+UiNumbers.exactResource(h.water.getFluidAmount(),h.water.getCapacity(),"mB"),x,y);
+            if (isPointInRegion(74,30,26,20,x,y)) drawHoveringText(UiNumbers.exact(h.euPerTick)+" EU/t | "+h.clientDuration+" t",x,y);
+            Slot s=getSlotUnderMouse();
+            if (s!=null && s.slotNumber<2 && !s.getHasStack()) drawHoveringText(ManagerGui.tr(s.slotNumber==0?"hydroponic_slot_seed":"hydroponic_slot_catalyst"),x,y);
         }
     }
     @Override protected void drawGuiContainerBackgroundLayer(float ticks,int x,int y) {
@@ -168,6 +168,7 @@ public final class EquipmentGui extends GuiContainer {
         else if (machine instanceof GrinGrinderTile) texture="equipment_grinder";
         else if (machine instanceof GrinExtractorTile) texture="equipment_extractor";
         else if (machine instanceof SeedAnalyzerTile) texture="equipment_analyzer";
+        else if (machine instanceof HydroponicChamberTile) texture="equipment_hydroponic";
         else texture="equipment_mixer";
         net.minecraft.client.renderer.GlStateManager.disableDepth();
         FarmGuiStyle.background(texture,guiLeft,guiTop,xSize,ySize);
@@ -179,7 +180,7 @@ public final class EquipmentGui extends GuiContainer {
         fontRenderer.drawString(trimmed,centerX-fontRenderer.getStringWidth(trimmed)/2,y,ManagerGui.ink());
     }
     @Override protected void drawGuiContainerForegroundLayer(int x,int y) {
-        String name = machine instanceof ComposterTile ? "composter_name" : machine instanceof GrinGrinderTile ? "grinder_name" : machine instanceof GrinExtractorTile ? "extractor_name" : machine instanceof WeedExFabricatorTile ? "mixer_name" : machine instanceof SeedAnalyzerTile ? "analyzer_name" : weeder() ? "weeder_name" : monitor() ? "monitor_name" : "legacy_name";
+        String name = machine instanceof ComposterTile ? "composter_name" : machine instanceof GrinGrinderTile ? "grinder_name" : machine instanceof GrinExtractorTile ? "extractor_name" : machine instanceof WeedExFabricatorTile ? "mixer_name" : machine instanceof SeedAnalyzerTile ? "analyzer_name" : machine instanceof HydroponicChamberTile ? "hydroponic_name" : weeder() ? "weeder_name" : monitor() ? "monitor_name" : "legacy_name";
         FarmGuiStyle.title(fontRenderer,ManagerGui.tr(name),8,7,side()?128:146);
         if (machine instanceof ComposterTile) {
             ComposterTile c=(ComposterTile)machine;
@@ -220,9 +221,8 @@ public final class EquipmentGui extends GuiContainer {
             vertical(112,28,20,50,e.extract.getFluidAmount()/(double)Math.max(1,e.extract.getCapacity()),0xff83aa55);
             FarmGuiStyle.tankScale(28,28,20,50);
             FarmGuiStyle.tankScale(112,28,20,50);
-            FarmGuiStyle.heat(74,42,e.heatConnected || e.progress>0);
             centeredText(ManagerGui.tr("water"),38,18,44); centeredText(ManagerGui.tr("extract_short"),122,18,48);
-            centeredText(e.clientHeatPerTick+" HU/t",80,28,50); bar(56,59,48,e.progress/(double)Math.max(1,e.clientDuration),0xff76a74b);
+            bar(56,59,48,e.progress/(double)Math.max(1,e.clientDuration),0xff76a74b);
             centeredText(e.progress+" / "+e.clientDuration+" t",80,69,56); text(ManagerGui.tr(e.condition),8,106,160);
         } else if (machine instanceof SeedAnalyzerTile) {
             SeedAnalyzerTile a=(SeedAnalyzerTile)machine;
@@ -244,6 +244,20 @@ public final class EquipmentGui extends GuiContainer {
                 fontRenderer.drawString(fontRenderer.trimStringToWidth(ManagerGui.tr("analyzer_no_data"),102),34,70,0xff8899a6);
             }
             text(ManagerGui.tr(a.condition),8,106,160);
+        } else if (machine instanceof HydroponicChamberTile) {
+            HydroponicChamberTile h=(HydroponicChamberTile)machine;
+            double euRatio=h.energy.getEnergyStored()/Math.max(1,h.energy.getCapacity());
+            FarmGuiStyle.bolt(13,44,euRatio);
+            vertical(28,28,20,50,h.water.getFluidAmount()/(double)Math.max(1,h.water.getCapacity()),0xff438cbd);
+            FarmGuiStyle.tankScale(28,28,20,50);
+            int maxP=Math.max(1,h.clientDuration*HydroponicChamberTile.PROGRESS_SCALE);
+            bar(74,38,26,h.progress/(double)maxP,0xff76a74b);
+            centeredText(String.format(java.util.Locale.ROOT,"%.0f%%",h.progress*100.0/maxP),87,47,30);
+            fontRenderer.drawString(fontRenderer.trimStringToWidth((h.hasGlass?"+ ":"- ")+ManagerGui.tr("hydroponic_check_glass"),46),54,75,h.hasGlass?0xff7fd17a:0xffe07070);
+            fontRenderer.drawString(fontRenderer.trimStringToWidth((h.hasSubsoil?"+ ":"- ")+ManagerGui.tr("hydroponic_check_subsoil"),46),54,84,h.hasSubsoil?0xff7fd17a:0xffe07070);
+            fontRenderer.drawString(fontRenderer.trimStringToWidth((h.domeBonus?"+ ":"- ")+ManagerGui.tr("hydroponic_check_dome"),42),102,75,h.domeBonus?0xff7fd17a:0xff8899a6);
+            fontRenderer.drawString(fontRenderer.trimStringToWidth((h.heatBonus?"+ ":"- ")+ManagerGui.tr("hydroponic_check_heat"),42),102,84,h.heatBonus?0xffffb84d:0xff8899a6);
+            text(ManagerGui.tr(h.condition),8,106,160);
         } else if(weeder()) {
             WeederTile w=(WeederTile)machine;
             int gasCap=Math.max(1,w.gas.getCapacity());
@@ -251,18 +265,20 @@ public final class EquipmentGui extends GuiContainer {
             vertical(8,36,12,28,w.gas.getFluidAmount()/(double)gasCap,0xff83aa55);
             FarmGuiStyle.tankScale(8,36,12,28);
             text(ManagerGui.tr("biogas")+": "+UiNumbers.resource(w.gas.getFluidAmount(),gasCap,"mB"),25,37,143);
-            text(ManagerGui.tr("input_short"),36,52,48);text(ManagerGui.tr("output_short"),100,52,48);
+            text(ManagerGui.tr("input_short"),36,52,48);text(ManagerGui.tr("output_short"),100,52,48);text(ManagerGui.tr("weed_item_short"),130,52,42);
             
             if(sidebarExpanded)AreaWidgets.draw(fontRenderer,182,30,w.radius,w.layers);
         } else if (monitor()) {
             MonitorTile m=(MonitorTile)machine; NBTTagCompound s=m.snapshot;
             String state="connected".equals(m.connection) && s.hasKey("State")?s.getString("State"):"monitor_"+m.connection;
-            fontRenderer.drawString(fontRenderer.trimStringToWidth(ManagerGui.tr(state),160),8,22,m.alarmActive?FarmGuiStyle.warningInk():FarmGuiStyle.goodInk());
+            fontRenderer.drawString(fontRenderer.trimStringToWidth(ManagerGui.tr(state),160),8,22,m.alarmActive?0xffffb08a:0xff9cdeb0);
             double wirelessRatio=m.wirelessEuUpgrades()>0?m.energy.getEnergyStored()/Math.max(1,m.wirelessEuCapacity()):0;
-            FarmGuiStyle.bolt(29,132,wirelessRatio);
+            FarmGuiStyle.bolt(29,153,wirelessRatio);
             if("connected".equals(m.connection) && "weeder".equals(s.getString("Target"))){
                 int gasCap=Math.max(1,s.hasKey("GasCapacity")?s.getInteger("GasCapacity"):ManagerConfig.weederGasCapacity);
-                FarmGuiStyle.panel(74,34,94,58);
+                FarmGuiStyle.panel(73,33,96,58);
+                drawRect(78,44,164,49,FarmGuiStyle.darkTheme()?0xff080b0f:0xff373737);
+                drawRect(79,45,163,48,FarmGuiStyle.darkTheme()?0xff05080c:0xff262626);
                 bar(78,44,86,s.getInteger("Gas")/(double)gasCap,0xff83aa55);
                 text(ManagerGui.tr("biogas")+": "+UiNumbers.resource(s.getInteger("Gas"),gasCap,"mB"),78,56,86);
                 vertical(8,42,16,36,m.water.getFluidAmount()/(double)Math.max(1,m.water.getCapacity()),0xff438cbd);
@@ -288,20 +304,15 @@ public final class EquipmentGui extends GuiContainer {
                 int fertilizer=remote&&s.hasKey("Fertilizer")?s.getInteger("Fertilizer"):m.inventory.getStackInSlot(4).getCount()+m.inventory.getStackInSlot(5).getCount()+m.inventory.getStackInSlot(6).getCount();
                 text("x"+UiNumbers.compact(fertilizer),50,77,24);
                 if(remote && "manager".equals(s.getString("Target"))){
-                    NBTTagList mSlots=s.getTagList("ManagerSlots",10);
-                    for(int i=0;i<mSlots.tagCount() && i<15;i++){
-                        ItemStack stack=new ItemStack(mSlots.getCompoundTagAt(i));
-                        if(stack.isEmpty())continue;
-                        int sx=76+(i%5)*18, sy=36+(i/5)*18;
-                        mc.getRenderItem().renderItemAndEffectIntoGUI(stack,sx,sy);
-                        mc.getRenderItem().renderItemOverlays(fontRenderer,stack,sx,sy);
-                    }
+                    renderMonitorStacks(s.getTagList("ManagerSlots", 10), 15, 76, 36, 5);
+                    renderMonitorStacks(s.getTagList("ManagerUpgrades", 10), 4, 98, 92, 4);
+                    text(ManagerGui.tr("monitor_target_upgrades"), 8, 96, 88);
                 }
                 net.minecraft.client.renderer.RenderHelper.disableStandardItemLighting();
             }
-            text(ManagerGui.tr("wireless_short"),8,94,82);text(ManagerGui.tr("fertilizer_short"),98,94,70);
-            text(ManagerGui.tr("wireless_eu_short"),39,134,54);
-            text(ManagerGui.tr("harvest_transfer_short"),118,134,54);
+            text(ManagerGui.tr("wireless_short"),8,115,82);text(ManagerGui.tr("fertilizer_short"),98,115,70);
+            text(ManagerGui.tr("wireless_eu_short"),47,155,46);
+            text(ManagerGui.tr("harvest_transfer_short"),118,155,54);
             if(sidebarExpanded){
                 if(tab<2){
                     survey.draw(fontRenderer,s,182,46,132,tab==1);
@@ -316,6 +327,25 @@ public final class EquipmentGui extends GuiContainer {
         } else text(ManagerGui.tr("legacy_help"),8,22,160);
     }
     private String percent(int value){return value<0?"-":value==0?ManagerGui.tr("empty_short"):value+"%";}
+    private void renderMonitorStacks(NBTTagList items, int count, int left, int top, int columns) {
+        for (int i = 0; i < count; i++) {
+            ItemStack stack = new ItemStack(items.getCompoundTagAt(i));
+            if (stack.isEmpty()) continue;
+            int x = left + i % columns * 18, y = top + i / columns * 18;
+            mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x, y);
+            mc.getRenderItem().renderItemOverlays(fontRenderer, stack, x, y);
+        }
+    }
+
+    private void monitorStackTooltip(NBTTagList items, int count, int left, int top, int columns, int x, int y) {
+        for (int i = 0; i < count; i++) {
+            if (!isPointInRegion(left + i % columns * 18, top + i / columns * 18, 16, 16, x, y)) continue;
+            ItemStack stack = new ItemStack(items.getCompoundTagAt(i));
+            if (!stack.isEmpty()) renderToolTip(stack, x, y);
+            return;
+        }
+    }
+
     private void drawHarvestList(NBTTagCompound state){
         NBTTagList items=state.getTagList("HarvestItems",10);int pages=Math.max(1,(items.tagCount()+5)/6);harvestPage=Math.min(harvestPage,pages-1);
         FarmGuiStyle.title(fontRenderer,ManagerGui.tr("harvest_inventory"),182,44,132);
@@ -333,8 +363,8 @@ public final class EquipmentGui extends GuiContainer {
             net.minecraft.client.renderer.RenderHelper.enableGUIStandardItemLighting();
             mc.getRenderItem().renderItemAndEffectIntoGUI(stack,184,y+2);mc.getRenderItem().renderItemOverlays(fontRenderer,stack,184,y+2);
             net.minecraft.client.renderer.RenderHelper.disableStandardItemLighting();
-            text(stack.getDisplayName()+" x"+UiNumbers.compact(stack.getCount()),204,y+2,108);
-            text(ManagerGui.tr(entry.getInteger("Source")==0?"harvest_manager_source":"harvest_monitor_source"),204,y+11,108);
+            fontRenderer.drawString(fontRenderer.trimStringToWidth(stack.getDisplayName()+" x"+UiNumbers.compact(stack.getCount()),108),204,y+2,0xfff0f0f0);
+            fontRenderer.drawString(fontRenderer.trimStringToWidth(ManagerGui.tr(entry.getInteger("Source")==0?"harvest_manager_source":"harvest_monitor_source"),108),204,y+11,0xffbcbcbc);
         }
         text(ManagerGui.tr("page")+" "+(harvestPage+1)+" / "+pages,228,210,72);
         if(!"manager".equals(state.getString("Target")))text(ManagerGui.tr("harvest_unlinked"),182,196,132);

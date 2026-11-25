@@ -1,0 +1,144 @@
+{
+  "parent": "block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "minecraft:blocks/planks_oak",
+    "mount": "minecraft:blocks/planks_oak",
+    "glow": "cropmanager:blocks/farm_lantern",
+    "glass": "minecraft:blocks/glass"
+  },
+  "elements": [
+    {
+      "from": [
+        6,
+        5,
+        0
+      ],
+      "to": [
+        10,
+        14,
+        2
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#mount"
+        },
+        "south": {
+          "texture": "#mount"
+        },
+        "east": {
+          "texture": "#mount"
+        },
+        "west": {
+          "texture": "#mount"
+        },
+        "up": {
+          "texture": "#mount"
+        },
+        "down": {
+          "texture": "#mount"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        4,
+        2
+      ],
+      "to": [
+        10,
+        6,
+        11
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#mount"
+        },
+        "south": {
+          "texture": "#mount"
+        },
+        "east": {
+          "texture": "#mount"
+        },
+        "west": {
+          "texture": "#mount"
+        },
+        "up": {
+          "texture": "#mount"
+        },
+        "down": {
+          "texture": "#mount"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        6,
+        5
+      ],
+      "to": [
+        11,
+        12,
+        11
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#glow"
+        },
+        "south": {
+          "texture": "#glow"
+        },
+        "east": {
+          "texture": "#glow"
+        },
+        "west": {
+          "texture": "#glow"
+        },
+        "up": {
+          "texture": "#glow"
+        },
+        "down": {
+          "texture": "#glow"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        12,
+        4
+      ],
+      "to": [
+        12,
+        14,
+        12
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#mount"
+        },
+        "south": {
+          "texture": "#mount"
+        },
+        "east": {
+          "texture": "#mount"
+        },
+        "west": {
+          "texture": "#mount"
+        },
+        "up": {
+          "texture": "#mount"
+        },
+        "down": {
+          "texture": "#mount"
+        }
+      }
+    }
+  ]
+}

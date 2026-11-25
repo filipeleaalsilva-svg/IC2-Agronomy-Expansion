@@ -213,7 +213,7 @@ public final class MonitorTile extends FarmTile implements ITickable {
         if (testUntil > 0 && world.getTotalWorldTime() >= testUntil) { testUntil = 0; refresh(); }
         if (++ticks >= 20) { ticks = 0; refresh(); transferResources(); }
     }
-    private void transferWirelessEnergy() {
+    void transferWirelessEnergy() {
         int upgrades = wirelessEuUpgrades();
         if (upgrades <= 0 || energy.getEnergyStored() <= 0) return;
         double remaining = Math.min(energy.getEnergyStored(), wirelessEuRate());
@@ -239,15 +239,26 @@ public final class MonitorTile extends FarmTile implements ITickable {
             }
         }
         if (remaining <= 0) return;
-        double maxDistSq = (double) ManagerConfig.monitorSupportWirelessRadius * ManagerConfig.monitorSupportWirelessRadius;
-        for (TileEntity te : new java.util.ArrayList<>(world.loadedTileEntityList)) {
-            if (remaining <= 0) break;
-            if (te == null || te == this || te.isInvalid() || te.getWorld() != world || te.getPos().distanceSq(pos) > maxDistSq) continue;
-            if (!(te instanceof FarmTile) || !((FarmTile) te).isSupportMachine()) continue;
-            BasicSink sink = ((FarmTile) te).energySink();
-            if (sink != null) {
-                double sent = transferWirelessEnergyTo(sink, remaining);
-                if (sent > 0) { te.markDirty(); remaining -= sent; }
+        int radius = ManagerConfig.monitorSupportWirelessRadius;
+        double maxDistSq = (double) radius * radius;
+        net.minecraft.world.chunk.IChunkProvider provider = world.getChunkProvider();
+        if (provider == null) return;
+        int minCx = (pos.getX() - radius) >> 4, maxCx = (pos.getX() + radius) >> 4;
+        int minCz = (pos.getZ() - radius) >> 4, maxCz = (pos.getZ() + radius) >> 4;
+        for (int cx = minCx; cx <= maxCx && remaining > 0; cx++) {
+            for (int cz = minCz; cz <= maxCz && remaining > 0; cz++) {
+                net.minecraft.world.chunk.Chunk chunk = provider.getLoadedChunk(cx, cz);
+                if (chunk == null) continue;
+                for (TileEntity te : chunk.getTileEntityMap().values()) {
+                    if (remaining <= 0) break;
+                    if (te == null || te == this || te.isInvalid() || te.getWorld() != world || te.getPos().distanceSq(pos) > maxDistSq) continue;
+                    if (!(te instanceof FarmTile) || !((FarmTile) te).isSupportMachine()) continue;
+                    BasicSink sink = ((FarmTile) te).energySink();
+                    if (sink != null) {
+                        double sent = transferWirelessEnergyTo(sink, remaining);
+                        if (sent > 0) { te.markDirty(); remaining -= sent; }
+                    }
+                }
             }
         }
     }
@@ -357,6 +368,14 @@ public final class MonitorTile extends FarmTile implements ITickable {
         for (int slot = 0; slot < harvestInventory.getSlots(); slot++) appendHarvestItem(items, harvestInventory.getStackInSlot(slot), 1);
         snapshot.setTag("HarvestItems", items);
         snapshot.setTag("ManagerSlots", managerSlots);
+        NBTTagList managerUpgrades = new NBTTagList();
+        for (int slot = ManagerTile.UPGRADE_START; slot < ManagerTile.UPGRADE_END; slot++) {
+            NBTTagCompound entry = new NBTTagCompound();
+            ItemStack stack = manager.inventory.getStackInSlot(slot);
+            if (!stack.isEmpty()) stack.writeToNBT(entry);
+            managerUpgrades.appendTag(entry);
+        }
+        snapshot.setTag("ManagerUpgrades", managerUpgrades);
     }
     private static void appendHarvestItem(NBTTagList items, ItemStack stack, int source) {
         if (stack.isEmpty()) return;
@@ -388,7 +407,7 @@ public final class MonitorTile extends FarmTile implements ITickable {
         destination.fill(new FluidStack(sample, accepted), true);
     }
     @Override public boolean control(int action, EntityPlayer player) {
-        if (action == 13 || action >= 200 && action <= 204 || action >= 220 && action <= 230) {
+        if (action == 13 || action == 200 || action == 201 || action >= 220 && action <= 230) {
             if (linked == null || dimension != world.provider.getDimension() || pos.distanceSq(linked) > (double)connectionRange() * connectionRange() || !world.isBlockLoaded(linked, false)) return false;
             TileEntity target = world.getTileEntity(linked);
             boolean changed;
@@ -452,4 +471,14 @@ public final class MonitorTile extends FarmTile implements ITickable {
     @Override public SPacketUpdateTileEntity getUpdatePacket() { return new SPacketUpdateTileEntity(pos, 0, getUpdateTag()); }
     @Override public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity packet) { handleUpdateTag(packet.getNbtCompound()); }
     @Override public void handleUpdateTag(NBTTagCompound t) { readFromNBT(t); acceptGuiState(t.getCompoundTag("Display")); }
+    @Override EquipmentLayout equipmentLayout() {
+        return new EquipmentLayout(inventory, 173,
+                new int[]{8, 26, 44, 62, 98, 116, 134, 98, 8},
+                new int[]{127, 127, 127, 127, 127, 127, 127, 151, 151},
+                -1, true,
+                s -> isWirelessRange(s) ? new int[]{0, 4}
+                        : ManagerTile.isFertilizer(s) ? new int[]{4, 7}
+                        : isHarvestTransfer(s) ? new int[]{7, 8}
+                        : isWirelessEu(s) ? new int[]{8, 9} : null);
+    }
 }

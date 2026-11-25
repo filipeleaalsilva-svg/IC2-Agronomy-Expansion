@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "formed=false": { "model": "cropmanager:silo_casing" },
+    "formed=true": { "model": "cropmanager:silo_empty" }
+  }
+}

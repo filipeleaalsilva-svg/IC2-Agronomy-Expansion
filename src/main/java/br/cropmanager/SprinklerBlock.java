@@ -11,7 +11,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
@@ -42,7 +41,7 @@ public final class SprinklerBlock extends Block {
         this.tier = tier;
         setRegistryName(CropManager.ID, name);
         setTranslationKey("cropmanager." + name);
-        setCreativeTab(CreativeTabs.REDSTONE);
+        setCreativeTab(CropManager.TAB);
         setHardness(2.5F);
         setResistance(8.0F);
         setSoundType(SoundType.METAL);
@@ -67,6 +66,15 @@ public final class SprinklerBlock extends Block {
         int speed = SprinklerTile.speedMultiplierForTier(tier);
         tooltip.add(I18n.format("cropmanager.sprinkler_tip_area", diameter, diameter, speed));
         tooltip.add(I18n.format("cropmanager.sprinkler_tip_water"));
+        tooltip.add(I18n.format("cropmanager.sprinkler_tip_redstone"));
+    }
+
+    @Override
+    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        if (!world.isRemote) {
+            TileEntity te = world.getTileEntity(pos);
+            if (te instanceof SprinklerTile) ((SprinklerTile) te).refreshActiveState();
+        }
     }
 
     @Override
@@ -77,16 +85,30 @@ public final class SprinklerBlock extends Block {
         SprinklerTile sprinkler = (SprinklerTile) te;
         if (world.isRemote) return true;
         ItemStack held = player.getHeldItem(hand);
-        if (!held.isEmpty()) {
+        if (!held.isEmpty() && player.canPlayerEdit(pos, facing, held) && world.isBlockModifiable(player, pos)) {
             FluidActionResult res = FluidUtil.tryEmptyContainer(held, sprinkler.water, sprinkler.water.getCapacity(), player, true);
             if (res.isSuccess()) {
                 if (!player.capabilities.isCreativeMode) player.setHeldItem(hand, res.getResult());
+                sprinkler.refreshActiveState();
                 world.playSound(null, pos, SoundEvents.ITEM_BUCKET_EMPTY, SoundCategory.BLOCKS, 0.7F, 1.1F);
                 return true;
             }
         }
+        if (player.isSneaking()) {
+            if (!player.canPlayerEdit(pos, facing, held) || !world.isBlockModifiable(player, pos)) return false;
+            sprinkler.redstoneMode = (sprinkler.redstoneMode + 1) % 3;
+            sprinkler.markDirty();
+            sprinkler.refreshActiveState();
+            world.playSound(null, pos, SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.5F,
+                    sprinkler.redstoneMode == 1 ? 0.6F : 0.5F);
+            player.sendStatusMessage(new TextComponentTranslation("cropmanager.redstone_" + sprinkler.redstoneMode), true);
+            return true;
+        }
         int diameter = sprinkler.radius() * 2 + 1;
-        if (sprinkler.hasWaterSourceBelow()) {
+        if (!sprinkler.isRedstoneAllowed()) {
+            player.sendStatusMessage(new TextComponentTranslation("cropmanager.sprinkler_status_paused",
+                    diameter, diameter, sprinkler.speedMultiplier()), true);
+        } else if (sprinkler.hasWaterSourceBelow()) {
             player.sendStatusMessage(new TextComponentTranslation("cropmanager.sprinkler_status_source",
                     diameter, diameter, sprinkler.speedMultiplier()), true);
         } else {

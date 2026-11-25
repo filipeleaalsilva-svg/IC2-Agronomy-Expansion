@@ -21,6 +21,8 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 public final class SprinklerTile extends TileEntity implements ITickable {
     public int tier;
     public int cooldown;
+    /** 0 = always active, 1 = active with redstone signal, 2 = active without redstone signal (default). */
+    public int redstoneMode = 2;
     public final FluidTank water = new FluidTank(4000) {
         { setCanDrain(false); }
         @Override public boolean canFillFluidType(FluidStack stack) { return stack != null && stack.getFluid() == FluidRegistry.WATER; }
@@ -66,10 +68,25 @@ public final class SprinklerTile extends TileEntity implements ITickable {
         return hasWaterSourceBelow() || water.getFluidAmount() >= waterCostForTier(tier);
     }
 
+    public static boolean redstoneAllows(int mode, boolean powered) {
+        return mode == 0 || (mode == 1 ? powered : !powered);
+    }
+
+    public boolean isRedstoneAllowed() {
+        boolean powered = world != null && pos != null && world.isBlockLoaded(pos, false) && world.isBlockPowered(pos);
+        return redstoneAllows(redstoneMode, powered);
+    }
+
+    public void refreshActiveState() {
+        if (world != null && !world.isRemote && pos != null) {
+            syncActiveState(isRedstoneAllowed() && hasWater());
+        }
+    }
+
     @Override
     public void update() {
         if (world == null || world.isRemote) return;
-        boolean ready = hasWater();
+        boolean ready = isRedstoneAllowed() && hasWater();
         syncActiveState(ready);
         if (!ready) return;
 
@@ -88,37 +105,45 @@ public final class SprinklerTile extends TileEntity implements ITickable {
         int r = radius();
         int growthBonus = ManagerConfig.sprinklerGrowthBonus * speedMultiplier();
         int hydrationBonus = ManagerConfig.sprinklerHydrationBonus;
+        BlockPos.MutableBlockPos target = new BlockPos.MutableBlockPos();
+        int bx = pos.getX(), by = pos.getY(), bz = pos.getZ();
+        int maxY = world.getHeight();
         for (int dx = -r; dx <= r; dx++) {
             for (int dz = -r; dz <= r; dz++) {
                 for (int dy = -1; dy <= 1; dy++) {
-                    BlockPos target = pos.add(dx, dy, dz);
-                    if (target.getY() < 0 || target.getY() >= world.getHeight() || !world.isBlockLoaded(target, false)) continue;
+                    int ty = by + dy;
+                    if (ty < 0 || ty >= maxY) continue;
+                    target.setPos(bx + dx, ty, bz + dz);
+                    if (!world.isBlockLoaded(target, false)) continue;
                     IBlockState state = world.getBlockState(target);
                     if (state.getBlock() instanceof BlockFarmland) {
                         if (state.getValue(BlockFarmland.MOISTURE) < 7) {
-                            world.setBlockState(target, state.withProperty(BlockFarmland.MOISTURE, 7), 2);
+                            world.setBlockState(target.toImmutable(), state.withProperty(BlockFarmland.MOISTURE, 7), 2);
                         }
                         continue;
                     }
                     TileEntity te = world.getTileEntity(target);
-                    if (te instanceof TileEntityCrop) {
-                        hydrateCrop((TileEntityCrop) te, hydrationBonus, growthBonus);
-                        world.markChunkDirty(target, te);
+                    if (te instanceof TileEntityCrop && hydrateCrop((TileEntityCrop) te, hydrationBonus, growthBonus)) {
+                        world.markChunkDirty(target.toImmutable(), te);
                     }
                 }
             }
         }
     }
 
-    public static void hydrateCrop(TileEntityCrop crop, int hydrationBonus, int growthBonus) {
+    public static boolean hydrateCrop(TileEntityCrop crop, int hydrationBonus, int growthBonus) {
+        boolean changed = false;
         if (crop.getStorageWater() < 100) {
             crop.setStorageWater(Math.min(100, crop.getStorageWater() + hydrationBonus));
             crop.dirty = true;
+            changed = true;
         }
         if (crop.getCrop() != null && crop.getCurrentSize() < crop.getCrop().getMaxSize() && growthBonus > 0) {
             crop.setGrowthPoints(crop.getGrowthPoints() + growthBonus);
             crop.dirty = true;
+            changed = true;
         }
+        return changed;
     }
 
     private void syncActiveState(boolean active) {
@@ -156,6 +181,7 @@ public final class SprinklerTile extends TileEntity implements ITickable {
         super.writeToNBT(tag);
         tag.setInteger("Tier", tier);
         tag.setInteger("Cooldown", cooldown);
+        tag.setInteger("RedstoneMode", redstoneMode);
         tag.setTag("Water", water.writeToNBT(new NBTTagCompound()));
         return tag;
     }
@@ -165,6 +191,7 @@ public final class SprinklerTile extends TileEntity implements ITickable {
         super.readFromNBT(tag);
         tier = Math.max(1, Math.min(3, tag.hasKey("Tier") ? tag.getInteger("Tier") : 1));
         cooldown = Math.max(0, tag.getInteger("Cooldown"));
+        redstoneMode = tag.hasKey("RedstoneMode") ? Math.max(0, Math.min(2, tag.getInteger("RedstoneMode"))) : 2;
         water.setCapacity(tankCapacityForTier(tier));
         water.readFromNBT(tag.getCompoundTag("Water"));
     }

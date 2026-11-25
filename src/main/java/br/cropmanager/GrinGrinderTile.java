@@ -23,15 +23,43 @@ import net.minecraftforge.items.ItemStackHandler;
  * <p>Tritura olhos de aranha em Grin Powder IC2 consumindo EU e desgastando uma {@link GrindingBlade}
  * reutilizável a cada lote concluído.
  */
-public final class GrinGrinderTile extends FarmTile implements ITickable, IUpgradableBlock {
+public final class GrinGrinderTile extends PoweredMachineTile {
     public static final int DURATION = 100, EU_PER_TICK = 5;
-    public int progress, clientDuration = ManagerConfig.grinderDuration, workTicks = ManagerConfig.grinderDuration;
-    public double euPerTick = ManagerConfig.grinderEuPerTick;
-    private boolean upgradesDirty = true;
-    public String condition = "grinder_ready";
-    public final BasicSink energy = createSink(ManagerConfig.grinderEnergyCapacity, ManagerConfig.grinderSinkTier);
-    @Override public BasicSink energySink() { return energy; }
-    @Override public boolean isSupportMachine() { return true; }
+    public int clientDuration = ManagerConfig.grinderDuration;
+    public GrinGrinderTile() {
+        super(ManagerConfig.grinderEnergyCapacity, ManagerConfig.grinderSinkTier,
+                ManagerConfig.grinderDuration, ManagerConfig.grinderEuPerTick, "grinder_ready");
+    }
+    @Override protected ItemStackHandler machineInventory() { return inventory; }
+    @Override protected int upgradeStartSlot() { return 3; }
+    @Override protected int upgradeEndSlot() { return 7; }
+    @Override protected int batterySlot() { return 7; }
+    @Override protected int baseDuration() { return ManagerConfig.grinderDuration; }
+    @Override protected double baseEuPerTick() { return ManagerConfig.grinderEuPerTick; }
+    @Override protected int baseEnergyCapacity() { return ManagerConfig.grinderEnergyCapacity; }
+    @Override protected int baseSinkTier() { return ManagerConfig.grinderSinkTier; }
+    @Override protected boolean processMachineTick() {
+        ItemStack eye = inventory.getStackInSlot(0), blade = inventory.getStackInSlot(1);
+        ItemStack grin = IC2Items.getItem("crop_res", "grin_powder");
+        boolean canOutput = !grin.isEmpty() && inventory.insertItem(2, grin, true).isEmpty();
+        if (eye.isEmpty() || blade.isEmpty() || blade.getItemDamage() >= blade.getMaxDamage()) {
+            condition = "grinder_ingredients";
+            return false;
+        }
+        if (!canOutput) {
+            condition = "grinder_output";
+            return false;
+        }
+        if (!energy.useEnergy(euPerTick)) { condition = "grinder_energy"; return false; }
+        condition = "grinder_working"; progress++; markDirty();
+        if (progress >= workTicks) {
+            inventory.extractItem(0, 1, false);
+            if (blade.getItemDamage() + 1 >= blade.getMaxDamage()) inventory.setStackInSlot(1, ItemStack.EMPTY);
+            else { ItemStack damaged = blade.copy(); damaged.setItemDamage(damaged.getItemDamage() + 1); inventory.setStackInSlot(1, damaged); }
+            inventory.insertItem(2, grin, false); progress = 0; condition = "grinder_ready"; markDirty();
+        }
+        return true;
+    }
     public final ItemStackHandler inventory = new ItemStackHandler(8) {
         @Override public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
             return slot == 2 || isItemValid(slot, stack) ? super.insertItem(slot, stack, simulate) : stack;
@@ -46,59 +74,20 @@ public final class GrinGrinderTile extends FarmTile implements ITickable, IUpgra
         @Override protected void onContentsChanged(int slot) { if (slot >= 3 && slot < 7) upgradesDirty = true; markDirty(); }
     };
 
-    @Override public void onLoad() { if (!world.isRemote) { recalculateUpgrades(); energy.onLoad(); } }
-    @Override public void invalidate() { energy.invalidate(); super.invalidate(); }
-    @Override public void onChunkUnload() { energy.onChunkUnload(); super.onChunkUnload(); }
-    @Override public void update() {
-        if (world.isRemote) return;
-        if (upgradesDirty) recalculateUpgrades();
-        tickUpgrades(this, inventory, 3, 7);
-        dischargeBattery(inventory, 7, energy);
-        energy.update();
-        ItemStack eye = inventory.getStackInSlot(0), blade = inventory.getStackInSlot(1);
-        ItemStack grin = IC2Items.getItem("crop_res", "grin_powder");
-        boolean canOutput = !grin.isEmpty() && inventory.insertItem(2, grin, true).isEmpty();
-        if (eye.isEmpty() || blade.isEmpty() || blade.getItemDamage() >= blade.getMaxDamage()) {
-            condition = "grinder_ingredients";
-            setActive(false); return;
-        }
-        if (!canOutput) {
-            condition = "grinder_output";
-            setActive(false); return;
-        }
-        if (!energy.useEnergy(euPerTick)) { condition = "grinder_energy"; setActive(false); return; }
-        condition = "grinder_working"; progress++; markDirty(); setActive(true);
-        if (progress >= workTicks) {
-            inventory.extractItem(0, 1, false);
-            if (blade.getItemDamage() + 1 >= blade.getMaxDamage()) inventory.setStackInSlot(1, ItemStack.EMPTY);
-            else { ItemStack damaged = blade.copy(); damaged.setItemDamage(damaged.getItemDamage() + 1); inventory.setStackInSlot(1, damaged); }
-            inventory.insertItem(2, grin, false); progress = 0; condition = "grinder_ready"; markDirty();
-        }
-    }
-    private void recalculateUpgrades() {
-        double[] multipliers = applyIc2Upgrades(this, inventory, 3, 7, energy, 1, ManagerConfig.grinderEnergyCapacity, ManagerConfig.grinderSinkTier);
-        int next = Math.max(1, (int)Math.ceil(ManagerConfig.grinderDuration * multipliers[0]));
-        progress = Math.min(next - 1, (int)((long)progress * next / Math.max(1, workTicks))); workTicks = next;
-        euPerTick = Math.ceil(ManagerConfig.grinderEuPerTick * multipliers[1]);
-        upgradesDirty = false;
-    }
-    @Override public double getEnergy() { return energy.getEnergyStored(); }
-    @Override public boolean useEnergy(double amount) { boolean used = energy.useEnergy(amount); if (used) markDirty(); return used; }
-    @Override public Set<UpgradableProperty> getUpgradableProperties() { return EnumSet.of(UpgradableProperty.Processing, UpgradableProperty.EnergyStorage, UpgradableProperty.Transformer); }
     private IItemHandler exposed() {
-        return new IItemHandler() {
-            @Override public int getSlots() { return inventory.getSlots(); }
-            @Override public ItemStack getStackInSlot(int slot) { return inventory.getStackInSlot(slot); }
-            @Override public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) { return slot < 2 ? inventory.insertItem(slot, stack, simulate) : stack; }
-            @Override public ItemStack extractItem(int slot, int amount, boolean simulate) { return slot == 2 ? inventory.extractItem(slot, amount, simulate) : ItemStack.EMPTY; }
-            @Override public int getSlotLimit(int slot) { return inventory.getSlotLimit(slot); }
-        };
+        return exposedItems(inventory, 2, 2);
     }
     @Override public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing face) { return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, face); }
     @Override public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing face) { return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(exposed()) : super.getCapability(capability, face); }
     @Override public NBTTagCompound guiState() { NBTTagCompound tag = new NBTTagCompound(); tag.setInteger("Work", progress); tag.setInteger("Duration", workTicks); tag.setString("Condition", condition); tag.setDouble("EU", energy.getEnergyStored()); tag.setDouble("Capacity", energy.getCapacity()); tag.setInteger("Tier", energy.getSinkTier()); return tag; }
     @Override public void acceptGuiState(NBTTagCompound tag) { progress = tag.getInteger("Work"); if (tag.getInteger("Duration") > 0) { clientDuration = tag.getInteger("Duration"); workTicks = clientDuration; } condition = tag.getString("Condition"); energy.setCapacity(tag.getDouble("Capacity")); energy.setEnergyStored(tag.getDouble("EU")); energy.setSinkTier(Math.max(1, tag.getInteger("Tier"))); }
-    @Override public NBTTagCompound writeToNBT(NBTTagCompound tag) { super.writeToNBT(tag); energy.writeToNBT(tag); tag.setTag("Inventory", inventory.serializeNBT()); tag.setInteger("Work", progress); tag.setInteger("Duration", workTicks); return tag; }
-    @Override public void readFromNBT(NBTTagCompound tag) { super.readFromNBT(tag); energy.readFromNBT(tag); double eu = energy.getEnergyStored(); NBTTagCompound items = tag.getCompoundTag("Inventory").copy(); items.setInteger("Size", 8); inventory.deserializeNBT(items); workTicks = Math.max(1, tag.hasKey("Duration") ? tag.getInteger("Duration") : ManagerConfig.grinderDuration); progress = Math.max(0, Math.min(workTicks - 1, tag.getInteger("Work"))); upgradesDirty = true; recalculateUpgrades(); energy.setEnergyStored(Double.isFinite(eu) ? Math.max(0, Math.min(energy.getCapacity(), eu)) : 0); }
-    @Override public void dropContents() { dropHandler(inventory); }
+    @Override public NBTTagCompound writeToNBT(NBTTagCompound tag) { super.writeToNBT(tag); writePoweredNBT(tag); return tag; }
+    @Override public void readFromNBT(NBTTagCompound tag) { super.readFromNBT(tag); readPoweredNBT(tag); }
+    @Override EquipmentLayout equipmentLayout() {
+        return new EquipmentLayout(inventory, 126,
+                new int[]{38, 80, 122, 148, 148, 148, 148, 8},
+                new int[]{52, 52, 52, 22, 40, 58, 76, 62},
+                2, false,
+                s -> isBattery(s) ? new int[]{7, 8} : ManagerTile.isIc2Upgrade(s) ? new int[]{3, 7} : new int[]{0, 2});
+    }
 }

@@ -33,6 +33,7 @@ public abstract class FarmTile extends TileEntity {
     public void dropContents() {}
     @Nullable public BasicSink energySink() { return null; }
     public boolean isSupportMachine() { return false; }
+    @Nullable EquipmentLayout equipmentLayout() { return null; }
 
     protected BasicSink createSink(double capacity, int tier) {
         return new BasicSink(this, capacity, tier) {
@@ -115,6 +116,11 @@ public abstract class FarmTile extends TileEntity {
     public static FarmTile openMachine(EntityPlayer player) {
         if (player.openContainer instanceof ManagerContainer) return ((ManagerContainer)player.openContainer).machine;
         if (player.openContainer instanceof EquipmentContainer) return ((EquipmentContainer)player.openContainer).machine;
+        if (player.openContainer instanceof ReservoirContainer) return ((ReservoirContainer)player.openContainer).machine;
+        if (player.openContainer instanceof IndustrialTankContainer) return ((IndustrialTankContainer)player.openContainer).machine;
+        if (player.openContainer instanceof EuWifiContainer) return ((EuWifiContainer) player.openContainer).machine;
+        if (player.openContainer instanceof EuDishContainer) return ((EuDishContainer) player.openContainer).machine;
+        if (player.openContainer instanceof AgriculturalSiloContainer) return ((AgriculturalSiloContainer)player.openContainer).machine;
         return null;
     }
 

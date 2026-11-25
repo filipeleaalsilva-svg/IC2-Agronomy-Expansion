@@ -13,8 +13,10 @@ public final class ProbeGui extends GuiScreen {
     @Override protected void actionPerformed(net.minecraft.client.gui.GuiButton button) {}
     @Override public boolean doesGuiPauseGame() { return false; }
     private void field(String label,String value,int x,int y) {
-        fontRenderer.drawString(fontRenderer.trimStringToWidth(label,148),x,y,FarmGuiStyle.ink());
-        fontRenderer.drawString(value,x+200-fontRenderer.getStringWidth(value),y,FarmGuiStyle.ink());
+        String fittedValue = fontRenderer.trimStringToWidth(value, 108);
+        int valueWidth = fontRenderer.getStringWidth(fittedValue);
+        fontRenderer.drawString(fontRenderer.trimStringToWidth(label, 196 - valueWidth), x, y, FarmGuiStyle.ink());
+        fontRenderer.drawString(fittedValue, x + 200 - valueWidth, y, FarmGuiStyle.ink());
     }
     @Override public void drawScreen(int mouseX,int mouseY,float ticks) {
         drawDefaultBackground();int x=width/2-112,y=height/2-108;

@@ -46,7 +46,7 @@ public final class ManagerGui extends GuiContainer {
         if (tile.advanced && sidebarExpanded) {
             buttonList.add(new Control(20, 200, 14, 22, 16));
             buttonList.add(new Control(21, 224, 14, 22, 16));
-            AreaWidgets.add(buttonList, guiLeft + 200, guiTop + 38);
+            AreaWidgets.add(buttonList, guiLeft + 200, guiTop + 38, true);
         }
         refreshButtons();
     }
@@ -56,7 +56,7 @@ public final class ManagerGui extends GuiContainer {
             if (b.id == 11) b.displayString = tr(AreaPreview.selected(tile) ? "hide_area" : "show_area");
             if (b.id == 12) b.displayString = "i";
             if (b.id == 14) b.displayString = sidebarExpanded ? "<" : ">";
-            if (b.id >= 210 && b.id <= 215 || b.id == 11) b.visible = tile.advanced && sidebarExpanded && tab == 1;
+            if (b.id >= 210 && b.id <= 215 || b.id >= 240 && b.id <= 245 || b.id == 11) b.visible = tile.advanced && sidebarExpanded && tab == 1;
         }
         AreaWidgets.refresh(buttonList, tile, tile.radius, tile.layers, tile.serverMaxRadius);
     }
@@ -64,7 +64,7 @@ public final class ManagerGui extends GuiContainer {
     @Override protected void actionPerformed(GuiButton button) throws IOException {
         if (button.id == 14) { sidebarExpanded = !sidebarExpanded; initGui(); return; }
         if (button.id == 20 || button.id == 21) { tab = button.id - 20; refreshButtons(); return; }
-        if (button.id == 13 || button.id == 200 || button.id >= 210 && button.id <= 215) {
+        if (button.id == 13 || button.id == 200 || button.id >= 210 && button.id <= 215 || button.id >= 240 && button.id <= 245) {
             ManagerNetwork.CHANNEL.sendToServer(new ManagerNetwork.Action(tile, inventorySlots.windowId, button.id));
             return;
         }
@@ -161,7 +161,7 @@ public final class ManagerGui extends GuiContainer {
     @Override protected void drawGuiContainerForegroundLayer(int x, int y) {
         FarmGuiStyle.title(fontRenderer, tile.advanced ? tr("advanced_title_short") : "Crop Manager", 10, 7, 140);
         if (tile.advanced && sidebarExpanded) {
-            if (tab == 1) AreaWidgets.draw(fontRenderer, 200, 38, tile.radius, tile.layers);
+            if (tab == 1) AreaWidgets.draw(fontRenderer, 200, 38, tile);
             else drawDigitalScreen();
         }
     }

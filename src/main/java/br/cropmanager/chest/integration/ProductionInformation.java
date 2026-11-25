@@ -1,5 +1,6 @@
 package br.cropmanager.chest.integration;
 
+import br.cropmanager.crop.BaseCropCard;
 import ic2.api.crops.CropCard;
 import ic2.api.crops.ICropTile;
 import java.lang.reflect.Proxy;
@@ -22,6 +23,11 @@ public final class ProductionInformation {
     }
 
     public static ProductionInformation query(CropCard crop) {
+        if (crop instanceof BaseCropCard) {
+            ItemStack product = ((BaseCropCard) crop).previewGain();
+            return product.isEmpty() ? empty(Status.NONE)
+                    : new ProductionInformation(Status.DECLARED, Collections.singletonList(product));
+        }
         List<ItemStack> declared = PackCropProducts.query(crop);
         if (declared != null) return new ProductionInformation(Status.DECLARED, declared);
         // Exact implementation verified in IC2 2.8.222-ex112: getGain only copies cropDrop.

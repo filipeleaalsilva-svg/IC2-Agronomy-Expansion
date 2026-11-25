@@ -42,7 +42,6 @@ flowchart TD
         OE["Olho de Aranha"] --> GG["Moedor de Grin<br/>+ Lâmina de Moagem"]
         GG -->|"1 Grin Powder"| GE["Extrator de Grin"]
         H2O["Água 1.000 mB"] --> GE
-        Calor["Calor 20 HU/t<br/>Gerador ou Tubo Térmico"] --> GE
         GE -->|"1.000 mB Extrato de Grin"| WM["Misturador de Weed-Ex"]
         RS["1 Redstone"] --> WM
         WM -->|"500 mB"| WEX["Weed-Ex (fluido)"]
@@ -94,7 +93,7 @@ flowchart TD
 | **Capinador a Biogás**<br>`cropmanager:biogas_weeder` | Remove ervas daninhas preservando estacas de cultura e plantas férteis. Área de 3×3 a 17×17 em 3 camadas. | Não utiliza EU. Tanque interno de 16.000 mB de Biogás IC2. Consumo: 1 mB por posição varrida e 20 mB por erva removida (`ManagerConfig.java`). | Sem slots de upgrade ou bateria. | `WeederTile.java` |
 | **Composteira Elétrica**<br>`cropmanager:electric_composter` | 4 vegetais orgânicos + 1.000 mB de água → 1 Fertilizante IC2. Tempo de processo base: 200 ticks. | Buffer: 20.000 EU, Tier 1. Consumo: 5 EU/t (1.000 EU por fertilizante). | 4 slots de upgrade IC2 (`Overclocker`, etc.) + 1 slot de bateria IC2 com descarga automática. | `ComposterTile.java` |
 | **Moedor de Grin**<br>`cropmanager:grin_grinder` | 1 Olho de Aranha + desgaste de Lâmina de Moagem → 1 Grin Powder IC2. Tempo de processo base: 100 ticks. | Buffer: 20.000 EU, Tier 1. Consumo: 5 EU/t (500 EU por operação). | 4 slots de upgrade IC2 + 1 slot de bateria IC2 com descarga automática + 1 slot para Lâmina de Moagem. | `GrinGrinderTile.java` |
-| **Extrator de Grin**<br>`cropmanager:grin_extractor` | 1 Grin Powder + 1.000 mB de água + 20 HU/t de calor → 1.000 mB de Extrato de Grin. Tempo base: 100 ticks. Tanques de 16.000 mB para água e extrato. | Buffer: 20.000 EU, Tier 1. Consumo: 5 EU/t (500 EU por operação) + 20 HU/t de calor recebido nas 6 faces. | 4 slots de upgrade IC2 + 1 slot de bateria IC2 com descarga automática. | `GrinExtractorTile.java` |
+| **Extrator de Grin**<br>`cropmanager:grin_extractor` | 1 Grin Powder + 1.000 mB de água → 1.000 mB de Extrato de Grin. Tempo base: 100 ticks. Tanques de 16.000 mB para água e extrato. | Buffer: 20.000 EU, Tier 1. Consumo: 5 EU/t (500 EU por operação). | 4 slots de upgrade IC2 + 1 slot de bateria IC2 com descarga automática. | `GrinExtractorTile.java` |
 | **Misturador de Weed-Ex**<br>`cropmanager:weed_ex_fabricator` | 1.000 mB de Extrato de Grin + 1 Redstone → 500 mB de fluido Weed-Ex IC2. Tempo base: 100 ticks. Tanques de 16.000 mB para extrato e Weed-Ex. | Buffer: 20.000 EU, Tier 1. Consumo: 5 EU/t (500 EU por operação). | 4 slots de upgrade IC2 + 1 slot de bateria IC2 com descarga automática. | `WeedExFabricatorTile.java` |
 | **Tubo Térmico**<br>`cropmanager:thermal_pipe` | Conduz calor entre fontes térmicas IC2 (`IHeatSource`) e máquinas compatíveis, até 100 HU/t sem perda por bloco. | Não utiliza energia elétrica. | Bloco de condução direta multipart. | `ThermalPipeTile.java` |
 | **Baú de Dados de Cultivos**<br>`cropmanager:crop_database_chest` | 500 slots exclusivos para sacos de sementes IC2 (`ICropSeed`). Busca textual instantânea, visualização de genes e favoritos (Shift+R ou clique do meio). | Não consome energia externa. Coleta magnética opcional de sementes soltas em raio de 3 blocos. | Não aceita upgrades convencionais. Vinculação remota via Database Portátil e Upgrade Linker. | `TileCropDatabaseChest.java` |
@@ -249,7 +248,6 @@ O arquivo é gerado automaticamente na primeira execução com valores recomenda
 | `grin_grinder` | `bladeDurability` | `256` | 1 a 100k | usos | Durabilidade máxima da Lâmina de Moagem |
 | `grin_extractor` | `durationTicks` | `100` | 1 a 72k | ticks | Tempo de processo por lote de extração |
 | `grin_extractor` | `euPerTick` | `5` | 1 a 10k | EU/t | Consumo elétrico do Extrator de Grin |
-| `grin_extractor` | `heatPerTick` | `20` | 0 a 10k | HU/t | Calor IC2 consumido de fontes adjacentes ou tubos térmicos |
 | `grin_extractor` | `waterPerRecipe` | `1000` | 1 a 16k | mB | Água consumida por lote de extração |
 | `grin_extractor` | `extractPerRecipe` | `1000` | 1 a 16k | mB | Extrato de Grin gerado por lote |
 | `weed_ex_fabricator` | `durationTicks` | `100` | 1 a 72k | ticks | Tempo de mistura por lote de Weed-Ex |

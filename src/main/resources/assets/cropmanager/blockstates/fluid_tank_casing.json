@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "formed=false": { "model": "cropmanager:fluid_tank_casing" },
+    "formed=true": { "model": "cropmanager:fluid_tank_empty" }
+  }
+}

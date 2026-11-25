@@ -13,7 +13,6 @@ import net.minecraftforge.fluids.FluidUtil;
 /** Reads retired Crop Manager tile IDs so older saves can finish loading safely. */
 public class LegacyRecoveryTile extends TileEntity {
     public static final class Collector extends LegacyRecoveryTile {}
-    public static final class Reservoir extends LegacyRecoveryTile {}
     public static final class Sorter extends LegacyRecoveryTile {}
     public static final class Bench extends LegacyRecoveryTile {}
 

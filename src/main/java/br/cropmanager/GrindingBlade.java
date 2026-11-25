@@ -1,6 +1,5 @@
 package br.cropmanager;
 
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -8,7 +7,7 @@ public final class GrindingBlade extends Item {
     public GrindingBlade() {
         setRegistryName(CropManager.ID, "grinding_blade");
         setTranslationKey("cropmanager.grinding_blade");
-        setCreativeTab(CreativeTabs.TOOLS);
+        setCreativeTab(CropManager.TAB);
         setMaxStackSize(1);
         setMaxDamage(256);
     }

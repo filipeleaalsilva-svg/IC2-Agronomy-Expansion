@@ -64,8 +64,9 @@ public class ManagerTile extends FarmTile implements ITickable, IUpgradableBlock
     public int tankCapacity() { return world != null && world.isRemote ? water.getCapacity() : configuredTankCapacity(); }
 
     public int radius = ManagerConfig.defaultRadius, layers = ManagerConfig.defaultLayers, functions = 15;
+    public int offsetX, offsetY, offsetZ;
     public int status, serverMaxRadius = ManagerConfig.maxRadius;
-    private int cursor, activeTicks;
+    private int cursor, activeTicks, dirtyTicks;
     private final EnergyWarning energyWarning = new EnergyWarning();
     private double progress, interval = ManagerConfig.interval, demandMultiplier = 1;
     private boolean upgradesDirty = true;
@@ -195,21 +196,22 @@ public class ManagerTile extends FarmTile implements ITickable, IUpgradableBlock
         if ((functions & 2) != 0 && fertilizerSlot() < 0) status |= NO_FERTILIZER;
         if ((functions & 4) != 0 && water.getFluidAmount() == 0) status |= NO_WATER;
         if ((functions & 8) != 0 && weed.getFluidAmount() == 0) status |= NO_WEED;
+        boolean scanDirty = false;
         if (scanning) {
             progress = ScanLogic.credit(progress, interval, ManagerConfig.maxScans);
-            markDirty();
+            scanDirty = true;
             int attempts = 0;
             while (progress >= 1 && attempts++ < ManagerConfig.maxScans) {
                 if (getEnergy() < cost(ManagerConfig.scanEU)) { status |= NO_ENERGY; progress = 0; break; }
-                int[] offset = ScanLogic.offset(cursor, radius, layers);
+                int[] offset = ScanLogic.offset(cursor, radius, layers, offsetX, offsetY, offsetZ);
                 net.minecraft.util.math.BlockPos target = pos.add(offset[0], offset[1], offset[2]);
                 cursor = (cursor + 1) % ScanLogic.volume(radius, layers);
                 progress--;
-                markDirty();
+                scanDirty = true;
                 if (target.getY() < 0 || target.getY() >= world.getHeight() || !world.isBlockLoaded(target, false)) {
                     if (advanced) counts[5]++;
                 } else {
-                    useEnergy(cost(ManagerConfig.scanEU));
+                    energy.useEnergy(cost(ManagerConfig.scanEU));
                     TileEntity tile = world.getTileEntity(target);
                     if (tile instanceof TileEntityCrop) {
                         if (advanced) inspect((TileEntityCrop)tile, target);
@@ -222,7 +224,8 @@ public class ManagerTile extends FarmTile implements ITickable, IUpgradableBlock
         if (energyWarning.isLow(getEnergy(), cost(ManagerConfig.scanEU), scanning)) status |= NO_ENERGY;
         if (paused) activeTicks = 0;
         boolean active = activeTicks > 0;
-        if (activeTicks > 0) { activeTicks--; markDirty(); }
+        if (activeTicks > 0) { activeTicks--; scanDirty = true; }
+        if (scanDirty && ++dirtyTicks >= 20) { dirtyTicks = 0; markDirty(); }
         IBlockState state = world.getBlockState(pos);
         if (state.getBlock() instanceof ManagerBlock && state.getValue(ManagerBlock.ACTIVE) != active)
             setActive(active);
@@ -328,11 +331,21 @@ public class ManagerTile extends FarmTile implements ITickable, IUpgradableBlock
      * dimensões da área mudam para evitar exibição de médias misturadas entre áreas distintas.
      */
     public void settings(int newRadius, int newLayers, int newFunctions) {
+        settings(newRadius, newLayers, newFunctions, offsetX, offsetY, offsetZ);
+    }
+
+    public void settings(int newRadius, int newLayers, int newFunctions, int newOffsetX, int newOffsetY, int newOffsetZ) {
         newFunctions = (newFunctions & 1) | 14;
         if (!ScanLogic.validSettings(newRadius, newLayers, newFunctions, ManagerConfig.maxRadius)) return;
-        if (radius != newRadius || layers != newLayers) { resetReport(); progress = 0; }
+        if (!ScanLogic.validOffsets(newOffsetX, newOffsetY, newOffsetZ)) return;
+        if (radius != newRadius || layers != newLayers
+                || offsetX != newOffsetX || offsetY != newOffsetY || offsetZ != newOffsetZ) {
+            resetReport();
+            progress = 0;
+        }
         if (functions != newFunctions) energyWarning.clear();
         radius = newRadius; layers = newLayers; functions = newFunctions;
+        offsetX = newOffsetX; offsetY = newOffsetY; offsetZ = newOffsetZ;
         markDirty();
     }
     @Override public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing face) {
@@ -365,6 +378,7 @@ public class ManagerTile extends FarmTile implements ITickable, IUpgradableBlock
         tag.setTag("Water", water.writeToNBT(new NBTTagCompound()));
         tag.setTag("Weed", weed.writeToNBT(new NBTTagCompound()));
         tag.setInteger("Radius", radius); tag.setInteger("Layers", layers); tag.setInteger("Functions", functions);
+        tag.setInteger("OffsetX", offsetX); tag.setInteger("OffsetY", offsetY); tag.setInteger("OffsetZ", offsetZ);
         tag.setInteger("Redstone", redstoneMode);
         tag.setBoolean("Enabled", enabled); tag.setTag("Automation", automation.write());
         tag.setInteger("Cursor", cursor); tag.setDouble("Progress", progress); tag.setInteger("ActiveTicks", activeTicks);
@@ -392,6 +406,9 @@ public class ManagerTile extends FarmTile implements ITickable, IUpgradableBlock
         radius = MathHelper.clamp(tag.getInteger("Radius"), 1, ManagerConfig.maxRadius);
         layers = tag.getInteger("Layers") & 7; if (layers == 0) layers = ManagerConfig.defaultLayers;
         functions = (tag.getInteger("Functions") & 1) | 14;
+        offsetX = MathHelper.clamp(tag.getInteger("OffsetX"), -ScanLogic.MAX_HORIZONTAL_OFFSET, ScanLogic.MAX_HORIZONTAL_OFFSET);
+        offsetY = MathHelper.clamp(tag.getInteger("OffsetY"), -ScanLogic.MAX_VERTICAL_OFFSET, ScanLogic.MAX_VERTICAL_OFFSET);
+        offsetZ = MathHelper.clamp(tag.getInteger("OffsetZ"), -ScanLogic.MAX_HORIZONTAL_OFFSET, ScanLogic.MAX_HORIZONTAL_OFFSET);
         cursor = Math.floorMod(tag.getInteger("Cursor"), ScanLogic.volume(radius, layers));
         progress = tag.getDouble("Progress");
         if (!Double.isFinite(progress)) progress = 0;
@@ -412,6 +429,7 @@ public class ManagerTile extends FarmTile implements ITickable, IUpgradableBlock
         tag.setDouble("EU", getEnergy()); tag.setDouble("Capacity", energy.getCapacity()); tag.setInteger("Tier", energy.getSinkTier());
         tag.setInteger("Water", water.getFluidAmount()); tag.setInteger("Weed", weed.getFluidAmount());
         tag.setInteger("Radius", radius); tag.setInteger("Layers", layers); tag.setInteger("Functions", functions);
+        tag.setInteger("OffsetX", offsetX); tag.setInteger("OffsetY", offsetY); tag.setInteger("OffsetZ", offsetZ);
         tag.setBoolean("Enabled", enabled); tag.setTag("Automation", automation.write()); tag.setString("State", stateKey());
         tag.setInteger("Redstone", redstoneMode); tag.setBoolean("Paused", paused);
         tag.setInteger("TankCapacity", tankCapacity()); tag.setInteger("Cursor", world != null && world.isRemote ? clientCursor : cursor);
@@ -427,6 +445,7 @@ public class ManagerTile extends FarmTile implements ITickable, IUpgradableBlock
         water.setFluid(tag.getInteger("Water") > 0 ? new FluidStack(FluidRegistry.WATER, tag.getInteger("Water")) : null);
         weed.setFluid(tag.getInteger("Weed") > 0 ? new FluidStack(FluidName.weed_ex.getInstance(), tag.getInteger("Weed")) : null);
         radius = tag.getInteger("Radius"); layers = tag.getInteger("Layers"); functions = tag.getInteger("Functions");
+        offsetX = tag.getInteger("OffsetX"); offsetY = tag.getInteger("OffsetY"); offsetZ = tag.getInteger("OffsetZ");
         enabled = !tag.hasKey("Enabled") || tag.getBoolean("Enabled"); automation.read(tag.getCompoundTag("Automation"));
         redstoneMode = tag.getInteger("Redstone"); paused = tag.getBoolean("Paused");
         report = tag.getCompoundTag("Report"); report.setLong("Age", tag.getLong("ReportAge"));
@@ -447,7 +466,13 @@ public class ManagerTile extends FarmTile implements ITickable, IUpgradableBlock
             int[] next = ManagerSettings.applyControl(control, radius, layers, functions, ManagerConfig.maxRadius);
             if (next == null) return false; settings(next[0], next[1], next[2]); return true;
         }
-        if (action == 215) { settings(ManagerConfig.defaultRadius, ManagerConfig.defaultLayers, functions); return true; }
+        if (action == 215) { settings(ManagerConfig.defaultRadius, ManagerConfig.defaultLayers, functions, 0, 0, 0); return true; }
+        if (action == 240) { settings(radius, layers, functions, offsetX - 1, offsetY, offsetZ); return true; }
+        if (action == 241) { settings(radius, layers, functions, offsetX + 1, offsetY, offsetZ); return true; }
+        if (action == 242) { settings(radius, layers, functions, offsetX, offsetY - 1, offsetZ); return true; }
+        if (action == 243) { settings(radius, layers, functions, offsetX, offsetY + 1, offsetZ); return true; }
+        if (action == 244) { settings(radius, layers, functions, offsetX, offsetY, offsetZ - 1); return true; }
+        if (action == 245) { settings(radius, layers, functions, offsetX, offsetY, offsetZ + 1); return true; }
         if (action == 13) { redstoneMode = (redstoneMode + 1) % 3; progress = 0; markDirty(); return true; }
         return false;
     }

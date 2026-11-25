@@ -7,7 +7,7 @@ public final class CropGuiLayout {
     public static final int HEADER_Y = 14, NAME_Y = 26, NAME_LINE_HEIGHT = 10;
     public static final int[] STAT_Y = {46, 56, 66};
     public static final int PRODUCES_Y = 76, PRODUCT_Y = 84, PRODUCTS_PER_ROW = 5;
-    public static final int TAB_WIDTH = 22, DRAWER_WIDTH = 94, DRAWER_HEIGHT = 88;
+    public static final int TAB_WIDTH = 22, DRAWER_WIDTH = 100, DRAWER_HEIGHT = 112;
     public static final Region PANEL = new Region(7, 11, 86, 91);
     public static final Region HEADER = new Region(TEXT_LEFT, HEADER_Y, TEXT_WIDTH, 9);
     public static final Region NAME = new Region(TEXT_LEFT, NAME_Y, TEXT_WIDTH, 19);

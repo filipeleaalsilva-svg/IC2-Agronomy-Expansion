@@ -1,9 +1,11 @@
 package br.cropmanager;
 
+import br.cropmanager.chest.inventory.PortableCropInventory;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.*;
@@ -26,6 +28,32 @@ public final class ManagerNetwork {
                 br.cropmanager.chest.network.ChestMessage.class, 4, Side.SERVER);
         CHANNEL.registerMessage(br.cropmanager.chest.network.ChestSettingsMessage.Handler.class,
                 br.cropmanager.chest.network.ChestSettingsMessage.class, 5, Side.CLIENT);
+        CHANNEL.registerMessage(br.cropmanager.chest.network.ChestViewMessage.Handler.class,
+                br.cropmanager.chest.network.ChestViewMessage.class, 6, Side.CLIENT);
+        CHANNEL.registerMessage(ToggleSeedPickup.Handler.class, ToggleSeedPickup.class, 7, Side.SERVER);
+    }
+
+    public static final class ToggleSeedPickup implements IMessage {
+        @Override public void fromBytes(ByteBuf buffer) { }
+        @Override public void toBytes(ByteBuf buffer) { }
+
+        public static final class Handler implements IMessageHandler<ToggleSeedPickup, IMessage> {
+            @Override public IMessage onMessage(ToggleSeedPickup message, MessageContext context) {
+                EntityPlayerMP player = context.getServerHandler().player;
+                player.getServerWorld().addScheduledTask(() -> {
+                    if (player.isSpectator() || !player.isEntityAlive()
+                            || player.openContainer != player.inventoryContainer) return;
+                    PortableCropInventory portable = PortableCropInventory.open(player, player.inventory.currentItem);
+                    if (portable == null) portable = PortableCropInventory.open(player, 40);
+                    if (portable == null) return;
+                    boolean enabled = !portable.isPickupEnabled();
+                    portable.setPickupEnabled(enabled);
+                    player.sendStatusMessage(new TextComponentTranslation(enabled
+                            ? "cropdatabasechest.pickup.tooltip_on" : "cropdatabasechest.pickup.tooltip_off"), true);
+                });
+                return null;
+            }
+        }
     }
     public static final class Settings implements IMessage {
         private BlockPos pos;

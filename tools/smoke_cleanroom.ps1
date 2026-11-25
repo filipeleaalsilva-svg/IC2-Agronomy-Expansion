@@ -7,6 +7,9 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $project = Split-Path $PSScriptRoot -Parent
+$buildGradle = Get-Content -LiteralPath (Join-Path $project 'build.gradle') -Raw
+if ($buildGradle -notmatch "(?m)^version\s*=\s*'([^']+)'\s*$") { throw 'Could not read the mod version from build.gradle.' }
+$modVersion = $Matches[1]
 $testRoot = Join-Path $project 'build\cleanroom-smoke'
 $CleanroomRoot = (Resolve-Path -LiteralPath $CleanroomRoot).ProviderPath
 $javaExe = Join-Path $JavaHome 'bin\java.exe'
@@ -33,14 +36,14 @@ $modsRoot = [IO.Path]::GetFullPath((Join-Path $testRoot 'mods'))
 New-Item -ItemType Directory -Force -Path $modsRoot | Out-Null
 # Only remove known generated addon artifacts in this disposable mods directory.
 # Keep IC2, other mods, unknown files, and all subdirectories.
-foreach ($oldJar in Get-ChildItem -LiteralPath $modsRoot -File -Filter 'CropManager-*.jar') {
-    if ($oldJar.Name -match '^CropManager-\d+\.\d+\.\d+(?:-[A-Za-z]+\d+)?(?:-(?:runtime-tests(?:-dev)?|dev|sources))?\.jar$') {
+foreach ($oldJar in Get-ChildItem -LiteralPath $modsRoot -File -Filter '*.jar') {
+    if ($oldJar.Name -match '^(?:CropManager|IC2-Agronomy-Expansion)-\d+\.\d+\.\d+(?:-[A-Za-z]+\d+)?(?:-(?:runtime-tests(?:-dev)?|dev|sources))?\.jar$') {
         if ($oldJar.DirectoryName -ne $modsRoot) { throw "Unexpected addon cleanup path: $($oldJar.FullName)" }
         Remove-Item -LiteralPath $oldJar.FullName
     }
 }
 Copy-Item -LiteralPath "$project\libs\industrialcraft-2-2.8.222-ex112.jar" -Destination "$testRoot\mods"
-Copy-Item -LiteralPath "$project\build\libs\CropManager-0.5.0-alpha2.jar" -Destination "$testRoot\mods"
+Copy-Item -LiteralPath "$project\build\libs\IC2-Agronomy-Expansion-$modVersion.jar" -Destination "$testRoot\mods"
 if (-not $RunWorldTests -and (Test-Path -LiteralPath "$testRoot\eula.txt") -and
     (Select-String -LiteralPath "$testRoot\eula.txt" -Pattern '^eula=true$' -Quiet)) {
     throw 'This test directory already accepts the EULA; use -RunWorldTests for an automatically stopped test run.'
@@ -50,7 +53,7 @@ if ($RunWorldTests) {
         -not (Select-String -LiteralPath "$testRoot\eula.txt" -Pattern '^eula=true$' -Quiet)) {
         throw 'Accept the Minecraft EULA by setting eula=true in build/cleanroom-smoke/eula.txt first.'
     }
-    Copy-Item -LiteralPath "$project\build\libs\CropManager-0.5.0-alpha2-runtime-tests.jar" -Destination "$testRoot\mods"
+    Copy-Item -LiteralPath "$project\build\libs\IC2-Agronomy-Expansion-$modVersion-runtime-tests.jar" -Destination "$testRoot\mods"
     Set-Content -LiteralPath "$testRoot\server.properties" -Encoding ascii -Value @(
         'level-name=cropmanager-test-world', 'level-type=FLAT', 'generate-structures=false',
         'server-ip=127.0.0.1', 'server-port=25576', 'online-mode=false', 'view-distance=2',

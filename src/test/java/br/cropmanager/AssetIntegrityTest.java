@@ -32,8 +32,12 @@ public final class AssetIntegrityTest {
         String[] blocks = {
                 "advanced_crop_manager", "agricultural_monitor", "electric_composter",
                 "biogas_weeder", "weed_ex_fabricator", "grin_grinder", "grin_extractor",
-                "thermal_pipe", "seed_analyzer", "manual_composter", "radioactive_soil",
+                "thermal_pipe", "biogas_heat_burner", "biogas_generator", "biogas_generator_casing", "biogas_sprayer", "sprinkler_diagonal", "seed_analyzer", "manual_composter", "radioactive_soil",
                 "sprinkler_mk1", "sprinkler_mk2", "sprinkler_mk3", "crop_database_chest"
+                , "agricultural_reservoir", "reservoir_casing", "pollinator_hive", "greenhouse_glass",
+                "fluid_tank", "fluid_tank_casing", "agricultural_silo", "silo_casing", "fluid_pipe",
+                "greenhouse_frame", "garden_trellis", "farm_lantern", "wooden_sconce", "industrial_lantern", "glass_lamp",
+                "eu_wifi_plug", "eu_wifi_point", "eu_dish_antenna", "hydroponic_chamber"
         };
         for (String block : blocks) {
             Path bs = ASSETS.resolve("blockstates").resolve(block + ".json");
@@ -49,7 +53,8 @@ public final class AssetIntegrityTest {
                 "agricultural_probe", "weed_killer_upgrade", "wireless_range_upgrade",
                 "harvest_transfer_upgrade", "wireless_eu_upgrade", "grinding_blade",
                 "organic_compost", "catalytic_fertilizer", "nitro_essence", "bio_fiber",
-                "portable_crop_database", "upgrade_linker", "mutagenic_powder"
+                "portable_crop_database", "upgrade_linker", "mutagenic_powder",
+                "reservoir_capacity", "reservoir_pump", "reservoir_reserve", "agricultural_manual", "crossing_tool"
         };
         for (String item : items) {
             Path itemModel = ASSETS.resolve("models").resolve("item").resolve(item + ".json");
@@ -62,30 +67,86 @@ public final class AssetIntegrityTest {
     public void guiTexturesHaveExpectedDimensions() throws IOException {
         String[] gui512 = {
                 "equipment_analyzer", "equipment_composter", "equipment_extractor", "equipment_grinder",
-                "equipment_legacy", "equipment_mixer", "equipment_monitor",
+                "equipment_hydroponic", "equipment_legacy", "equipment_mixer", "equipment_monitor",
                 "equipment_monitor_compact", "equipment_weeder_compact", "equipment_weeder_expanded",
                 "manager_advanced", "manager_advanced_compact", "manager_basic"
         };
         for (String name : gui512) {
             assertPngSize(ASSETS.resolve("textures").resolve("gui").resolve(name + ".png"), 512, 512);
         }
+        assertPngSize(ASSETS.resolve("textures/gui/agricultural_reservoir.png"), 256, 256);
+        assertPngSize(ASSETS.resolve("textures/gui/fluid_tank.png"), 256, 256);
+        assertPngSize(ASSETS.resolve("textures/gui/agricultural_silo.png"), 256, 256);
+        for (String texture : new String[] {"fluid_tank_iron", "fluid_tank_band", "fluid_tank_casing", "fluid_tank_controller"})
+            assertPngSize(ASSETS.resolve("textures/blocks/" + texture + ".png"), 16, 16);
+        for (String texture : new String[] {"silo_casing", "silo_controller", "silo_corrugated", "silo_roof"})
+            assertPngSize(ASSETS.resolve("textures/blocks/" + texture + ".png"), 16, 16);
+        assertTrue("Missing fluid_tank.obj", Files.isRegularFile(ASSETS.resolve("models/block/fluid_tank.obj")));
+        assertTrue("Missing fluid_tank.mtl", Files.isRegularFile(ASSETS.resolve("models/block/fluid_tank.mtl")));
+        assertTrue("Missing agricultural_silo.obj", Files.isRegularFile(ASSETS.resolve("models/block/agricultural_silo.obj")));
+        assertTrue("Missing agricultural_silo.mtl", Files.isRegularFile(ASSETS.resolve("models/block/agricultural_silo.mtl")));
+        assertTrue("Missing biogas_generator.obj", Files.isRegularFile(ASSETS.resolve("models/block/biogas_generator.obj")));
+        assertTrue("Missing biogas_generator.mtl", Files.isRegularFile(ASSETS.resolve("models/block/biogas_generator.mtl")));
+        for (String material : new String[] {"brass", "controller", "copper", "glass", "iron_plate", "wood"})
+            assertPngSize(ASSETS.resolve("textures/blocks/water_tower_" + material + ".png"), 16, 16);
+        for (String texture : new String[] {"sheetmetal_copper", "storage_copper", "storage_steel", "storage_constantan"})
+            assertPngSize(ASSETS.resolve("textures/blocks/" + texture + ".png"), 16, 16);
         assertPngSize(ASSETS.resolve("textures").resolve("gui").resolve("crop_database_chest.png"), 256, 256);
         assertPngSize(ASSETS.resolve("textures").resolve("gui").resolve("crop_database_drawer.png"), 128, 128);
         assertPngSize(ASSETS.resolve("textures").resolve("gui").resolve("icons.png"), 64, 64);
         assertPngSize(ASSETS.resolve("textures").resolve("gui").resolve("ic2_widgets.png"), 256, 256);
         assertPngSize(ASSETS.resolve("textures").resolve("blocks").resolve("grin_grinder_front_active.png"), 16, 64);
         assertPngSize(ASSETS.resolve("textures").resolve("blocks").resolve("grin_extractor_front_active.png"), 16, 64);
+        for (String texture : new String[] {"reservoir_casing", "reservoir_tank_glass", "reservoir_ladder", "reservoir_railing", "reservoir_controller"})
+            assertPngSize(ASSETS.resolve("textures").resolve("blocks").resolve(texture + ".png"), 16, 16);
+        for (String texture : new String[] {"pollinator_hive_front", "pollinator_hive_front_charged", "pollinator_hive_side", "pollinator_hive_top"})
+            assertPngSize(ASSETS.resolve("textures").resolve("blocks").resolve(texture + ".png"), 16, 16);
+        assertPngSize(ASSETS.resolve("textures").resolve("blocks").resolve("greenhouse_glass.png"), 16, 16);
         assertPngSize(ASSETS.resolve("textures").resolve("blocks").resolve("seed_analyzer_front_active.png"), 16, 64);
+        assertPngSize(ASSETS.resolve("textures").resolve("blocks").resolve("hydroponic_chamber_front_active.png"), 16, 64);
         assertTrue("Missing mcmeta for grin_grinder_front_active", Files.isRegularFile(ASSETS.resolve("textures").resolve("blocks").resolve("grin_grinder_front_active.png.mcmeta")));
         assertTrue("Missing mcmeta for grin_extractor_front_active", Files.isRegularFile(ASSETS.resolve("textures").resolve("blocks").resolve("grin_extractor_front_active.png.mcmeta")));
         assertTrue("Missing mcmeta for seed_analyzer_front_active", Files.isRegularFile(ASSETS.resolve("textures").resolve("blocks").resolve("seed_analyzer_front_active.png.mcmeta")));
+        assertTrue("Missing mcmeta for hydroponic_chamber_front_active", Files.isRegularFile(ASSETS.resolve("textures").resolve("blocks").resolve("hydroponic_chamber_front_active.png.mcmeta")));
         String[] customCrops = {
                 "grinbloom", "bioreed", "nitrobulb", "lazuli_bloom", "irid_moss",
-                "radbloom", "glowbloom", "quartzreed", "lithivine", "sulfurbud"
+                "radbloom", "glowbloom", "quartzreed", "lithivine", "sulfurbud",
+                "resincane", "cryolotus", "cupric_moss", "stannum_herb", "voltreed"
         };
         for (String crop : customCrops) {
             for (int stage = 1; stage <= 4; stage++) {
                 assertPngSize(ASSETS.resolve("textures").resolve("blocks").resolve("crops").resolve(crop + "_" + stage + ".png"), 16, 16);
+            }
+        }
+    }
+
+    @Test
+    public void greenhouseGlassTextureHasTransparentCutoutOpening() throws IOException {
+        Path texture = ASSETS.resolve("textures").resolve("blocks").resolve("greenhouse_glass.png");
+        assertPngSize(texture, 16, 16);
+        BufferedImage image = ImageIO.read(texture.toFile());
+        assertEquals("The center opening must stay fully transparent for CUTOUT", 0,
+                (image.getRGB(8, 8) >>> 24) & 0xFF);
+        assertEquals("The metal frame must remain opaque", 255,
+                (image.getRGB(1, 1) >>> 24) & 0xFF);
+    }
+
+    @Test
+    public void manualComposterModelsStayWithinHalfHeightAndWoodenStyle() throws IOException {
+        assertFalse("Legacy steel frame texture should not remain",
+                Files.exists(ASSETS.resolve("textures/blocks/manual_composter_steel.png")));
+        assertPngSize(ASSETS.resolve("textures/blocks/manual_composter_wood.png"), 16, 16);
+        assertPngSize(ASSETS.resolve("textures/blocks/manual_composter_rim.png"), 16, 16);
+        JsonParser parser = new JsonParser();
+        for (int fill = 0; fill <= 5; fill++) {
+            Path modelPath = ASSETS.resolve("models/block/manual_composter_" + fill + ".json");
+            JsonObject root = parser.parse(new String(Files.readAllBytes(modelPath), StandardCharsets.UTF_8)).getAsJsonObject();
+            for (JsonElement el : root.getAsJsonArray("elements")) {
+                JsonObject obj = el.getAsJsonObject();
+                double minY = obj.getAsJsonArray("from").get(1).getAsDouble();
+                double maxY = obj.getAsJsonArray("to").get(1).getAsDouble();
+                assertTrue("minY out of bounds in " + modelPath, minY >= 0.0 && minY <= 8.0);
+                assertTrue("maxY exceeds half-block height (8px) in " + modelPath + ": " + maxY, maxY >= 0.0 && maxY <= 8.0);
             }
         }
     }
@@ -126,11 +187,40 @@ public final class AssetIntegrityTest {
                 "cropmanager.crop.quartzreed",
                 "cropmanager.crop.lithivine",
                 "cropmanager.crop.sulfurbud",
+                "cropmanager.crop.resincane",
+                "cropmanager.crop.cryolotus",
+                "cropmanager.crop.cupric_moss",
+                "cropmanager.crop.stannum_herb",
+                "cropmanager.crop.voltreed",
                 "tile.cropmanager.radioactive_soil.name",
                 "tile.cropmanager.sprinkler_mk1.name",
                 "tile.cropmanager.sprinkler_mk2.name",
                 "tile.cropmanager.sprinkler_mk3.name",
-                "cropmanager.jei_crops_title"
+                "cropmanager.jei_crops_title",
+                "itemGroup.cropmanager"
+                , "tile.cropmanager.agricultural_reservoir.name", "tile.cropmanager.reservoir_casing.name",
+                "cropmanager.reservoir_title", "cropmanager.reservoir_formed", "cropmanager.reservoir_unformed", "cropmanager.reservoir_auto_on",
+                "cropmanager.reservoir_auto_off", "cropmanager.reservoir_auto_water_help", "cropmanager.reservoir_auto_weed_help",
+                "cropmanager.reservoir_empty", "cropmanager.reservoir_filter", "cropmanager.reservoir_container", "cropmanager.reservoir_tank_a", "cropmanager.reservoir_tank_b"
+                , "tile.cropmanager.pollinator_hive.name", "tile.cropmanager.greenhouse_glass.name",
+                "tile.cropmanager.fluid_tank.name", "tile.cropmanager.fluid_tank_casing.name",
+                "cropmanager.fluid_tank_title", "cropmanager.fluid_tank_help",
+                "cropmanager.fluid_tank_item_stored", "cropmanager.fluid_tank_item_upgrades",
+                "cropmanager.fluid_tank_capacity_tip", "cropmanager.fluid_tank_comparator_tip",
+                "cropmanager.fluid_tank_comparator_desc", "cropmanager.fluid_tank_auto_desc",
+                "cropmanager.fluid_tank_rs_desc", "cropmanager.fluid_tank_port_hint",
+                "tile.cropmanager.agricultural_silo.name", "tile.cropmanager.silo_casing.name",
+                "cropmanager.silo_unformed", "cropmanager.silo_item_stored",
+                "cropmanager.silo_stacks_tip", "cropmanager.silo_locked",
+                "cropmanager.silo_unlocked", "cropmanager.silo_lock_hint",
+                "tile.cropmanager.biogas_generator.name", "tile.cropmanager.biogas_heat_burner.name",
+                "tile.cropmanager.biogas_sprayer.name", "tile.cropmanager.sprinkler_diagonal.name",
+                "item.cropmanager.crossing_tool.name", "tile.cropmanager.eu_wifi_plug.name",
+                "tile.cropmanager.eu_wifi_point.name", "tile.cropmanager.eu_dish_antenna.name",
+                "tile.cropmanager.hydroponic_chamber.name", "cropmanager.hydroponic_name",
+                "cropmanager.hydroponic_no_seed", "cropmanager.hydroponic_no_glass",
+                "cropmanager.hydroponic_no_subsoil", "cropmanager.hydroponic_no_water",
+                "cropmanager.hydroponic_no_catalyst", "cropmanager.hydroponic_working"
         };
         for (String key : required) {
             assertTrue("Missing en_us key: " + key, enKeys.contains(key));
@@ -144,6 +234,20 @@ public final class AssetIntegrityTest {
         Set<String> ptKeys = loadLangKeys(ASSETS.resolve("lang").resolve("pt_br.lang"));
         assertEquals("Translation keys count mismatch", enKeys.size(), ptKeys.size());
         assertEquals("Translation keys mismatch", enKeys, ptKeys);
+    }
+
+    @Test
+    public void manualTextureAndNavigationKeysArePresent() throws IOException {
+        assertPngSize(ASSETS.resolve("textures/gui/guide_book.png"), 512, 512);
+        Set<String> keys = loadLangKeys(ASSETS.resolve("lang/en_us.lang"));
+        assertTrue(keys.contains("item.cropmanager.agricultural_manual.name"));
+        for (String category : new String[]{"crops", "machines", "chemistry", "irrigation", "upgrades", "storage"}) {
+            assertTrue("Missing manual category: " + category, keys.contains("cropmanager.guide.cat." + category));
+        }
+        for (String control : new String[]{"home", "back", "forward", "search", "contents", "index_help",
+                "no_results", "no_recipe", "scroll", "recipe_index", "shapeless", "portable_link"}) {
+            assertTrue("Missing manual control: " + control, keys.contains("cropmanager.guide.ui." + control));
+        }
     }
 
     private static void verifyJsonRefs(Path jsonFile, boolean isBlockstate) throws IOException {
@@ -172,11 +276,6 @@ public final class AssetIntegrityTest {
         if ("items/portable_crop_database".equals(textureRef)) {
             assertEquals("Expected 32px width for portable_crop_database: " + tex, 32, w);
             assertEquals("Expected 32px height for portable_crop_database: " + tex, 32, h);
-            return;
-        }
-        if ("blocks/crop_database_chest_front".equals(textureRef)) {
-            assertEquals("Expected 64px width for crop_database_chest_front: " + tex, 64, w);
-            assertEquals("Expected 64px height for crop_database_chest_front: " + tex, 64, h);
             return;
         }
         boolean isStatic16 = w == 16 && h == 16;
