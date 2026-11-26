@@ -34,13 +34,17 @@ public final class BiogasGeneratorTile extends FarmTile implements ITickable, IE
     private boolean registered;
     private BlockPos center;
     private int checkTicks;
+    private int previousSignal = -1;
     private double storedEu;
     final FluidTank gas = new FluidTank(16000) {
         { setCanDrain(false); }
         @Override public boolean canFillFluidType(FluidStack stack) {
             return stack != null && stack.getFluid() == FluidName.biogas.getInstance();
         }
-        @Override protected void onContentsChanged() { markDirty(); }
+        @Override protected void onContentsChanged() {
+            markDirty();
+            updateComparator(center);
+        }
     };
 
     @Nullable
@@ -51,13 +55,30 @@ public final class BiogasGeneratorTile extends FarmTile implements ITickable, IE
     }
 
     void unformOnBreak() {
-        if (center != null && world != null) {
-            StorageMultiblockSupport.linkStorageCasings(world, pos, center, pos.getY() - 1, HEIGHT, null);
-            StorageMultiblockSupport.updateShellComparators(world, pos, center, pos.getY() - 1, HEIGHT,
-                    CropManager.BIOGAS_GENERATOR_CASING);
-        }
+        BlockPos oldCenter = center;
         formed = false;
         center = null;
+        previousSignal = 0;
+        if (oldCenter != null && world != null) {
+            StorageMultiblockSupport.linkStorageCasings(world, pos, oldCenter, pos.getY() - 1, HEIGHT, null);
+            StorageMultiblockSupport.updateShellComparators(world, pos, oldCenter, pos.getY() - 1, HEIGHT,
+                    CropManager.BIOGAS_GENERATOR_CASING);
+        }
+    }
+
+    private void updateComparator(@Nullable BlockPos shellCenter) {
+        if (world == null || world.isRemote || pos == null || !world.isBlockLoaded(pos, false)) return;
+        int signal = comparatorSignal();
+        if (signal == previousSignal) return;
+        previousSignal = signal;
+        IBlockState state = world.getBlockState(pos);
+        if (state.getBlock() == CropManager.BIOGAS_GENERATOR) {
+            world.updateComparatorOutputLevel(pos, state.getBlock());
+        }
+        if (shellCenter != null) {
+            StorageMultiblockSupport.updateShellComparators(world, pos, shellCenter, pos.getY() - 1, HEIGHT,
+                    CropManager.BIOGAS_GENERATOR_CASING);
+        }
     }
 
     private void unformAndSync() {
@@ -66,6 +87,9 @@ public final class BiogasGeneratorTile extends FarmTile implements ITickable, IE
         if (world != null && pos != null && world.isBlockLoaded(pos, false)) {
             IBlockState state = world.getBlockState(pos);
             world.notifyBlockUpdate(pos, state, state, 3);
+            if (!world.isRemote && state.getBlock() == CropManager.BIOGAS_GENERATOR) {
+                world.updateComparatorOutputLevel(pos, state.getBlock());
+            }
         }
     }
 
@@ -81,17 +105,14 @@ public final class BiogasGeneratorTile extends FarmTile implements ITickable, IE
         if (result == StorageMultiblockSupport.Validation.DEFER) return;
         boolean valid = result == StorageMultiblockSupport.Validation.VALID;
         if (formed == valid && (!valid ? center == null : proposed.equals(center))) return;
-        if (center != null) {
-            StorageMultiblockSupport.linkStorageCasings(world, pos, center, pos.getY() - 1, HEIGHT, null);
+        BlockPos oldCenter = center;
+        if (oldCenter != null) {
+            StorageMultiblockSupport.linkStorageCasings(world, pos, oldCenter, pos.getY() - 1, HEIGHT, null);
         }
         center = valid ? proposed : null;
         formed = valid;
         if (valid) StorageMultiblockSupport.linkStorageCasings(world, pos, center, pos.getY() - 1, HEIGHT, pos);
-        BlockPos comparatorCenter = valid ? center : proposed;
-        if (comparatorCenter != null) {
-            StorageMultiblockSupport.updateShellComparators(world, pos, comparatorCenter, pos.getY() - 1, HEIGHT,
-                    CropManager.BIOGAS_GENERATOR_CASING);
-        }
+        updateComparator(valid ? center : (oldCenter != null ? oldCenter : proposed));
         markDirty();
         if (world.isBlockLoaded(pos, false)) {
             IBlockState state = world.getBlockState(pos);
@@ -162,13 +183,16 @@ public final class BiogasGeneratorTile extends FarmTile implements ITickable, IE
         unformOnBreak();
         checkTicks = 0;
         markDirty();
-        if (world != null && world.isBlockLoaded(pos, false)) {
+        if (world != null && pos != null && world.isBlockLoaded(pos, false)) {
             IBlockState state = world.getBlockState(pos);
             world.notifyBlockUpdate(pos, state, state, 3);
+            if (!world.isRemote && state.getBlock() == CropManager.BIOGAS_GENERATOR) {
+                world.updateComparatorOutputLevel(pos, state.getBlock());
+            }
         }
     }
     @Override public int comparatorSignal() {
-        return StorageMultiblockSupport.comparatorSignal(gas.getFluidAmount(), gas.getCapacity());
+        return formed ? StorageMultiblockSupport.comparatorSignal(gas.getFluidAmount(), gas.getCapacity()) : 0;
     }
 
     @Override public boolean usable(EntityPlayer player) {
@@ -210,6 +234,14 @@ public final class BiogasGeneratorTile extends FarmTile implements ITickable, IE
         storedEu = tag.getDouble("EU");
     }
 
+    public NBTTagCompound writeItemData() {
+        NBTTagCompound tag = writeToNBT(new NBTTagCompound());
+        tag.removeTag("x");
+        tag.removeTag("y");
+        tag.removeTag("z");
+        return tag;
+    }
+
     @Override public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         super.writeToNBT(tag);
         tag.setTag("GasTank", gas.writeToNBT(new NBTTagCompound()));
@@ -218,14 +250,16 @@ public final class BiogasGeneratorTile extends FarmTile implements ITickable, IE
     }
     @Override public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
-        gas.readFromNBT(tag.getCompoundTag("GasTank"));
+        StorageMultiblockSupport.readFluidTank(gas, tag.getCompoundTag("GasTank"));
         FluidStack fuel = gas.getFluid();
         if (!gas.canFillFluidType(fuel)) gas.setFluid(null);
         else fuel.amount = Math.min(gas.getCapacity(), fuel.amount);
         double saved = tag.getDouble("StoredEU");
         storedEu = Double.isFinite(saved) ? Math.max(0, Math.min(BUFFER, saved)) : 0;
         formed = false;
+        center = null;
         checkTicks = 0;
+        previousSignal = -1;
     }
 
     @Override public NBTTagCompound getUpdateTag() {

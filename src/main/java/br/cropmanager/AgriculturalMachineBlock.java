@@ -1,16 +1,21 @@
 package br.cropmanager;
 
+import javax.annotation.Nullable;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Mirror;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public final class AgriculturalMachineBlock extends BlockHorizontal {
@@ -35,6 +40,61 @@ public final class AgriculturalMachineBlock extends BlockHorizontal {
     @Override public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing side,
             float x, float y, float z, int meta, EntityLivingBase placer) {
         return getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
+    }
+
+    @Override public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state,
+            EntityLivingBase placer, ItemStack stack) {
+        super.onBlockPlacedBy(world, pos, state, placer, stack);
+        if (!world.isRemote) {
+            TileEntity tile = world.getTileEntity(pos);
+            if (tile instanceof BiogasGeneratorTile) ((BiogasGeneratorTile) tile).validateShell();
+        }
+    }
+
+    @Override public boolean hasComparatorInputOverride(IBlockState state) {
+        return this == CropManager.BIOGAS_GENERATOR;
+    }
+
+    @Override public int getComparatorInputOverride(IBlockState state, World world, BlockPos pos) {
+        if (this != CropManager.BIOGAS_GENERATOR) return 0;
+        TileEntity tile = world.getTileEntity(pos);
+        return tile instanceof BiogasGeneratorTile ? ((BiogasGeneratorTile) tile).comparatorSignal() : 0;
+    }
+
+    @Override public void getDrops(NonNullList<ItemStack> drops, IBlockAccess access, BlockPos pos,
+            IBlockState state, int fortune) {
+        TileEntity tile = access.getTileEntity(pos);
+        if (tile instanceof BiogasGeneratorTile) {
+            ItemStack stack = new ItemStack(this);
+            stack.setTagInfo("BlockEntityTag", ((BiogasGeneratorTile) tile).writeItemData());
+            drops.add(stack);
+            return;
+        }
+        super.getDrops(drops, access, pos, state, fortune);
+    }
+
+    @Override public boolean removedByPlayer(IBlockState state, World world, BlockPos pos,
+            EntityPlayer player, boolean willHarvest) {
+        if (this == CropManager.BIOGAS_GENERATOR) {
+            return willHarvest || super.removedByPlayer(state, world, pos, player, false);
+        }
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+
+    @Override protected boolean canSilkHarvest() {
+        return this != CropManager.BIOGAS_GENERATOR && super.canSilkHarvest();
+    }
+
+    @Override public void harvestBlock(World world, EntityPlayer player, BlockPos pos,
+            IBlockState state, @Nullable TileEntity tile, ItemStack tool) {
+        try {
+            super.harvestBlock(world, player, pos, state, tile, tool);
+        } finally {
+            if (this == CropManager.BIOGAS_GENERATOR
+                    && world.getBlockState(pos).getBlock() == this && world.getTileEntity(pos) == tile) {
+                world.setBlockToAir(pos);
+            }
+        }
     }
     @Override public boolean onBlockActivated(World world, BlockPos pos, IBlockState state,
             net.minecraft.entity.player.EntityPlayer player, net.minecraft.util.EnumHand hand, EnumFacing side,

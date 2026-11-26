@@ -6,10 +6,12 @@ import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.FluidTank;
 
 /**
  * Shared geometry, validation, casing-binding, and comparator helpers for 3xHx3 storage multiblocks.
@@ -129,5 +131,16 @@ final class StorageMultiblockSupport {
     static int comparatorSignal(long current, long capacity) {
         if (capacity <= 0 || current <= 0) return 0;
         return Math.min(15, Math.max(1, (int) Math.floor(current * 14.0 / capacity) + 1));
+    }
+
+    static void readFluidTank(FluidTank tank, NBTTagCompound nbt) {
+        // ItemBlock.setTileEntityNBT merges BlockEntityTag onto an empty tile's NBT, leaving "Empty" alongside "FluidName".
+        if (nbt.hasKey("Empty") && nbt.hasKey("FluidName")) {
+            NBTTagCompound clean = nbt.copy();
+            clean.removeTag("Empty");
+            tank.readFromNBT(clean);
+        } else {
+            tank.readFromNBT(nbt);
+        }
     }
 }

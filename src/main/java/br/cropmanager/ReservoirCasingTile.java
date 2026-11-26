@@ -122,6 +122,16 @@ public final class ReservoirCasingTile extends TileEntity implements IEnergySink
         return master == null ? ReservoirCasingBlock.Part.CASING : master.renderPart(pos);
     }
 
+    boolean isFormed() {
+        AgriculturalReservoirTile master = controller();
+        return master != null && master.formed;
+    }
+
+    int comparatorSignal() {
+        AgriculturalReservoirTile master = controller();
+        return master != null && master.formed ? master.comparatorSignal() : 0;
+    }
+
     void notifyControllerBroken() {
         AgriculturalReservoirTile master = controller();
         if (master != null) master.casingBroken(pos);

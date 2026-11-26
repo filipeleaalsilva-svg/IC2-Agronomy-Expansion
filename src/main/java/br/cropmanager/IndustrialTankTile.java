@@ -521,7 +521,7 @@ public final class IndustrialTankTile extends FarmTile implements ITickable, Sto
         super.readFromNBT(tag);
         readFixedInventory(inventory, tag.getCompoundTag("Inventory"), INVENTORY_SLOTS);
         readSettings(tag);
-        tank.readFromNBT(tag.getCompoundTag("Tank"));
+        StorageMultiblockSupport.readFluidTank(tank, tag.getCompoundTag("Tank"));
         baseY = tag.getInteger("StructureBaseY");
         center = tag.hasKey("StructureCenter", 4) ? BlockPos.fromLong(tag.getLong("StructureCenter")) : null;
         autoOutput = !tag.hasKey("AutoOutput") || tag.getBoolean("AutoOutput");

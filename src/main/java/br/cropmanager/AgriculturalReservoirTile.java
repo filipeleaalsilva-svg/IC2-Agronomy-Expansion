@@ -381,6 +381,7 @@ public final class AgriculturalReservoirTile extends FarmTile implements ITickab
             TileEntity tile = world.getTileEntity(shell);
             if (tile instanceof ReservoirCasingTile) ((ReservoirCasingTile) tile).setController(pos);
         }
+        updateShellComparators();
     }
 
     ReservoirCasingBlock.Part renderPart(BlockPos casingPos) {
@@ -409,8 +410,11 @@ public final class AgriculturalReservoirTile extends FarmTile implements ITickab
     }
 
     void unformOnBreak() {
+        if (!formed) return;
         formed = false;
         unlinkCasings();
+        previousSignal = 0;
+        updateShellComparators();
     }
 
     private void unlinkCasings() {
@@ -448,6 +452,7 @@ public final class AgriculturalReservoirTile extends FarmTile implements ITickab
     private boolean redstoneAllows(int i) {
         int mode = redstoneModes[i];
         if (mode == 0) return true;
+        if (world == null || center == null) return mode == 2;
         for (BlockPos casing : shellPositions(center, baseY, height))
             if (world.isBlockLoaded(casing, false) && world.isBlockPowered(casing)) return mode == 1;
         return mode == 2;
@@ -571,10 +576,20 @@ public final class AgriculturalReservoirTile extends FarmTile implements ITickab
             IBlockState state = world.getBlockState(pos);
             world.notifyBlockUpdate(pos, state, state, 3);
             int signal = comparatorSignal();
-            if (state.getBlock() == CropManager.AGRICULTURAL_RESERVOIR && signal != previousSignal) {
+            if (signal != previousSignal) {
                 previousSignal = signal;
-                world.updateComparatorOutputLevel(pos, state.getBlock());
+                if (state.getBlock() == CropManager.AGRICULTURAL_RESERVOIR) {
+                    world.updateComparatorOutputLevel(pos, state.getBlock());
+                }
+                updateShellComparators();
             }
+        }
+    }
+
+    private void updateShellComparators() {
+        if (world != null && !world.isRemote) {
+            StorageMultiblockSupport.updateShellComparators(
+                    world, pos, center, baseY, height, CropManager.RESERVOIR_CASING);
         }
     }
 
@@ -650,11 +665,11 @@ public final class AgriculturalReservoirTile extends FarmTile implements ITickab
             legacyPorts = tag.getBoolean("ReservoirFormed") || tag.hasKey("Inventory");
         }
         if (tag.hasKey(TANK_KEYS[0], 10) || tag.hasKey(TANK_KEYS[1], 10)) {
-            water.readFromNBT(tag.getCompoundTag(TANK_KEYS[0]));
-            weed.readFromNBT(tag.getCompoundTag(TANK_KEYS[1]));
+            StorageMultiblockSupport.readFluidTank(water, tag.getCompoundTag(TANK_KEYS[0]));
+            StorageMultiblockSupport.readFluidTank(weed, tag.getCompoundTag(TANK_KEYS[1]));
         } else {
-            water.readFromNBT(tag.getCompoundTag(LEGACY_TANK_KEYS[0]));
-            weed.readFromNBT(tag.getCompoundTag(LEGACY_TANK_KEYS[1]));
+            StorageMultiblockSupport.readFluidTank(water, tag.getCompoundTag(LEGACY_TANK_KEYS[0]));
+            StorageMultiblockSupport.readFluidTank(weed, tag.getCompoundTag(LEGACY_TANK_KEYS[1]));
         }
         energy.readFromNBT(tag);
         double eu = energy.getEnergyStored();

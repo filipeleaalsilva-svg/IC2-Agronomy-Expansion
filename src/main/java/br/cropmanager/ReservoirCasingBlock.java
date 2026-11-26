@@ -53,6 +53,13 @@ public final class ReservoirCasingBlock extends Block {
     @Override public boolean isFullCube(IBlockState state) { return true; }
     @SideOnly(Side.CLIENT) @Override public BlockRenderLayer getRenderLayer() { return BlockRenderLayer.CUTOUT_MIPPED; }
 
+    @Override public boolean hasComparatorInputOverride(IBlockState state) { return true; }
+
+    @Override public int getComparatorInputOverride(IBlockState state, World world, BlockPos pos) {
+        TileEntity tile = world.getTileEntity(pos);
+        return tile instanceof ReservoirCasingTile ? ((ReservoirCasingTile) tile).comparatorSignal() : 0;
+    }
+
     @Override public boolean onBlockActivated(World world, BlockPos pos, IBlockState state,
             EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
         TileEntity tile = world.getTileEntity(pos);
