@@ -35,13 +35,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - **Empacotamento do JAR** — removido `items.zip` residual dos recursos do mod (`src/main/resources/assets/cropmanager/textures/`).
 - **Baú de Dados de Cultivos** — usa texturas próprias nas seis faces.
 - **Interface da Ferramenta de Cruzamento (`CrossingToolGui`)** — atualizada para o tema escuro padrão `#1C1C1D`.
-
-### Corrigido
 - **`EuDishContainer` e `EuWifiContainer`:** registro de `EuDishContainer` em `FarmTile.openMachine` para sincronização de estado e botão redstone na GUI da Antena Parabólica; transferência Shift-Clique no slot de fertilizante do Pulverizador a Biogás.
 - **Plugin HEI/JEI (`CropManagerJeiPlugin` / `CropRecipeCategory`):** lookup corrigido para `IC2Items.getItem("crop_stick")` e nome do mod sincronizado com `CropManager.NAME`.
-- **Multibloco do Gerador a Biogás (`BiogasGeneratorTile` / `AgriculturalMachineBlock`) e Queimador Térmico (`BiogasHeatBurnerTile`):** desvinculação imediata das cascas em `casingBroken` e `breakBlock`, preservação do estado `formed` em chunks descarregados (`DEFER`) e proteção contra leitura de estado após substituição do bloco.
+- **Multibloco do Gerador a Biogás (`BiogasGeneratorTile` / `AgriculturalMachineBlock`) e Queimador Térmico (`BiogasHeatBurnerTile`):** desvinculação imediata das cascas em `casingBroken` e `breakBlock`, preservação do estado `formed` em chunks descarregados (`DEFER`), validação de carcaça ao posicionar o bloco, preservação de `BlockEntityTag` no drop e sinal de comparador redstone proporcional à energia/gás.
+- **Multiblocos de Armazenamento e Logística (`ReservoirCasingBlock`, `StorageMultiblockSupport`, `IndustrialTankTile`):** delegação de sinal de comparador nas carcaças do Reservatório Agrícola e saneamento de tags NBT de tanques (`readFluidTank`) prevenindo perda de fluidos após mesclagem de itens.
 - **Rede Wi-Fi de EU (`WirelessEuGridData`, `WirelessEuUpgrade`, `EuWifiPointTile`):** bloqueio de alteração de privacidade de canais públicos pertencentes a outro jogador, conservação de EU e preservação de `lastSourceDim` ao atender máquinas cheias em outra dimensão, atualização de `EnergyNet` ao trocar Tier, ciclagem completa de taxa e guarda contra `NaN` em `drawEnergy`.
 - **Renderers (`TESR`) e Traduções:** verificação do bloco antes de ler `FACING` em `AgriculturalSiloRenderer`, `IndustrialTankRenderer`, `BiogasGeneratorRenderer`, `MonitorRenderer` e `CropChestRenderer`; adição das 6 chaves de localização faltantes do Silo Agrícola em `en_us.lang` e `pt_br.lang`.
+- **Testes de Regressão:** expansão abrangente das suítes de teste para o Reservatório Agrícola, Silo Agrícola, Gerador a Biogás, Tubos de Fluido e Tanque Industrial.
 
 ## [0.5.0-alpha.10] - 2026-11-21
 
