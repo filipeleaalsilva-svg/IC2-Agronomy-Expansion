@@ -3,19 +3,27 @@ package br.cropmanager;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Bootstrap;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProviderSurface;
 import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -28,9 +36,12 @@ import net.minecraftforge.items.ItemStackHandler;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -54,6 +65,10 @@ public final class IndustrialTankTest {
         if (!ForgeRegistries.ITEMS.containsKey(CropManager.RESERVOIR_CAPACITY.getRegistryName())) {
             ForgeRegistries.ITEMS.register(CropManager.RESERVOIR_CAPACITY);
         }
+        if (!ForgeRegistries.ITEMS.containsKey(CropManager.FLUID_TANK.getRegistryName())) {
+            ForgeRegistries.ITEMS.register(new ItemBlock(CropManager.FLUID_TANK)
+                    .setRegistryName(CropManager.FLUID_TANK.getRegistryName()));
+        }
         forgeInstanceField = ForgeModContainer.class.getDeclaredField("INSTANCE");
         forgeInstanceField.setAccessible(true);
         previousForgeMod = (ForgeModContainer) forgeInstanceField.get(null);
@@ -71,8 +86,8 @@ public final class IndustrialTankTest {
 
     private static final class MockStructure {
         final World world = mock(World.class);
-        final BlockPos center = new BlockPos(0, 64, 0);
-        final BlockPos controllerPos = center.north().up();
+        final BlockPos center;
+        final BlockPos controllerPos;
         final IBlockState controllerState = CropManager.FLUID_TANK.getDefaultState()
                 .withProperty(IndustrialTankBlock.FACING, EnumFacing.NORTH);
         final IBlockState casingState = CropManager.FLUID_TANK_CASING.getDefaultState();
@@ -83,7 +98,27 @@ public final class IndustrialTankTest {
         boolean powered = false;
 
         MockStructure() {
+            this(new BlockPos(0, 64, 0));
+        }
+
+        MockStructure(BlockPos center) {
+            this.center = center;
+            this.controllerPos = center.north().up();
+            try {
+                Field randField = World.class.getDeclaredField("rand");
+                randField.setAccessible(true);
+                randField.set(world, new Random(0L));
+                Field providerField = World.class.getDeclaredField("provider");
+                providerField.setAccessible(true);
+                providerField.set(world, new WorldProviderSurface());
+            } catch (ReflectiveOperationException e) {
+                throw new AssertionError(e);
+            }
+            GameRules gameRules = new GameRules();
+            MinecraftServer server = mock(MinecraftServer.class);
             when(world.getHeight()).thenReturn(256);
+            when(world.getGameRules()).thenReturn(gameRules);
+            when(world.getMinecraftServer()).thenReturn(server);
             when(world.isBlockLoaded(any(BlockPos.class), eq(false))).thenReturn(true);
             when(world.isBlockPowered(any(BlockPos.class))).thenAnswer(call -> powered);
             controller.setWorld(world);
@@ -112,9 +147,17 @@ public final class IndustrialTankTest {
             });
             when(world.getTileEntity(any(BlockPos.class))).thenAnswer(call -> {
                 BlockPos pos = call.getArgument(0);
+                if (overrides.containsKey(pos) && overrides.get(pos).getBlock() == Blocks.AIR) return null;
                 if (pos.equals(controllerPos)) return controller;
                 if (casings.containsKey(pos)) return casings.get(pos);
                 return externalTiles.get(pos);
+            });
+            when(world.setBlockToAir(any(BlockPos.class))).thenAnswer(call -> {
+                BlockPos pos = call.getArgument(0);
+                IBlockState current = world.getBlockState(pos);
+                current.getBlock().breakBlock(world, pos, current);
+                overrides.put(pos, Blocks.AIR.getDefaultState());
+                return true;
             });
         }
     }
@@ -381,5 +424,203 @@ public final class IndustrialTankTest {
                 s.world, casingPos, s.casingState, player, EnumHand.MAIN_HAND, EnumFacing.EAST, .5F, .5F, .5F));
         verify(player).openGui(CropManager.instance, 16, s.world,
                 s.controllerPos.getX(), s.controllerPos.getY(), s.controllerPos.getZ());
+    }
+
+    @Test
+    public void initialTryFormDefersOnUnloadedChunkAndRejectsMissingCasingOrCapController() {
+        MockStructure s = new MockStructure();
+        BlockPos topCenter = s.center.up(4);
+        when(s.world.isBlockLoaded(eq(topCenter), eq(false))).thenReturn(false);
+        s.controller.tryForm();
+        assertFalse("Unloaded chunk must defer initial tryForm", s.controller.formed);
+
+        when(s.world.isBlockLoaded(eq(topCenter), eq(false))).thenReturn(true);
+        s.controller.tryForm();
+        assertTrue(s.controller.formed);
+
+        // Missing casing rejects formation
+        MockStructure missing = new MockStructure();
+        missing.overrides.put(missing.center.up(4), Blocks.AIR.getDefaultState());
+        missing.controller.tryForm();
+        assertFalse(missing.controller.formed);
+
+        // Controller placed on floor or roof cap layer rejects formation
+        MockStructure capController = new MockStructure();
+        capController.controller.setPos(capController.center.north()); // y = floor
+        capController.overrides.put(capController.center.north(), capController.controllerState);
+        capController.overrides.put(capController.controllerPos, capController.casingState);
+        capController.controller.tryForm();
+        assertFalse(capController.controller.formed);
+    }
+
+    @Test
+    public void cleanBreakHarvestRoundTripAndCasingBreakPreserveFluidAndSettings() {
+        MockStructure s = new MockStructure();
+        s.controller.tryForm();
+        assertTrue(s.controller.formed);
+
+        EntityPlayer player = mock(EntityPlayer.class);
+        player.inventory = new InventoryPlayer(player);
+        player.world = s.world;
+        when(player.getDistanceSq(s.controllerPos)).thenReturn(4.0);
+
+        s.controller.inventory.setStackInSlot(IndustrialTankTile.CAPACITY_SLOT,
+                new ItemStack(CropManager.RESERVOIR_CAPACITY, 2));
+        s.controller.tank.fill(new FluidStack(FluidRegistry.WATER, 85000), true);
+        player.inventory.setItemStack(new ItemStack(Items.WATER_BUCKET));
+        assertTrue(s.controller.control(30, player)); // set water filter
+        player.inventory.setItemStack(ItemStack.EMPTY);
+        assertTrue(s.controller.control(12, player)); // port 2: CLOSED -> INPUT
+        assertTrue(s.controller.control(1, player));  // redstone: 0 -> 1 (HIGH)
+        assertTrue(s.controller.control(0, player));  // toggle autoOutput
+        boolean expectedAutoOutput = s.controller.autoOutput;
+
+        // Breaking one casing unforms and unlinks all casings while preserving fluid/filter/upgrades/settings
+        BlockPos topCasing = s.center.up(4);
+        CropManager.FLUID_TANK_CASING.breakBlock(s.world, topCasing, s.casingState);
+        assertFalse(s.controller.formed);
+        for (StorageCasingTile casing : s.casings.values()) {
+            assertNull(casing.controller());
+        }
+        assertEquals(85000, s.controller.tank.getFluidAmount());
+        assertEquals(FluidRegistry.WATER, s.controller.filterFluid().getFluid());
+        assertEquals(2, s.controller.upgradeCount());
+        assertEquals(1, s.controller.portMode(2));
+        assertEquals(1, s.controller.redstoneMode());
+        assertEquals(expectedAutoOutput, s.controller.autoOutput);
+
+        // Re-form, then clean break controller with removedByPlayer + harvestBlock
+        s.controller.tryForm();
+        assertTrue(s.controller.formed);
+        assertTrue(CropManager.FLUID_TANK.removedByPlayer(s.controllerState, s.world, s.controllerPos, player, true));
+        assertSame(s.controller, s.world.getTileEntity(s.controllerPos));
+
+        CropManager.FLUID_TANK.harvestBlock(
+                s.world, player, s.controllerPos, s.controllerState, s.controller, new ItemStack(Items.IRON_PICKAXE));
+        ArgumentCaptor<Entity> captor = ArgumentCaptor.forClass(Entity.class);
+        verify(s.world).spawnEntity(captor.capture());
+        ItemStack drop = ((EntityItem) captor.getValue()).getItem();
+        assertEquals(Item.getItemFromBlock(CropManager.FLUID_TANK), drop.getItem());
+        NBTTagCompound tag = drop.getSubCompound("BlockEntityTag");
+        assertNotNull(tag);
+        assertFalse(tag.getBoolean("TankFormed"));
+        assertFalse(tag.hasKey("x"));
+        assertFalse(tag.hasKey("y"));
+        assertFalse(tag.hasKey("z"));
+        assertFalse(s.controller.formed);
+        for (StorageCasingTile casing : s.casings.values()) {
+            assertNull(casing.controller());
+        }
+
+        // Re-place at a different position
+        MockStructure s2 = new MockStructure(new BlockPos(20, 70, 20));
+        assertTrue(ItemBlock.setTileEntityNBT(s2.world, player, s2.controllerPos, drop));
+        CropManager.FLUID_TANK.onBlockPlacedBy(s2.world, s2.controllerPos, s2.controllerState, player, drop);
+
+        assertTrue(s2.controller.formed);
+        assertEquals(s2.controllerPos, s2.controller.getPos());
+        assertEquals(85000, s2.controller.tank.getFluidAmount());
+        assertEquals(FluidRegistry.WATER, s2.controller.filterFluid().getFluid());
+        assertEquals(2, s2.controller.upgradeCount());
+        assertEquals(1, s2.controller.portMode(2));
+        assertEquals(1, s2.controller.redstoneMode());
+        assertEquals(expectedAutoOutput, s2.controller.autoOutput);
+    }
+
+    @Test
+    public void comparatorSignalProgressionAndShellNotifications() {
+        assertTrue(CropManager.FLUID_TANK.hasComparatorInputOverride(CropManager.FLUID_TANK.getDefaultState()));
+        assertTrue(CropManager.FLUID_TANK_CASING.hasComparatorInputOverride(CropManager.FLUID_TANK_CASING.getDefaultState()));
+
+        MockStructure s = new MockStructure();
+        BlockPos eastCasing = s.center.east();
+        BlockPos topCasing = s.center.up(4);
+
+        // Unformed with fluid -> 0 on controller and casings
+        s.controller.tank.fill(new FluidStack(FluidRegistry.WATER, 64000), true);
+        assertEquals(0, CropManager.FLUID_TANK.getComparatorInputOverride(s.controllerState, s.world, s.controllerPos));
+        assertEquals(0, CropManager.FLUID_TANK_CASING.getComparatorInputOverride(s.casingState, s.world, eastCasing));
+
+        // Formed empty -> 0
+        s.controller.tank.drain(64000, true);
+        clearInvocations(s.world);
+        s.controller.tryForm();
+        assertTrue(s.controller.formed);
+        assertEquals(0, CropManager.FLUID_TANK.getComparatorInputOverride(s.controllerState, s.world, s.controllerPos));
+        assertEquals(0, CropManager.FLUID_TANK_CASING.getComparatorInputOverride(s.casingState, s.world, eastCasing));
+        verify(s.world, atLeastOnce()).updateComparatorOutputLevel(eastCasing, CropManager.FLUID_TANK_CASING);
+
+        // 1 mB -> 1, 50% -> 8, capacity-1 -> 14, full -> 15
+        clearInvocations(s.world);
+        s.controller.tank.fill(new FluidStack(FluidRegistry.WATER, 1), true);
+        assertEquals(1, CropManager.FLUID_TANK.getComparatorInputOverride(s.controllerState, s.world, s.controllerPos));
+        assertEquals(1, CropManager.FLUID_TANK_CASING.getComparatorInputOverride(s.casingState, s.world, eastCasing));
+        assertEquals(1, CropManager.FLUID_TANK_CASING.getComparatorInputOverride(s.casingState, s.world, topCasing));
+        verify(s.world).updateComparatorOutputLevel(s.controllerPos, CropManager.FLUID_TANK);
+        verify(s.world, atLeastOnce()).updateComparatorOutputLevel(eastCasing, CropManager.FLUID_TANK_CASING);
+        verify(s.world).updateComparatorOutputLevel(topCasing, CropManager.FLUID_TANK_CASING);
+
+        s.controller.tank.fill(new FluidStack(FluidRegistry.WATER, 63999), true);
+        assertEquals(8, CropManager.FLUID_TANK.getComparatorInputOverride(s.controllerState, s.world, s.controllerPos));
+        assertEquals(8, CropManager.FLUID_TANK_CASING.getComparatorInputOverride(s.casingState, s.world, eastCasing));
+
+        s.controller.tank.fill(new FluidStack(FluidRegistry.WATER, 63999), true);
+        assertEquals(14, CropManager.FLUID_TANK.getComparatorInputOverride(s.controllerState, s.world, s.controllerPos));
+        assertEquals(14, CropManager.FLUID_TANK_CASING.getComparatorInputOverride(s.casingState, s.world, eastCasing));
+
+        s.controller.tank.fill(new FluidStack(FluidRegistry.WATER, 1), true);
+        assertEquals(15, CropManager.FLUID_TANK.getComparatorInputOverride(s.controllerState, s.world, s.controllerPos));
+        assertEquals(15, CropManager.FLUID_TANK_CASING.getComparatorInputOverride(s.casingState, s.world, eastCasing));
+
+        // Break controller -> unformOnBreak notifies casings and resets comparator to 0
+        clearInvocations(s.world);
+        s.controller.unformOnBreak();
+        assertEquals(0, CropManager.FLUID_TANK.getComparatorInputOverride(s.controllerState, s.world, s.controllerPos));
+        assertEquals(0, CropManager.FLUID_TANK_CASING.getComparatorInputOverride(s.casingState, s.world, eastCasing));
+        verify(s.world, atLeastOnce()).updateComparatorOutputLevel(eastCasing, CropManager.FLUID_TANK_CASING);
+    }
+
+    @Test
+    public void redstoneModeLowBlocksDrainAndAutoEjectWhileKeepingInputOpen() {
+        MockStructure s = new MockStructure();
+        s.controller.tryForm();
+        assertTrue(s.controller.formed);
+
+        EntityPlayer player = mock(EntityPlayer.class);
+        player.world = s.world;
+        when(player.getDistanceSq(s.controllerPos)).thenReturn(4.0);
+        // Mode 0 -> 1 -> 2 (LOW)
+        assertTrue(s.controller.control(1, player));
+        assertTrue(s.controller.control(1, player));
+        assertEquals(2, s.controller.redstoneMode());
+
+        BlockPos topPos = new BlockPos(0, 68, 0);
+        BlockPos botPos = new BlockPos(0, 64, 0);
+        IFluidHandler upHandler = s.casings.get(topPos).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, EnumFacing.UP);
+        IFluidHandler downHandler = s.casings.get(botPos).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, EnumFacing.DOWN);
+        assertNotNull(upHandler);
+        assertNotNull(downHandler);
+
+        final FluidTank destTank = new FluidTank(10000);
+        TileEntity destTile = mock(TileEntity.class);
+        when(destTile.isInvalid()).thenReturn(false);
+        when(destTile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, EnumFacing.UP)).thenReturn(destTank);
+        s.externalTiles.put(botPos.down(), destTile);
+
+        assertEquals(4000, upHandler.fill(new FluidStack(FluidRegistry.WATER, 4000), true));
+
+        // Unpowered in LOW mode: drain and autoEject work
+        s.powered = false;
+        assertEquals(500, downHandler.drain(500, true).amount);
+        s.controller.autoEjectFluids();
+        assertTrue(destTank.getFluidAmount() > 0);
+        int ejectedBeforePower = destTank.getFluidAmount();
+
+        // Powered in LOW mode: drain and autoEject blocked, UP fill still allowed
+        s.powered = true;
+        assertNull(downHandler.drain(500, true));
+        s.controller.autoEjectFluids();
+        assertEquals(ejectedBeforePower, destTank.getFluidAmount());
+        assertEquals(500, upHandler.fill(new FluidStack(FluidRegistry.WATER, 500), true));
     }
 }
