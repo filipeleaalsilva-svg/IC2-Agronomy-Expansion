@@ -28,6 +28,24 @@ public final class ClientChecks {
     private static final boolean RESERVOIR_QA = Boolean.getBoolean("cropmanager.qaReservoir");
     private static final boolean LIGHTS_QA = Boolean.getBoolean("cropmanager.qaLights");
     private static final boolean MANUAL_QA = Boolean.getBoolean("cropmanager.qaManual");
+    private static final boolean SHOWCASE_QA = Boolean.getBoolean("cropmanager.qaShowcase");
+    private static final String[] SHOWCASE_SHOTS = {
+            "01-overview-aerial", "02-hub-wifi-database", "03-automated-crop-farm",
+            "04-multiblock-courtyard", "05-chemistry-and-biogas", "06-botanical-greenhouse-15crops",
+            "07-hydroponic-thermal-lab", "08-irrigation-sprinklers"
+    };
+    private static final double[][] SHOWCASE_VIEWS = {
+            // {x, y, z, yaw, pitch}
+            {0.5, 36.0, 46.0, 180.0, 38.0},    // 01-overview-aerial
+            {0.5, 8.5, 17.5, 180.0, 14.0},     // 02-hub-wifi-database
+            {0.5, 10.5, -2.5, 180.0, 24.0},    // 03-automated-crop-farm
+            {12.0, 11.5, 6.5, -132.0, 18.0},   // 04-multiblock-courtyard
+            {-14.0, 10.0, 6.5, 142.0, 18.0},   // 05-chemistry-and-biogas
+            {-25.0, 7.2, 14.2, 0.0, 18.0},     // 06-botanical-greenhouse-15crops
+            {26.5, 10.5, 25.5, -180.0, 24.0},  // 07-hydroponic-thermal-lab
+            {32.0, 12.5, -14.0, 135.0, 28.0}   // 08-irrigation-sprinklers
+    };
+    private static ShowcaseFarmBuilder.ShowcaseSummary showcaseSummary;
     private static final String[] RESERVOIR_SHOTS = {"reservoir-gui", "reservoir-gui-scale1", "reservoir-upgrades",
             "reservoir-south", "reservoir-west", "reservoir-north", "reservoir-east", "reservoir-teardown"};
     private static final EnumFacing[] RESERVOIR_FACES = {EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.NORTH, EnumFacing.EAST};
@@ -43,22 +61,28 @@ public final class ClientChecks {
     private static final String[] SHOTS=CONTRAST?new String[]{"monitor-dark-contrast","monitor-light-contrast"}:new String[]{"manager-operation","manager-data","manager-filter","manager-collapsed","composter","monitor-data","monitor-controls","monitor-native","reservoir","collector","probe","world","network-manager","network-monitor","network-collector","scale1-manager","scale1-composter","scale1-monitor","scale1-reservoir","scale1-collector","weeder","weeder-world","monitor-automation","manager-area","weeder-area","network-remote","network-rule","monitor-environment","manager-environment","crop-selected-environment","survey-pagination","scale1-weeder","scale1-monitor-controls","scale1-monitor-automation"};
     private static EntityPlayerMP player(Minecraft mc) { return mc.getIntegratedServer().getPlayerList().getPlayers().get(0); }
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent e) {
-        if(!Boolean.getBoolean("cropmanager.clientQa") || e.phase!=TickEvent.Phase.END)return;
+        if((!Boolean.getBoolean("cropmanager.clientQa") && !SHOWCASE_QA) || e.phase!=TickEvent.Phase.END)return;
         Minecraft mc=Minecraft.getMinecraft();
         try {
             if(!launched && mc.currentScreen instanceof GuiMainMenu) {
-                launched=true;mc.gameSettings.guiScale=2;mc.gameSettings.renderDistanceChunks=4;mc.gameSettings.pauseOnLostFocus=false;
+                launched=true;mc.gameSettings.guiScale=2;mc.gameSettings.renderDistanceChunks=SHOWCASE_QA?8:4;mc.gameSettings.pauseOnLostFocus=false;
                 String lang=System.getProperty("cropmanager.qaLanguage","en_us");mc.gameSettings.language=lang;mc.getLanguageManager().setCurrentLanguage(mc.getLanguageManager().getLanguage(lang));if(CONTRAST) {
                     contrastPack=new net.minecraft.client.resources.FileResourcePack(new File(System.getProperty("cropmanager.qaContrastPack")));
                     defaultPacks(mc).add(contrastPack);
                 }
                 mc.refreshResources();
-                mc.launchIntegratedServer(LIGHTS_QA ? "cropmanager-lights-client-test"
+                mc.launchIntegratedServer(SHOWCASE_QA ? ShowcaseFarmBuilder.SAVE_FOLDER
+                                : LIGHTS_QA ? "cropmanager-lights-client-test"
                                 : MANUAL_QA ? "cropmanager-manual-client-test"
                                 : RESERVOIR_QA ? "cropmanager-reservoir-client-test" : "cropmanager-client-test",
-                        "Crop Manager GUI QA", new WorldSettings(1,GameType.CREATIVE,false,false,WorldType.FLAT).enableCommands());return;
+                        SHOWCASE_QA ? "Crop Manager Showcase Farm" : "Crop Manager GUI QA",
+                        new WorldSettings(1,GameType.CREATIVE,false,false,WorldType.FLAT).enableCommands());return;
             }
             if(mc.world==null || mc.player==null)return;
+            if (SHOWCASE_QA) {
+                checkShowcase(mc);
+                return;
+            }
             if (LIGHTS_QA) {
                 checkLights(mc);
                 return;
@@ -191,6 +215,65 @@ public final class ClientChecks {
         ScreenShotHelper.saveScreenshot(out, "greenhouse-lights.png", mc.displayWidth, mc.displayHeight, mc.getFramebuffer());
         CropManager.log.info("CROP_MANAGER_CLIENT_QA_PASSED");
         mc.shutdown();
+    }
+
+    private static void checkShowcase(Minecraft mc) {
+        if (!preparing) {
+            preparing = true;
+            String lang = System.getProperty("cropmanager.qaLanguage", "pt_br");
+            mc.getIntegratedServer().addScheduledTask(() -> {
+                try {
+                    WorldServer world = mc.getIntegratedServer().getWorld(0);
+                    EntityPlayerMP p = player(mc);
+                    showcaseSummary = ShowcaseFarmBuilder.build(world, ShowcaseFarmBuilder.DEFAULT_ORIGIN, lang, p);
+                    ShowcaseFarmBuilder.verifyShowcaseIntegrity(world, showcaseSummary);
+                    ready = true;
+                } catch (Throwable err) {
+                    CropManager.log.error("CROP_MANAGER_SHOWCASE_QA_FAILED", err);
+                    mc.addScheduledTask(mc::shutdown);
+                }
+            });
+            return;
+        }
+        if (!ready) {
+            return;
+        }
+        if (age == 0) {
+            mc.displayGuiScreen(null);
+            mc.gameSettings.hideGUI = true;
+            mc.gameSettings.fovSetting = 70.0f;
+            mc.gameSettings.renderDistanceChunks = 8;
+            double[] view = SHOWCASE_VIEWS[stage];
+            mc.getIntegratedServer().addScheduledTask(() -> {
+                EntityPlayerMP p = player(mc);
+                p.capabilities.isFlying = true;
+                p.sendPlayerAbilities();
+                p.connection.setPlayerLocation(view[0], view[1], view[2], (float) view[3], (float) view[4]);
+            });
+        }
+        int requiredSettle = stage == 0 ? 80 : 40;
+        if (++age < requiredSettle) {
+            return;
+        }
+        File out = new File(System.getProperty("cropmanager.qaDir"));
+        out.mkdirs();
+        ScreenShotHelper.saveScreenshot(out, SHOWCASE_SHOTS[stage] + ".png", mc.displayWidth, mc.displayHeight, mc.getFramebuffer());
+        CropManager.log.info("CLIENT_QA_SCREENSHOT {}", SHOWCASE_SHOTS[stage]);
+        stage++;
+        age = 0;
+        if (stage == SHOWCASE_SHOTS.length) {
+            mc.gameSettings.hideGUI = false;
+            mc.getIntegratedServer().addScheduledTask(() -> {
+                EntityPlayerMP p = player(mc);
+                p.capabilities.isFlying = false;
+                p.sendPlayerAbilities();
+                p.connection.setPlayerLocation(0.5, 5.0, 28.5, 180.0f, 10.0f);
+                mc.getIntegratedServer().saveAllWorlds(false);
+                CropManager.log.info("CROP_MANAGER_SHOWCASE_QA_PASSED");
+                mc.addScheduledTask(mc::shutdown);
+            });
+            ready = false;
+        }
     }
 
     @SuppressWarnings("unchecked") private static java.util.List<GuiButton> buttons(GuiScreen screen) throws Exception {

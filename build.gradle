@@ -89,8 +89,12 @@ tasks.named('runClient').configure {
         if (providers.gradleProperty('clientQaReservoir').isPresent()) jvmArgs '-Dcropmanager.qaReservoir=true'
         if (providers.gradleProperty('clientQaLights').isPresent()) jvmArgs '-Dcropmanager.qaLights=true'
         if (providers.gradleProperty('clientQaManual').isPresent()) jvmArgs '-Dcropmanager.qaManual=true'
+        if (providers.gradleProperty('clientQaShowcase').isPresent()) {
+            jvmArgs '-Dcropmanager.qaShowcase=true', "-Dcropmanager.qaDir=${layout.buildDirectory.dir('showcase-shots').get().asFile.absolutePath}"
+        }
         if (providers.gradleProperty('clientQaStart').isPresent()) jvmArgs "-Dcropmanager.qaStart=${providers.gradleProperty('clientQaStart').get()}"
-        args '--width', '1100', '--height', '760'
+        args '--width', providers.gradleProperty('clientQaShowcase').isPresent() ? '1600' : '1100',
+             '--height', providers.gradleProperty('clientQaShowcase').isPresent() ? '900' : '760'
         doFirst {
             def qaMods = layout.projectDirectory.dir('run/mods').asFile
             def currentQa = runtimeTestJar.get().archiveFile.get().asFile

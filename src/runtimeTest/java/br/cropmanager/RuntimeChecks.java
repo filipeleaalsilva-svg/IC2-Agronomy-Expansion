@@ -19,6 +19,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -57,6 +58,10 @@ public final class RuntimeChecks {
             if (new ItemStack(tag).getItem() == item) total += tag.getInteger("PendingCount");
         }
         return total;
+    }
+
+    @Mod.EventHandler public void serverStarting(FMLServerStartingEvent event) {
+        event.registerServerCommand(new ShowcaseCommand());
     }
 
     @Mod.EventHandler public void started(FMLServerStartedEvent event) {
