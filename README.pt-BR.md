@@ -1,4 +1,4 @@
-[English](README.md) | **Português (PT-BR)**
+[English](README.md) | **Português (PT-BR)** | [Wiki Oficial](https://github.com/filipeleaalsilva-svg/IC2-Agronomy-Expansion/wiki)
 
 # IC2: Agronomy Expansion 0.5.0-alpha11
 
@@ -31,12 +31,12 @@ py tools\verify_artifact.py
 1. Copie **somente** `IC2-Agronomy-Expansion-0.5.0-alpha11.jar` para a pasta `mods/` (não instale o JAR de `runtime-tests`).
 2. Cliente e servidor devem usar exatamente a mesma versão (`acceptableRemoteVersions = [0.5.0-alpha11]`).
 3. **IndustrialCraft 2 Experimental (`2.8.222-ex112`)** é obrigatório (integração opcional com **HEI/JEI**).
-4. A interface em tema escuro (`#1C1C1D`) agora é o padrão do mod (a cor do texto se adapta automaticamente à luminosidade do fundo carregado).
+4. A interface clara clássica do IC2 é o padrão do JAR. Para usar o tema escuro (`#1C1C1D`), coloque o Resource Pack opcional `IC2-Agronomy-Expansion-GUI-Dark-0.5.0-alpha11.zip` (`pack_format: 3`, 20 texturas de interface remapeadas) na pasta `resourcepacks/` — a cor do texto se adapta automaticamente à luminosidade do fundo carregado.
 
 ### Migração de Mundos Antigos
 - Faça backup do mundo antes de atualizar versões alpha.
 - O **Crop Manager básico** antigo migra automaticamente para o **Advanced Crop Manager** após o carregamento do chunk (até 32 migrações por tick via `LegacyMigration`), preservando inventário, EU, tanques, área e controles.
-- Blocos legados removidos (`agricultural_collector`, `agricultural_reservoir`, `seed_classifier`, `seed_workbench`) são retirados de forma adiada via `LegacyRecoveryTile`, devolvendo itens ao chão; itens guardados em inventário são remapeados conforme registro do Forge (`MissingMappings`).
+- Blocos legados removidos (`agricultural_collector`, `seed_classifier`, `seed_workbench`) são retirados de forma adiada via `LegacyRecoveryTile`, devolvendo itens ao chão; itens guardados em inventário são remapeados conforme registro do Forge (`MissingMappings`).
 - O Crop-Matron e o Crop Harvester nativos do IC2 permanecem disponíveis.
 
 ---
@@ -78,7 +78,7 @@ py tools\verify_artifact.py
 - **Reservatório Agrícola (`agricultural_reservoir` + `reservoir_casing`):** Multibloco `3×5×3` de dois tanques independentes com energia IC2, filtros de fluido, módulos de bomba/reserva e upgrades de capacidade.
 - **Tanque Industrial de Fluido (`fluid_tank` + `fluid_tank_casing`):** Multibloco `3×5×3` sem EU para armazenamento em massa de um fluido (`128.000 mB` base + até 8 upgrades de `+32.000 mB`), portas configuráveis por face e auto-extração por redstone.
 - **Silo Agrícola (`agricultural_silo` + `silo_casing`):** Multibloco `3×5×3` sem EU para armazenamento em massa de um tipo de item (`128.000` base + até 8 upgrades de `+32.000`), trava de template, portas configuráveis e auto-extração por redstone.
-- **Tubos de Fluido (`fluid_pipe` — Tubo, Restritor Redstone e Roteador 6-vias):** Logística de fluidos sem energia com equalização automática entre tanques e roteamento direcional.
+- **Tubo de Fluido (`fluid_pipe`):** Logística de fluidos sem energia com equalização automática entre tanques e distribuição round-robin entre vizinhos.
 - **Colmeia Polinizadora (`pollinator_hive`) e Vidro de Estufa (`greenhouse_glass`):** A Colmeia acelera cruzamentos em estacas duplas próximas (com carga opcional de **Pó Mutagênico** para triplicar a cadência); o Vidro de Estufa concede bônus de crescimento por random tick ao cultivo diretamente abaixo sob luz adequada.
 - **Câmara Hidropônica (`hydroponic_chamber`):** Máquina Tier 2 EU (`50.000 EU`, `16 EU/t`, tanque de `16.000 mB` de água) que cultiva Sacos de Sementes IC2 em ambiente fechado (`VirtualCropTile`). Exige `greenhouse_glass` acima e subsolo válido abaixo (`dirt`/`farmland`/`grass`, ou `radioactive_soil` para `radbloom`), com bônus opcionais de cúpula `3×3` (`+25%`) e calor IC2 adjacente (`+50%`).
 - **Rede Wi-Fi de EU e Antena Parabólica (`eu_wifi_plug`, `eu_wifi_point`, `eu_dish_antenna`):** 1.000 canais públicos/privados (`100.000 EU` de buffer, saída selecionável `T1–T4` e controle redstone) e distribuição sem fio por área integrada ao `WirelessEuUpgrade`.
@@ -134,7 +134,7 @@ Mais detalhes de cálculo em [docs/CONFIGURACAO.md](docs/CONFIGURACAO.md).
 
 ## Testes e Qualidade
 
-- **`src/test/java/br/cropmanager/**`:** **269 testes unitários** distribuídos em **45 suítes** cobrindo lógica de varredura, regras de automação, persistência NBT, capabilities, integridade de assets/i18n (`796` chaves `en_us`/`pt_br`), Câmara Hidropônica, rede Wi-Fi de EU, Antena Parabólica, máquinas a Biogás, multiblocos, tubos de fluido, polinização, inventário do Baú de Dados, receitas e proteção contra duplicação.
+- **`src/test/java/br/cropmanager/**`:** **290 testes unitários** distribuídos em **45 suítes** cobrindo lógica de varredura, regras de automação, persistência NBT, capabilities, integridade de assets/i18n (`796` chaves `en_us`/`pt_br`), Câmara Hidropônica, rede Wi-Fi de EU, Antena Parabólica, máquinas a Biogás, multiblocos, tubos de fluido, polinização, inventário do Baú de Dados, receitas e proteção contra duplicação.
 - **`src/runtimeTest/java/br/cropmanager/**`:** Addon separado (`cropmanager_tests`, nunca empacotado no JAR final) para validação em runtime real no Cleanroom (`RuntimeChecks.java` e `ClientChecks.java`).
 
 ---

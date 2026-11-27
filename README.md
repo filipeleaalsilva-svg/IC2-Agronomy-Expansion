@@ -1,4 +1,4 @@
-**English** | [Português (PT-BR)](README.pt-BR.md)
+**English** | [Português (PT-BR)](README.pt-BR.md) | [Official Wiki](https://github.com/filipeleaalsilva-svg/IC2-Agronomy-Expansion/wiki)
 
 # IC2: Agronomy Expansion 0.5.0-alpha11
 
@@ -36,12 +36,12 @@ py tools\verify_artifact.py
 1. Copy **only** `IC2-Agronomy-Expansion-0.5.0-alpha11.jar` into your `mods/` folder (do not install the `runtime-tests` JAR).
 2. Client and server must run the exact same version (`acceptableRemoteVersions = [0.5.0-alpha11]`).
 3. **IndustrialCraft 2 Experimental (`2.8.222-ex112`)** is required (**HEI/JEI** integration is optional).
-4. The dark theme UI (`#1C1C1D`) is the mod default (text color automatically adapts to the brightness of the loaded background).
+4. The classic light IC2 UI is the mod default in the JAR. For the dark theme (`#1C1C1D`), place the optional resource pack `IC2-Agronomy-Expansion-GUI-Dark-0.5.0-alpha11.zip` (`pack_format: 3`, 20 remapped GUI textures) in `resourcepacks/` — text color automatically adapts to the brightness of the loaded background.
 
 ### Legacy World Migration
 - Back up your world before upgrading between alpha versions.
 - The legacy **basic Crop Manager** automatically migrates to the **Advanced Crop Manager** after chunk load (up to 32 migrations per tick via `LegacyMigration`), preserving inventory, EU, tanks, area, and controls.
-- Removed legacy blocks (`agricultural_collector`, `agricultural_reservoir`, `seed_classifier`, `seed_workbench`) are retired lazily via `LegacyRecoveryTile`, dropping their items on the ground; stored items in inventories are remapped via Forge `MissingMappings`.
+- Removed legacy blocks (`agricultural_collector`, `seed_classifier`, `seed_workbench`) are retired lazily via `LegacyRecoveryTile`, dropping their items on the ground; stored items in inventories are remapped via Forge `MissingMappings`.
 - Native IC2 Crop-Matron and Crop Harvester remain available.
 
 ---
@@ -83,7 +83,7 @@ py tools\verify_artifact.py
 - **Agricultural Reservoir (`agricultural_reservoir` + `reservoir_casing`):** `3×5×3` dual-tank multiblock with IC2 power, fluid filters, pump/reserve modules, and capacity upgrades.
 - **Industrial Fluid Tank (`fluid_tank` + `fluid_tank_casing`):** Zero-EU `3×5×3` multiblock for bulk single-fluid storage (`128,000 mB` base + up to 8 `+32,000 mB` upgrades), configurable face ports, and redstone auto-extract.
 - **Agricultural Silo (`agricultural_silo` + `silo_casing`):** Zero-EU `3×5×3` multiblock for bulk single-item storage (`128,000` base + up to 8 `+32,000` upgrades), template lock, configurable ports, and redstone auto-extract.
-- **Fluid Pipes (`fluid_pipe` — Pipe, Redstone Restrictor, and 6-Way Router):** Zero-EU fluid logistics with automatic tank equalization and directional routing.
+- **Fluid Pipe (`fluid_pipe`):** Zero-EU fluid logistics with automatic tank equalization and round-robin distribution across adjacent tanks.
 - **Pollinator Hive (`pollinator_hive`) & Greenhouse Glass (`greenhouse_glass`):** The Hive speeds up cross-breeding on nearby double crop sticks (optionally consuming **Mutagenic Powder** to triple cadence); Greenhouse Glass grants a random-tick growth bonus to the crop directly below under adequate light.
 - **Hydroponic Chamber (`hydroponic_chamber`):** Tier 2 EU machine (`50,000 EU`, `16 EU/t`, `16,000 mB` water tank) that grows IC2 Seed Bags in a controlled enclosure (`VirtualCropTile`). Requires `greenhouse_glass` above and valid subsoil below (`dirt`/`farmland`/`grass`, or `radioactive_soil` for `radbloom`), with optional `3×3` glass dome (`+25%` speed) and adjacent IC2 heat (`+50%` speed) bonuses.
 - **Wi-Fi EU Grid & Dish Antenna (`eu_wifi_plug`, `eu_wifi_point`, `eu_dish_antenna`):** 1,000 public/private EU channels (`100,000 EU` smoothing buffer, selectable `T1–T4` output and redstone control) plus area wireless power distribution integrated with `WirelessEuUpgrade`.
@@ -139,7 +139,7 @@ See [docs/CONFIGURACAO.md](docs/CONFIGURACAO.md) for detailed formulas.
 
 ## Tests & Quality
 
-- **`src/test/java/br/cropmanager/**`:** **269 unit tests** across **45 suites** covering scan logic, automation rules, NBT persistence, capabilities, asset/i18n integrity (`796` `en_us`/`pt_br` keys), Hydroponic Chamber, Wi-Fi EU grid, Dish Antenna, Biogas machines, multiblocks, fluid pipes, pollination, Database Chest inventory, recipes, and dupe protection.
+- **`src/test/java/br/cropmanager/**`:** **290 unit tests** across **45 suites** covering scan logic, automation rules, NBT persistence, capabilities, asset/i18n integrity (`796` `en_us`/`pt_br` keys), Hydroponic Chamber, Wi-Fi EU grid, Dish Antenna, Biogas machines, multiblocks, fluid pipes, pollination, Database Chest inventory, recipes, and dupe protection.
 - **`src/runtimeTest/java/br/cropmanager/**`:** Separate addon (`cropmanager_tests`, never packaged in the release JAR) for live Cleanroom runtime validation (`RuntimeChecks.java` and `ClientChecks.java`).
 
 ---
