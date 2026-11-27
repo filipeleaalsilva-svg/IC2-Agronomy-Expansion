@@ -7,6 +7,8 @@ logs/
 libs/*.jar
 .local-archive/
 referencia/
+design_kit/
+docs/artwork/curseforge/logo/variations/
 __pycache__/
 *.py[cod]
 /CropManager*.jar
