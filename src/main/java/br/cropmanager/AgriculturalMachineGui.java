@@ -45,32 +45,35 @@ final class AgriculturalMachineGui extends GuiContainer {
     }
 
     @Override protected void drawGuiContainerBackgroundLayer(float tick, int x, int y) {
-        drawRect(guiLeft, guiTop, guiLeft + xSize, guiTop + ySize, 0xff1c1c1d);
+        FarmGuiStyle.panel(guiLeft, guiTop, xSize, ySize);
         for (net.minecraft.inventory.Slot slot : inventorySlots.inventorySlots) {
-            int left = guiLeft + slot.xPos, top = guiTop + slot.yPos;
-            drawRect(left - 1, top - 1, left + 17, top + 17, 0xff424244);
+            FarmGuiStyle.slot(guiLeft + slot.xPos, guiTop + slot.yPos);
         }
     }
 
     @Override protected void drawGuiContainerForegroundLayer(int x, int y) {
+        int titleColor = FarmGuiStyle.ink();
+        int waterColor = FarmGuiStyle.darkTheme() ? 0x80caff : 0x1d6a96;
+        int gasColor = FarmGuiStyle.darkTheme() ? 0x9aea64 : 0x487a22;
+        int energyColor = FarmGuiStyle.darkTheme() ? 0xffd65a : 0x9c6500;
         if (machine instanceof DiagonalSprinklerTile) {
             DiagonalSprinklerTile sprinkler = (DiagonalSprinklerTile) machine;
-            fontRenderer.drawString(I18n.format("tile.cropmanager.sprinkler_diagonal.name"), 8, 8, 0xffffff);
-            fontRenderer.drawString(I18n.format("cropmanager.biogas_sprayer.water", sprinkler.water.getFluidAmount()), 8, 23, 0x80caff);
+            fontRenderer.drawString(I18n.format("tile.cropmanager.sprinkler_diagonal.name"), 8, 8, titleColor);
+            fontRenderer.drawString(I18n.format("cropmanager.biogas_sprayer.water", sprinkler.water.getFluidAmount()), 8, 23, waterColor);
             return;
         }
         if (machine instanceof BiogasSprayerTile) {
             BiogasSprayerTile sprayer = (BiogasSprayerTile) machine;
-            fontRenderer.drawString(I18n.format("tile.cropmanager.biogas_sprayer.name"), 8, 8, 0xffffff);
-            fontRenderer.drawString(I18n.format("cropmanager.biogas_sprayer.gas", sprayer.gas.getFluidAmount()), 8, 30, 0x9aea64);
-            fontRenderer.drawString(I18n.format("cropmanager.biogas_sprayer.water", sprayer.water.getFluidAmount()), 8, 50, 0x80caff);
+            fontRenderer.drawString(I18n.format("tile.cropmanager.biogas_sprayer.name"), 8, 8, titleColor);
+            fontRenderer.drawString(I18n.format("cropmanager.biogas_sprayer.gas", sprayer.gas.getFluidAmount()), 8, 30, gasColor);
+            fontRenderer.drawString(I18n.format("cropmanager.biogas_sprayer.water", sprayer.water.getFluidAmount()), 8, 50, waterColor);
             return;
         }
         BiogasGeneratorTile generator = (BiogasGeneratorTile) machine;
-        fontRenderer.drawString(I18n.format("tile.cropmanager.biogas_generator.name"), 8, 8, 0xffffff);
+        fontRenderer.drawString(I18n.format("tile.cropmanager.biogas_generator.name"), 8, 8, titleColor);
         fontRenderer.drawString(I18n.format(generator.isFormed() ? "cropmanager.biogas_generator.ready"
-                : "cropmanager.biogas_generator.incomplete"), 8, 28, 0xffffff);
-        fontRenderer.drawString(I18n.format("cropmanager.biogas_generator.gas", generator.gas.getFluidAmount()), 8, 43, 0x9aea64);
-        fontRenderer.drawString(I18n.format("cropmanager.biogas_generator.energy", (int) generator.guiState().getDouble("EU")), 8, 58, 0xffd65a);
+                : "cropmanager.biogas_generator.incomplete"), 8, 28, titleColor);
+        fontRenderer.drawString(I18n.format("cropmanager.biogas_generator.gas", generator.gas.getFluidAmount()), 8, 43, gasColor);
+        fontRenderer.drawString(I18n.format("cropmanager.biogas_generator.energy", (int) generator.guiState().getDouble("EU")), 8, 58, energyColor);
     }
 }

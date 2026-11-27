@@ -17,21 +17,14 @@ final class CrossingToolGui extends GuiContainer {
     }
 
     @Override protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-        drawRect(guiLeft, guiTop, guiLeft + xSize, guiTop + ySize, 0xFF1C1C1D);
-        drawRect(guiLeft, guiTop, guiLeft + xSize, guiTop + 1, 0xFF4E4E52);
-        drawRect(guiLeft, guiTop, guiLeft + 1, guiTop + ySize, 0xFF4E4E52);
-        drawRect(guiLeft, guiTop + ySize - 1, guiLeft + xSize, guiTop + ySize, 0xFF080809);
-        drawRect(guiLeft + xSize - 1, guiTop, guiLeft + xSize, guiTop + ySize, 0xFF080809);
+        FarmGuiStyle.panel(guiLeft, guiTop, xSize, ySize);
         for (net.minecraft.inventory.Slot slot : inventorySlots.inventorySlots) {
-            int x = guiLeft + slot.xPos;
-            int y = guiTop + slot.yPos;
-            drawRect(x - 1, y - 1, x + 17, y + 17, 0xFF0D0D0E);
-            drawRect(x, y, x + 16, y + 16, 0xFF121213);
+            FarmGuiStyle.slot(guiLeft + slot.xPos, guiTop + slot.yPos);
         }
     }
 
     @Override protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-        fontRenderer.drawString(I18n.format("item.cropmanager.crossing_tool.name"), 8, 8, 0xFFE6E6E6);
-        fontRenderer.drawString(I18n.format("container.inventory"), 8, 51, 0xFFB0B0B0);
+        fontRenderer.drawString(I18n.format("item.cropmanager.crossing_tool.name"), 8, 8, FarmGuiStyle.ink());
+        fontRenderer.drawString(I18n.format("container.inventory"), 8, 51, FarmGuiStyle.mutedInk());
     }
 }

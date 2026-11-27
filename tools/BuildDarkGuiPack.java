@@ -22,6 +22,7 @@ public final class BuildDarkGuiPack {
         "equipment_composter.png",
         "equipment_extractor.png",
         "equipment_grinder.png",
+        "equipment_hydroponic.png",
         "equipment_legacy.png",
         "equipment_mixer.png",
         "equipment_monitor.png",
@@ -38,7 +39,7 @@ public final class BuildDarkGuiPack {
     public static void main(String[] args) throws IOException {
         Path root = Paths.get("").toAbsolutePath();
         Path lightDir = root.resolve("src/main/resources/assets/cropmanager/textures/gui");
-        Path packDir = root.resolve("dist/CropManager-GUI-Dark-0.5.0-alpha10");
+        Path packDir = root.resolve("dist/CropManager-GUI-Dark-0.5.0-alpha11");
         Path darkGuiDir = packDir.resolve("assets/cropmanager/textures/gui");
         Files.createDirectories(darkGuiDir);
 
@@ -52,15 +53,16 @@ public final class BuildDarkGuiPack {
             ImageIO.write(dark, "PNG", darkGuiDir.resolve(name).toFile());
         }
 
-        String mcmeta = "{\"pack\":{\"pack_format\":3,\"description\":\"Crop Manager - Dark Theme (#1C1C1D)\"}}";
+        String mcmeta = "{\"pack\":{\"pack_format\":3,\"description\":\"IC2: Agronomy Expansion - Dark Theme (#1C1C1D)\"}}";
         Files.write(packDir.resolve("pack.mcmeta"), mcmeta.getBytes(StandardCharsets.UTF_8));
 
-        Path zipPath = root.resolve("dist/CropManager-GUI-Dark-0.5.0-alpha10.zip");
-        try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
-            addToZip(zos, packDir, packDir.resolve("pack.mcmeta"));
-            for (String name : GUI_FILES) {
-                addToZip(zos, packDir, darkGuiDir.resolve(name));
-            }
+        // Copy pack.png if available
+        Path iconSource = root.resolve("dist/CropManager-GUI-Dark-0.5.0-alpha9/pack.png");
+        if (!Files.isRegularFile(iconSource)) {
+            iconSource = root.resolve("src/main/resources/pack.png");
+        }
+        if (Files.isRegularFile(iconSource)) {
+            Files.copy(iconSource, packDir.resolve("pack.png"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
         }
 
         // Verify #1C1C1D body pixel on equipment_monitor.png
@@ -70,7 +72,30 @@ public final class BuildDarkGuiPack {
             throw new IllegalStateException(String.format("Expected #1C1C1D body pixel, got #%06X", rgb));
         }
 
-        System.out.println("Generated " + GUI_FILES.length + " dark GUI textures (#1C1C1D) and " + zipPath);
+        // Build ZIP archives
+        Path[] targets = {
+            root.resolve("dist/IC2-Agronomy-Expansion-GUI-Dark-0.5.0-alpha11.zip"),
+            root.resolve("dist/CropManager-GUI-Dark-0.5.0-alpha11.zip"),
+            root.resolve("IC2-Agronomy-Expansion-GUI-Dark-0.5.0-alpha11.zip"),
+            root.resolve("CropManager-GUI-Dark-0.5.0-alpha11.zip"),
+            root.resolve("build/libs/IC2-Agronomy-Expansion-GUI-Dark-0.5.0-alpha11.zip")
+        };
+
+        for (Path zipPath : targets) {
+            if (zipPath.getParent() != null) Files.createDirectories(zipPath.getParent());
+            try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
+                addToZip(zos, packDir, packDir.resolve("pack.mcmeta"));
+                if (Files.isRegularFile(packDir.resolve("pack.png"))) {
+                    addToZip(zos, packDir, packDir.resolve("pack.png"));
+                }
+                for (String name : GUI_FILES) {
+                    addToZip(zos, packDir, darkGuiDir.resolve(name));
+                }
+            }
+            System.out.println("Generated: " + zipPath);
+        }
+
+        System.out.println("SUCCESS: Generated " + GUI_FILES.length + " dark GUI textures (#1C1C1D) in all target resource packs.");
     }
 
     private static BufferedImage toDark1C1C1D(BufferedImage src, boolean isGuideBook) {

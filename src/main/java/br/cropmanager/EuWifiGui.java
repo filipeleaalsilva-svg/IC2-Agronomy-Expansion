@@ -8,7 +8,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
 
 /**
- * Dark-themed (#1C1C1D) GUI for {@link EuWifiPlugTile} and {@link EuWifiPointTile}.
+ * Standard-themed GUI for {@link EuWifiPlugTile} and {@link EuWifiPointTile}.
  */
 public final class EuWifiGui extends GuiContainer {
     private final FarmTile machine;
@@ -67,42 +67,34 @@ public final class EuWifiGui extends GuiContainer {
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         int x = guiLeft, y = guiTop;
-        drawRect(x, y, x + xSize, y + ySize, 0xFF1C1C1D);
-        drawRect(x, y, x + xSize, y + 1, 0xFF4E4E52);
-        drawRect(x, y, x + 1, y + ySize, 0xFF4E4E52);
-        drawRect(x, y + ySize - 1, x + xSize, y + ySize, 0xFF080809);
-        drawRect(x + xSize - 1, y, x + xSize, y + ySize, 0xFF080809);
+        FarmGuiStyle.panel(x, y, xSize, ySize);
 
         // Energy bar
         double gridEu = isPoint ? ((EuWifiPointTile) machine).clientGridEu : ((EuWifiPlugTile) machine).clientGridEu;
         double gridCap = isPoint ? ((EuWifiPointTile) machine).clientGridCap : ((EuWifiPlugTile) machine).clientGridCap;
-        drawRect(x + 10, y + 72, x + 166, y + 82, 0xFF080809);
+        int barBg = FarmGuiStyle.darkTheme() ? 0xFF080809 : 0xFF555555;
+        drawRect(x + 10, y + 72, x + 166, y + 82, barBg);
         int fill = (int) Math.round(154.0 * Math.min(1.0, Math.max(0.0, gridEu / Math.max(1.0, gridCap))));
         if (fill > 0) drawRect(x + 11, y + 73, x + 11 + fill, y + 81, 0xFFD94A38);
 
         // Player inventory slots
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                drawSlotBox(x + 7 + col * 18, y + 93 + row * 18);
+                FarmGuiStyle.slot(x + 7 + col * 18, y + 93 + row * 18);
             }
         }
         for (int col = 0; col < 9; col++) {
-            drawSlotBox(x + 7 + col * 18, y + 151);
+            FarmGuiStyle.slot(x + 7 + col * 18, y + 151);
         }
-    }
-
-    private void drawSlotBox(int sx, int sy) {
-        drawRect(sx, sy, sx + 18, sy + 18, 0xFF0D0D0E);
-        drawRect(sx + 1, sy + 1, sx + 17, sy + 17, 0xFF121213);
     }
 
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
         String title = I18n.format(isPoint ? "tile.cropmanager.eu_wifi_point.name" : "tile.cropmanager.eu_wifi_plug.name");
-        fontRenderer.drawString(title, (xSize - fontRenderer.getStringWidth(title)) / 2, 8, 0xFFE6E6E6);
+        fontRenderer.drawString(title, (xSize - fontRenderer.getStringWidth(title)) / 2, 8, FarmGuiStyle.ink());
 
         String chLabel = I18n.format("cropmanager.wifi_channel", currentChannel());
-        fontRenderer.drawString(chLabel, (xSize - fontRenderer.getStringWidth(chLabel)) / 2, 28, 0xFFE6E6E6);
+        fontRenderer.drawString(chLabel, (xSize - fontRenderer.getStringWidth(chLabel)) / 2, 28, FarmGuiStyle.ink());
 
         if (isPoint) {
             EuWifiPointTile p = (EuWifiPointTile) machine;
@@ -110,19 +102,19 @@ public final class EuWifiGui extends GuiContainer {
             buttonList.get(5).displayString = p.effectiveRate() + " EU/t";
             buttonList.get(6).displayString = I18n.format("cropmanager.wifi_rs_" + p.redstoneMode);
             String rate = UiNumbers.exact(p.lastOutputRate) + " EU/t";
-            fontRenderer.drawString(rate, 12, 84, 0xFFB0B0B0);
+            fontRenderer.drawString(rate, 12, 84, FarmGuiStyle.mutedInk());
         } else {
             EuWifiPlugTile p = (EuWifiPlugTile) machine;
             buttonList.get(4).displayString = I18n.format(
                     p.clientPrivate ? "cropmanager.wifi_private" : "cropmanager.wifi_public");
             String rate = UiNumbers.exact(p.lastInputRate) + " EU/t";
-            fontRenderer.drawString(rate, 12, 84, 0xFFB0B0B0);
+            fontRenderer.drawString(rate, 12, 84, FarmGuiStyle.mutedInk());
         }
 
         double gridEu = isPoint ? ((EuWifiPointTile) machine).clientGridEu : ((EuWifiPlugTile) machine).clientGridEu;
         double gridCap = isPoint ? ((EuWifiPointTile) machine).clientGridCap : ((EuWifiPlugTile) machine).clientGridCap;
         String buf = UiNumbers.compact(gridEu) + " / " + UiNumbers.compact(gridCap) + " EU";
-        fontRenderer.drawString(buf, xSize - 12 - fontRenderer.getStringWidth(buf), 84, 0xFFB0B0B0);
+        fontRenderer.drawString(buf, xSize - 12 - fontRenderer.getStringWidth(buf), 84, FarmGuiStyle.mutedInk());
     }
 
     @Override
